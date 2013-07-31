@@ -28,9 +28,9 @@ our @EXPORT = qw( &purify_noparse &text_math_to_XMath &purify_tokens &text_XMath
 our $verbose=0;
 
 #my $wn = WordNet::QueryData->new(dir=>locate_external("WordNet-dict")."/", noload => 1);
-my ($wordnetdir) = grep {-d $_} ('/usr/share/wordnet/','/usr/local/wordnet/dict/');
-my %dirclause = ($wordnetdir ? (dir=>$wordnetdir) : ());
-my $wn = WordNet::QueryData->new(%dirclause, noload => 1);
+our ($wordnetdir) = grep {-d $_} ('/usr/share/wordnet/','/usr/local/wordnet/dict/');
+our %dirclause = ($wordnetdir ? (dir=>$wordnetdir) : ());
+our $wn = WordNet::QueryData->new(%dirclause, noload => 1);
 
 sub purify_noparse {
   my ($class) = @_;
@@ -275,7 +275,7 @@ our %MathWords = ("arccos" => { role=>'OPFUNCTION', meaning=>'inverse-cosine'},
 sub check_wordnet_word {
   my ($possible_word)=@_;
   if (((length $possible_word)>3) #heuristic: length >3
-      && (my @foundForms = $wn->validForms($possible_word)))#heuristic: in WordNet
+      && (my @foundForms = ($wn && $wn->validForms($possible_word))))#heuristic: in WordNet
     { if (@foundForms) {1;} else {0;}} else {0;}}
 
 
