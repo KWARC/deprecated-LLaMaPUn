@@ -125,6 +125,7 @@ sub getAbbrevs {
 sub normalize {
   my $inref=$_[1];
   my $outref=[];
+  require LLaMaPUn::Preprocessor;
   my $mathidtoken = LLaMaPUn::Preprocessor->mathidtoken;
 #  my $abbrevs=getAbbrevs();#maw
   my $w=LLaMaPUn::Tokenizer::Word->w;

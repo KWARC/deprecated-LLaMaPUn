@@ -17,6 +17,7 @@ use LLaMaPUn::Util;
 use Encode;
 use strict;
 use Carp;
+use Scalar::Util qw/blessed/;
 
 use vars qw($VERSION);
 $VERSION = "0.0.1";
@@ -31,32 +32,32 @@ sub new {
   my ($doc,$name,$path)=(undef,undef,undef);
   if ($options{document}) {
     $doc=$options{document};
-    $doc=parse_file($options{document}) unless $options{document}=~/XML::LibXML::Document/;
-    ($path,$name)=splitFilepath($options{document}) unless $options{document}=~/XML::LibXML::Document/;
+    $doc=parse_file($options{document}) unless blessed($options{document});
+    ($path,$name)=splitFilepath($options{document}) unless blessed($options{document});
   }
   $options{replacemath}="position" unless $options{replacemath};
   bless {DOCUMENT=>$doc,
-	 NAME=>$name,
-	 PATH=>$path,
-	 REPLACEMATH=>$options{replacemath},
-	 NORMALIZED=>0,
+   NAME=>$name,
+   PATH=>$path,
+   REPLACEMATH=>$options{replacemath},
+   NORMALIZED=>0,
          MATHCOUNT=>0,
-	 CITECOUNT=>0,
-	 REFCOUNT=>0,
+   CITECOUNT=>0,
+   REFCOUNT=>0,
          MATHMAP=>{},
          MATHIDMAP=>{},
-	 CITEMAP=>{},
-	 CITEIDMAP=>{},
-	 REFMAP=>{},
-	 REFIDMAP=>{}}, $class; }
+   CITEMAP=>{},
+   CITEIDMAP=>{},
+   REFMAP=>{},
+   REFIDMAP=>{}}, $class; }
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 sub setDocument {
   my ($self,$source)=@_;
   $self->{DOCUMENT}=$source;
-  $self->{DOCUMENT}=parse_file($source) unless $source=~/XML::LibXML::Document/;
-  my ($path,$name)=splitFilepath($source) unless $source=~/XML::LibXML::Document/;
+  $self->{DOCUMENT}=parse_file($source) unless blessed($source);
+  my ($path,$name)=splitFilepath($source) unless blessed($source);
   $self->{NORMALIZED}=0;
   $self->{NAME}=$name;
   $self->{PATH}=$path;
@@ -90,13 +91,12 @@ sub normalize {
     if ($self->{REPLACEMATH} eq "position") {
       $id=$segment->getAttribute('xml:id');
       if (!defined $id) {
-	my ($math_node)=$segment->getElementsByTagName('equation');
-	$id=$math_node->getAttribute('xml:id');
-	if (!defined $id) {
-	  ($math_node)=$math_node->getElementsByTagName('Math');
-	  $id=$math_node->getAttribute('xml:id');
-	}
-      }
+        my ($math_node)=$segment->getElementsByTagName('equation');
+        $id=$math_node->getAttribute('xml:id');
+        if (!defined $id) {
+          ($math_node)=$math_node->getElementsByTagName('Math');
+          $id=$math_node->getAttribute('xml:id');
+        }}
       $id=~s/\./-/g if $id;
       $mark="NoID" unless (defined $id);
       $mark="$fid-$id" unless $mark;
@@ -106,8 +106,7 @@ sub normalize {
       my $mathseg = $segment->toString;
       $mathseg=~s/\n+//g;
       $mathseg=~s/(\s+)/ /g;
-      $self->{MATHIDMAP}{"$mark"} = $mathseg;
-    }
+      $self->{MATHIDMAP}{"$mark"} = $mathseg; }
     elsif ($self->{REPLACEMATH} eq "syntax") {
       #my @xmath_nodes=$segment->getElementsByTagName('XMath');
       #my $mathseg=join('',map($_->toString,@xmath_nodes)); 
@@ -116,11 +115,9 @@ sub normalize {
       $mathseg=~s/(\s+)/ /g;
       $self->{MATHCOUNT}+=1;
       $self->{MATHMAP}{$mathseg} = scalar(keys %{$self->{MATHMAP}})+1 unless defined $self->{MATHMAP}{$mathseg};
-      $mark=$self->{MATHMAP}{$mathseg};
-    }
+      $mark=$self->{MATHMAP}{$mathseg}; }
     else {
-      $mark="";
-    }  
+      $mark=""; }  
     $mark="-$mark" if $mark;
     my $para_node = XML::LibXML::Element->new("p");
     $para_node->appendTextNode(" MathExprEquation$mark ");
@@ -128,23 +125,19 @@ sub normalize {
   }
   @equations = $root->getElementsByTagName('equation');
   foreach my $segment(@equations) {
-
     my $id;
     my $mark;
     if ($self->{REPLACEMATH} eq "position") {
       $id =$segment->getAttribute('xml:id');
       if (!defined $id) {
-	my ($math_node)=$segment->getElementsByTagName('Math');
-	if ($math_node) {
-	  $id=$math_node->getAttribute('xml:id');
-	}
-	else {
-	  # "Fake" equations, used for italics
-	  # The Purify.pm module should grow to abolish tese to begin with.
-	  $fakeeq++;
-	  $id="fake$fakeeq";
-	}
-      }
+        my ($math_node)=$segment->getElementsByTagName('Math');
+        if ($math_node) {
+          $id=$math_node->getAttribute('xml:id'); }
+        else {
+          # "Fake" equations, used for italics
+          # The Purify.pm module should grow to abolish tese to begin with.
+          $fakeeq++;
+          $id="fake$fakeeq"; } }
       $id=~s/\./-/g if $id;
       $mark="NoID" unless (defined $id);
       $mark="$fid-$id" unless $mark;
@@ -154,8 +147,7 @@ sub normalize {
       my $mathseg = $segment->toString;
       $mathseg=~s/\n+//g;
       $mathseg=~s/(\s+)/ /g;
-      $self->{MATHIDMAP}{"$mark"} = $mathseg;
-    }
+      $self->{MATHIDMAP}{"$mark"} = $mathseg; }
     elsif ($self->{REPLACEMATH} eq "syntax") {
       #my @xmath_nodes=$segment->getElementsByTagName('XMath');
       #my $mathseg=join('',map($_->toString,@xmath_nodes)); 
@@ -164,11 +156,9 @@ sub normalize {
       $mathseg=~s/(\s+)/ /g;
       $self->{MATHCOUNT}+=1;
       $self->{MATHMAP}{$mathseg} = scalar(keys %{$self->{MATHMAP}})+1 unless defined $self->{MATHMAP}{$mathseg};
-      $mark=$self->{MATHMAP}{$mathseg};
-    }
+      $mark=$self->{MATHMAP}{$mathseg}; }
     else {
-      $mark="";
-    }  
+      $mark=""; }  
     $mark="-$mark" if $mark;
     my $para_node = XML::LibXML::Element->new("p");
     $para_node->appendTextNode(" MathExprEquation$mark ");
@@ -193,30 +183,27 @@ sub normalize {
       next if $id=~/m(\d+)\.m(\d+)/;
       my $mark;
       if ($self->{REPLACEMATH} eq "position") {
-	$id=$math_node->getAttribute('xml:id');
-	$id=~s/\./-/g if $id;
-	$mark="NoID" unless (defined $id);
-	$mark="$fid-$id" unless $mark;
-	#my @xmath_nodes=$math_node->getElementsByTagName('XMath');
-	#my $mathseg=join('',map($_->toString,@xmath_nodes)); 
-	my $mathseg = $math_node->toString;
-	$mathseg=~s/\n+//g;
-	$mathseg=~s/(\s+)/ /g;
-	$self->{MATHIDMAP}{"$mark"} = $mathseg;
-      }
+        $id=$math_node->getAttribute('xml:id');
+        $id=~s/\./-/g if $id;
+        $mark="NoID" unless (defined $id);
+        $mark="$fid-$id" unless $mark;
+        #my @xmath_nodes=$math_node->getElementsByTagName('XMath');
+        #my $mathseg=join('',map($_->toString,@xmath_nodes)); 
+        my $mathseg = $math_node->toString;
+        $mathseg=~s/\n+//g;
+        $mathseg=~s/(\s+)/ /g;
+        $self->{MATHIDMAP}{"$mark"} = $mathseg; }
       elsif ($self->{REPLACEMATH} eq "syntax") {
-	#my @xmath_nodes=$math_node->getElementsByTagName('XMath');
-	#my $mathseg=join('',map($_->toString,@xmath_nodes)); 
-	my $mathseg = $math_node->toString;
-	$mathseg=~s/\n+//g;
-	$mathseg=~s/(\s+)/ /g;
-	$self->{MATHCOUNT}+=1;
-	$self->{MATHMAP}{$mathseg} = scalar(keys %{$self->{MATHMAP}})+1 unless defined $self->{MATHMAP}{$mathseg};
-	$mark=$self->{MATHMAP}{$mathseg};
-      }
+        #my @xmath_nodes=$math_node->getElementsByTagName('XMath');
+        #my $mathseg=join('',map($_->toString,@xmath_nodes)); 
+        my $mathseg = $math_node->toString;
+        $mathseg=~s/\n+//g;
+        $mathseg=~s/(\s+)/ /g;
+        $self->{MATHCOUNT}+=1;
+        $self->{MATHMAP}{$mathseg} = scalar(keys %{$self->{MATHMAP}})+1 unless defined $self->{MATHMAP}{$mathseg};
+        $mark=$self->{MATHMAP}{$mathseg}; }
       else {
-	$mark="";
-      }
+        $mark=""; }
       $mark="-$mark" if $mark;
       my $text_node = XML::LibXML::Text->new(" MathExpr$mark");
       $math_node->replaceNode($text_node);
@@ -225,25 +212,21 @@ sub normalize {
     foreach my $cite_node(@tonormalize) {
       my $mark;
       if ($self->{REPLACEMATH} eq "position") {
-	$mark="$fid-c$citeid";
-	$citeid++;
-	
-	my $citeseg=$cite_node->toString; 
-	$citeseg=~s/\n+//g; #Normalize empty lines
-	$citeseg=~s/(\s+)/ /g;#And spaces
-	$self->{CITEIDMAP}{"$mark"} = $citeseg;
-      }
+        $mark="$fid-c$citeid";
+        $citeid++;
+        my $citeseg=$cite_node->toString; 
+        $citeseg=~s/\n+//g; #Normalize empty lines
+        $citeseg=~s/(\s+)/ /g;#And spaces
+        $self->{CITEIDMAP}{"$mark"} = $citeseg; }
       elsif ($self->{REPLACEMATH} eq "syntax") {
-	my $citeseg=$cite_node->toString; 
-	$citeseg=~s/\n+//g; #Normalize empty lines
-	$citeseg=~s/(\s+)/ /g;#And spaces
-	$self->{CITECOUNT}+=1;
-	$self->{CITEMAP}{$citeseg} = scalar(keys %{$self->{CITEMAP}})+1 unless defined $self->{CITEMAP}{$citeseg};
-	$mark=$self->{CITEMAP}{$citeseg};
-      }
+        my $citeseg=$cite_node->toString; 
+        $citeseg=~s/\n+//g; #Normalize empty lines
+        $citeseg=~s/(\s+)/ /g;#And spaces
+        $self->{CITECOUNT}+=1;
+        $self->{CITEMAP}{$citeseg} = scalar(keys %{$self->{CITEMAP}})+1 unless defined $self->{CITEMAP}{$citeseg};
+        $mark=$self->{CITEMAP}{$citeseg}; }
       else {
-	$mark="";
-      }
+        $mark=""; }
       $mark="-$mark" if $mark;
       my $text_node = XML::LibXML::Text->new(" ourcitation$mark ");
       $cite_node->replaceNode($text_node);
@@ -252,25 +235,22 @@ sub normalize {
     foreach my $ref_node(@tonormalize) {
       my $mark;
       if ($self->{REPLACEMATH} eq "position") {
-	$mark="$fid-r$refid";
-	$refid++;
-
-	my $refseg=$ref_node->toString; 
-	$refseg=~s/\n+//g; #Normalize empty lines
-	$refseg=~s/(\s+)/ /g;#And spaces
-	$self->{REFIDMAP}{"$mark"} = $refseg;
-      }
+        $mark="$fid-r$refid";
+        $refid++;
+        my $refseg=$ref_node->toString; 
+        $refseg=~s/\n+//g; #Normalize empty lines
+        $refseg=~s/(\s+)/ /g;#And spaces
+        $self->{REFIDMAP}{"$mark"} = $refseg; }
       elsif ($self->{REPLACEMATH} eq "syntax") {
-	my $refseg=$ref_node->toString; 
-	$refseg=~s/\n+//g; #Normalize empty lines
-	$refseg=~s/(\s+)/ /g;#And spaces
-	$self->{REFCOUNT}+=1;
-	$self->{REFMAP}{$refseg} = scalar(keys %{$self->{REFMAP}})+1 unless defined $self->{REFMAP}{$refseg};
-	$mark=$self->{REFMAP}{$refseg};
-      }
+        my $refseg=$ref_node->toString; 
+        $refseg=~s/\n+//g; #Normalize empty lines
+        $refseg=~s/(\s+)/ /g;#And spaces
+        $self->{REFCOUNT}+=1;
+        $self->{REFMAP}{$refseg} = scalar(keys %{$self->{REFMAP}})+1 unless defined $self->{REFMAP}{$refseg};
+        $mark=$self->{REFMAP}{$refseg}; }
       else {
-	$mark="";
-      }
+        $mark=""; }
+
       $mark="-$mark" if $mark;
       my $text_node = XML::LibXML::Text->new(" ourreference$mark ");
       $ref_node->replaceNode($text_node);
@@ -318,6 +298,7 @@ sub getNormalizedElement {
   my $init="";
   my $result=\$init;
   $$result = $element->textContent if $element;
+  $$result = trimspaces($$result);
   $result;
 }
 
@@ -332,7 +313,7 @@ sub getNormalizedElements {
   my @elements=$root->getElementsByTagName($target);
   my $result=[];
   foreach my $element(@elements) {
-   push @$result, $element->textContent if $element;
+   push @$result, trimspaces($element->textContent) if $element;
   }
   $result;
 }
@@ -364,7 +345,8 @@ sub getNormalizedBody {
     $rawTextContent=join(" ",split("\n",$rawTextContent));
     $$result.=$rawTextContent;
   }
-  $result;
+  $$result = trimspaces($$result);
+  return $result; 
 }
 
 sub getNormalized {
@@ -377,7 +359,7 @@ sub getNormalized {
   my $root=$doc->getDocumentElement;
   my $init="";
   my $result=\$init;
-  $$result=encode('UTF-8',$root->textContent) if $root;
+  $$result=encode('UTF-8',trimspaces($root->textContent)) if $root;
   $result;
 }
 
@@ -399,7 +381,8 @@ sub getEntry {
   }
   elsif ($self->{REPLACEMATH} eq "position") {
     $id=~s/\s+$//g; #remove trailing \n and whitespace
-    chop $id if $id=~/\)$/;#remove ending )
+    $id=~s/\)$//;#remove ending )
+    require LLaMaPUn::Tokenizer;
     my $wordtoken=LLaMaPUn::Tokenizer::Word->wordtokenstrict;
     my @parts=split(/-/,$id);
     shift @parts; #remove MathExpr/ourcitation/ourreference
@@ -457,6 +440,7 @@ sub xmlid {
   my ($self,$math) = @_;
   $math=~s/\s+$//g; #remove trailing \n and whitespace
   chop $math if $math=~/\)$/;#remove )
+  require LLaMaPUn::Tokenizer;
   my $wordtoken=LLaMaPUn::Tokenizer::Word->wordtokenstrict;
   my @parts=split(/-/,$math);
   shift @parts if $parts[0]=~/^MathExpr/; #remove MathExpr if present
@@ -465,6 +449,14 @@ sub xmlid {
   $xmlid=~s/^s/S/;
   $xmlid;
 }
+
+sub trimspaces {
+  # Trim spaces
+  my $string = shift;
+  $string =~ s/\s\s+/ /g;
+  $string =~ s/^\s+//g;
+  $string =~ s/\s+$//g;
+  return $string; }
 
 1;
 
