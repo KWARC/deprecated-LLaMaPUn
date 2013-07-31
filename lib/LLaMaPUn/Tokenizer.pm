@@ -1,26 +1,26 @@
 # /=====================================================================\ #
-# |  LaMaPuN                                                            | #
+# |  LLaMaPUn                                                            | #
 # | Tokenization Module                                                 | #
 # |=====================================================================| #
-# | Part of the LaMaPUn project: http://kwarc.info/projects/lamapun/    | #
+# | Part of the LLaMaPUn project: http://kwarc.info/projects/LLaMaPUn/    | #
 # |  Research software, produced as part of work done by the            | #
 # |  KWARC group at Jacobs University,                                  | #
-# | Copyright (c) 2009 LaMaPUn group                                    | #
+# | Copyright (c) 2009 LLaMaPUn group                                    | #
 # | Released under the GNU Public License                               | #
 # |---------------------------------------------------------------------| #
 # | Deyan Ginev <d.ginev@jacobs-university.de>                  #_#     | #
 # | http://kwarc.info/people/dginev                            (o o)    | #
 # \=========================================================ooo==U==ooo=/ #
 
-package LaMaPUn::Tokenizer;
+package LLaMaPUn::Tokenizer;
 use strict;
 use Carp;
-use LaMaPUn::Util;
+use LLaMaPUn::Util;
 use Encode;
 
-our %Tokenizer = (sentence=>"LaMaPUn::Tokenizer::Sentence",
-	      chunk=>"LaMaPUn::Tokenizer::Chunk",
-	      word=>"LaMaPUn::Tokenizer::Word");
+our %Tokenizer = (sentence=>"LLaMaPUn::Tokenizer::Sentence",
+	      chunk=>"LLaMaPUn::Tokenizer::Chunk",
+	      word=>"LLaMaPUn::Tokenizer::Word");
 
 sub new {
   my($class,%options)=@_;
@@ -78,8 +78,8 @@ sub tokenize {
 
 #============================================================================== 
 # Sentence Tokenization
-package LaMaPUn::Tokenizer::Sentence;
-use base qw(LaMaPUn::Tokenizer);
+package LLaMaPUn::Tokenizer::Sentence;
+use base qw(LLaMaPUn::Tokenizer);
 use strict;
 use Encode;
 use Lingua::EN::Sentence qw( get_sentences add_acronyms get_acronyms );
@@ -92,7 +92,7 @@ sub new {
 }
 
 sub tokenize {
-  my $w=LaMaPUn::Tokenizer::Word->w;
+  my $w=LLaMaPUn::Tokenizer::Word->w;
   if (${$_[1]}=~/$w/) {
     get_sentences(${$_[1]}); #split by sentences, given a reference to a
                              #text scalar. output is sentence array ref
@@ -125,9 +125,9 @@ sub getAbbrevs {
 sub normalize {
   my $inref=$_[1];
   my $outref=[];
-  my $mathidtoken = LaMaPUn::Preprocessor->mathidtoken;
+  my $mathidtoken = LLaMaPUn::Preprocessor->mathidtoken;
 #  my $abbrevs=getAbbrevs();#maw
-  my $w=LaMaPUn::Tokenizer::Word->w;
+  my $w=LLaMaPUn::Tokenizer::Word->w;
   foreach my $sentence(@$inref) {
     next if $sentence =~ /^$/;
     $sentence =~ s/ +/ /go;# copied from final "maw"
@@ -193,8 +193,8 @@ sub normalize {
 
 #============================================================================== 
 # Chunk Tokenization
-package LaMaPUn::Tokenizer::Chunk;
-use base qw(LaMaPUn::Tokenizer);
+package LLaMaPUn::Tokenizer::Chunk;
+use base qw(LLaMaPUn::Tokenizer);
 use strict;
 
 sub new {
@@ -219,17 +219,17 @@ sub tokenize {
 }
 
 sub mergeMath {
-  LaMaPUn::Tokenizer::Sentence->mergeMath($_[1]);
+  LLaMaPUn::Tokenizer::Sentence->mergeMath($_[1]);
 }
 
 sub normalize {
-  LaMaPUn::Tokenizer::Sentence->normalize($_[1]);
+  LLaMaPUn::Tokenizer::Sentence->normalize($_[1]);
 }
 
 #============================================================================== 
 # Word Tokenization
-package LaMaPUn::Tokenizer::Word;
-use base qw(LaMaPUn::Tokenizer);
+package LLaMaPUn::Tokenizer::Word;
+use base qw(LLaMaPUn::Tokenizer);
 use strict;
 use encoding 'utf8';
 
@@ -300,7 +300,7 @@ sub mergeMath {
 
 sub normalize {
 # Normalization has no purpose in word tokenization
-#  LaMaPUn::Tokenizer::Sentence->normalize($_[1]);
+#  LLaMaPUn::Tokenizer::Sentence->normalize($_[1]);
  $_[1];
 }
 
@@ -312,12 +312,12 @@ __END__
 
 =head1 NAME
 
-C<LaMaPUn::Tokenizer> - Tokenization module for LaMaPUn normalized documents (plain text)
+C<LLaMaPUn::Tokenizer> - Tokenization module for LLaMaPUn normalized documents (plain text)
 
 =head1 SYNOPSIS
 
-    use LaMaPUn::Tokenizer;
-    my $tokenizer=LaMaPUn::Tokenizer->new(input=>"text",
+    use LLaMaPUn::Tokenizer;
+    my $tokenizer=LLaMaPUn::Tokenizer->new(input=>"text",
                                           token=>"sentence", 
                                           mergeMath=>1, 
                                           normalize=>1);
@@ -330,9 +330,9 @@ C<LaMaPUn::Tokenizer> - Tokenization module for LaMaPUn normalized documents (pl
 
 =over 4
 
-=item C<< my $preprocessor = LaMaPUn::Preprocessor->new(%options); >>
+=item C<< my $preprocessor = LLaMaPUn::Preprocessor->new(%options); >>
 
-Creates a new LaMaPUn Tokenizer object for normalized text documents
+Creates a new LLaMaPUn Tokenizer object for normalized text documents
 
   input : Admissible "text", "sentence" and "chunk". 
           While "text" can refer to any plain text input, 

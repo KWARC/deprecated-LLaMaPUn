@@ -1,19 +1,19 @@
 # /=====================================================================\ #
-# |  LaMaPuN                                                            | #
+# |  LLaMaPUn                                                            | #
 # | Preprocessor Module                                                 | #
 # |=====================================================================| #
-# | Part of the LaMaPUn project: http://kwarc.info/projects/lamapun/    | #
+# | Part of the LLaMaPUn project: http://kwarc.info/projects/LLaMaPUn/    | #
 # |  Research software, produced as part of work done by the            | #
 # |  KWARC group at Jacobs University,                                  | #
-# | Copyright (c) 2009 LaMaPUn group                                    | #
+# | Copyright (c) 2009 LLaMaPUn group                                    | #
 # | Released under the GNU Public License                               | #
 # |---------------------------------------------------------------------| #
 # | Deyan Ginev <d.ginev@jacobs-university.de>                  #_#     | #
 # | http://kwarc.info/people/dginev                            (o o)    | #
 # \=========================================================ooo==U==ooo=/ #
 
-package LaMaPUn::Preprocessor;
-use LaMaPUn::Util;
+package LLaMaPUn::Preprocessor;
+use LLaMaPUn::Util;
 use Encode;
 use strict;
 use Carp;
@@ -324,7 +324,6 @@ sub getNormalizedElement {
 sub getNormalizedElements {
   my ($self,$target)=@_;
   $self->normalize unless $self->{NORMALIZED};
-  my ($self,$target)=@_;
   my $doc = $self->{DOCUMENT};
   my $fid=$self->{NAME}||"doc0";
   $fid.="0" unless ($fid=~/\d$/);
@@ -341,7 +340,6 @@ sub getNormalizedElements {
 sub getNormalizedBody {
   my ($self,$target)=@_;
   $self->normalize unless $self->{NORMALIZED};
-  my ($self,$target)=@_;
   my $doc = $self->{DOCUMENT};
   my $fid=$self->{NAME}||"doc0";
   $fid.="0" unless ($fid=~/\d$/);
@@ -372,7 +370,6 @@ sub getNormalizedBody {
 sub getNormalized {
   my ($self,$target)=@_;
   $self->normalize unless $self->{NORMALIZED};
-  my ($self,$target)=@_;
   my $doc = $self->{DOCUMENT};
   my $fid=$self->{NAME}||"doc0";
   $fid.="0" unless ($fid=~/\d$/);
@@ -403,7 +400,7 @@ sub getEntry {
   elsif ($self->{REPLACEMATH} eq "position") {
     $id=~s/\s+$//g; #remove trailing \n and whitespace
     chop $id if $id=~/\)$/;#remove ending )
-    my $wordtoken=LaMaPUn::Tokenizer::Word->wordtokenstrict;
+    my $wordtoken=LLaMaPUn::Tokenizer::Word->wordtokenstrict;
     my @parts=split(/-/,$id);
     shift @parts; #remove MathExpr/ourcitation/ourreference
     my $mark=join("-",@parts); #retrieve original mark
@@ -460,7 +457,7 @@ sub xmlid {
   my ($self,$math) = @_;
   $math=~s/\s+$//g; #remove trailing \n and whitespace
   chop $math if $math=~/\)$/;#remove )
-  my $wordtoken=LaMaPUn::Tokenizer::Word->wordtokenstrict;
+  my $wordtoken=LLaMaPUn::Tokenizer::Word->wordtokenstrict;
   my @parts=split(/-/,$math);
   shift @parts if $parts[0]=~/^MathExpr/; #remove MathExpr if present
   my $file=shift @parts; #remove the following filename
@@ -477,12 +474,12 @@ __END__
 
 =head1 NAME
 
-C<LaMaPUn::Preprocessor> - Preprocessing module for LaTeXML tex|noparse.xml documents
+C<LLaMaPUn::Preprocessor> - Preprocessing module for LaTeXML tex|noparse.xml documents
 
 =head1 SYNOPSIS
 
-    use LaMaPUn::Preprocessor;
-    $preprocessor=LaMaPUn::Preprocessor->new(replacemath=>"position|syntax|generic",document=>"filePath"|$LibXML_Doc);
+    use LLaMaPUn::Preprocessor;
+    $preprocessor=LLaMaPUn::Preprocessor->new(replacemath=>"position|syntax|generic",document=>"filePath"|$LibXML_Doc);
     $preprocessor->setDocument("filePath"|$LibXML_Doc);
     $preprocessor->normalize; # usually left implicit
     $normalizedBody = $preprocessor->getNormalizedBody;
@@ -496,8 +493,8 @@ C<LaMaPUn::Preprocessor> - Preprocessing module for LaTeXML tex|noparse.xml docu
     %citemap = $preprocessor->getCiteEntries;
     $refbody = $preprocessor->getRefEntry($replacement_id);
     %refmap = $preprocessor->getRefEntries;
-    $mathidtoken = LaMaPUn::Preprocessor->mathidtoken;
-    $xmlid = LaMaPUn::Preprocessor->xmlid($replacement_id);
+    $mathidtoken = LLaMaPUn::Preprocessor->mathidtoken;
+    $xmlid = LLaMaPUn::Preprocessor->xmlid($replacement_id);
 
 =head1 DESCRIPTION
 
@@ -507,9 +504,9 @@ Preprocessing module carrying a sane transition from LaTeXML ".tex.xml|.noparse.
 
 =over 4
 
-=item C<< $preprocessor = LaMaPUn::Preprocessor->new(%options); >>
+=item C<< $preprocessor = LLaMaPUn::Preprocessor->new(%options); >>
 
-Creates a new LaMaPUn preprocessor object for normalizing LaTeXML-based XML documents
+Creates a new LLaMaPUn preprocessor object for normalizing LaTeXML-based XML documents
 
 document  : If supplied, accepted as filepath of source for Preprocessing.
             Also, a XML::LibXML::Document object could be directly given on input.
@@ -588,11 +585,11 @@ Analog to 'getMathEntry', but for ref elements.
 
 Analog to 'getMathEntries', but for ref elements.
 
-=item C<< $mathidtoken = LaMaPUn::Preprocessor->mathidtoken; >>
+=item C<< $mathidtoken = LLaMaPUn::Preprocessor->mathidtoken; >>
 
 Getter method for the internal regexp matching the normalized Math IDs, obtained when preprocessing with replacemath=>"position".
 
-=item C<< $xmlid = LaMaPUn::Preprocessor->xmlid($replacement_id); >>
+=item C<< $xmlid = LLaMaPUn::Preprocessor->xmlid($replacement_id); >>
 
 Converts the replacement math id to the original xml:id attribute of the source document.
 

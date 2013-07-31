@@ -1,38 +1,41 @@
 # /=====================================================================\ #
-# |  LaMaPuN                                                            | #
+# |  LLaMaPUn                                                            | #
 # | Purification Module                                                 | #
 # |=====================================================================| #
-# | Part of the LaMaPUn project: http://kwarc.info/projects/lamapun/    | #
+# | Part of the LLaMaPUn project: http://kwarc.info/projects/LLaMaPUn/    | #
 # |  Research software, produced as part of work done by the            | #
 # |  KWARC group at Jacobs University,                                  | #
-# | Copyright (c) 2009 LaMaPUn group                                    | #
+# | Copyright (c) 2009 LLaMaPUn group                                    | #
 # | Released under the GNU Public License                               | #
 # |---------------------------------------------------------------------| #
 # | Deyan Ginev <d.ginev@jacobs-university.de>                  #_#     | #
 # | http://kwarc.info/people/dginev                            (o o)    | #
 # \=========================================================ooo==U==ooo=/ #
 
-package LaMaPUn::Preprocessor::Purify;
+package LLaMaPUn::Preprocessor::Purify;
 use warnings;
 use strict;
 use Carp;
 use Encode;
 use XML::LibXML;
 use WordNet::QueryData;
-use LaMaPUn::Util;
-use LaMaPUn::LaTeXML;
+use LLaMaPUn::Util;
+use LLaMaPUn::LaTeXML;
 use Scalar::Util qw(blessed);
 
 our @ISA = qw(Exporter);
 our @EXPORT = qw( &purify_noparse &text_math_to_XMath &purify_tokens &text_XMath_to_text &merge_math);
 our $verbose=0;
 
-my $wn = WordNet::QueryData->new(dir=>locate_external("WordNet-dict")."/", noload => 1);
+#my $wn = WordNet::QueryData->new(dir=>locate_external("WordNet-dict")."/", noload => 1);
+my ($wordnetdir) = grep {-d $_} ('/usr/share/wordnet/','/usr/local/wordnet/dict/');
+my %dirclause = ($wordnetdir ? (dir=>$wordnetdir) : ());
+my $wn = WordNet::QueryData->new(%dirclause, noload => 1);
 
 sub purify_noparse {
   my ($class) = @_;
   my ($dom,%options);
-  if ($class eq 'LaMaPUn::Preprocessor::Purify') {
+  if ($class eq 'LLaMaPUn::Preprocessor::Purify') {
     ($class,$dom,%options) = @_; 
   } else { ($dom,%options)=@_; }
   if (! ref($dom)) {
@@ -77,7 +80,7 @@ my $consnt = qr/[bcdfghjklmnpqrstvwxz]/;
 my $CONSNT = qr/[BCDFGHJKLMNPQRSTVWXZ]/;
 sub is_math_construct {
   my ($class,$word) = @_;
-  ($word)=@_ unless ($class eq 'LaMaPUn::Preprocessor::Purify');
+  ($word)=@_ unless ($class eq 'LLaMaPUn::Preprocessor::Purify');
   return 0 unless (length $word > 0);
   return 1 if ($word =~ 
 	/ (^\d+$)        #1. Simple numbers
@@ -121,7 +124,7 @@ sub text_math_to_XMath {
   print STDERR "--------------- Text to XMath ---------------\n" if $verbose;
   my ($class,$dom) = @_;
   my $mathid=0;
-  $dom=$class unless ($class eq 'LaMaPUn::Preprocessor::Purify');
+  $dom=$class unless ($class eq 'LLaMaPUn::Preprocessor::Purify');
   #1.2.1	#Traverse each <p> paragraph in the document:
   my @paras = $dom->getElementsByTagName('p');
   foreach my $para(@paras) {
@@ -135,7 +138,7 @@ sub text_math_to_XMath {
       my $body = $textel->textContent;
       my @purified_words=();
 #1.2.3.			#Split by space to get words (ignoring punctuation for the moment)
-#v0.2 improvement: (TODO:) Use LaMaPUn::Tokenizer::Word to get the word tokens unambiguously
+#v0.2 improvement: (TODO:) Use LLaMaPUn::Tokenizer::Word to get the word tokens unambiguously
       my @words = split(/\s/,$body);
       push(@words," ") if ((chop $body) eq " ");
 #TODO: removing punctuation. This is a tricky issue which we decide to not handle at this stage.
@@ -183,7 +186,7 @@ sub text_math_to_XMath {
 	    $xmathel->addChild($xmtok);
 	    $mathel->addChild($xmathel);
 #1.2.6.3                            The Complex case - use latexmlmath to do the job for us
-#                                   Upgrade: Use LaMaPUn::Util::tex_to_noparse for extra speed!
+#                                   Upgrade: Use LLaMaPUn::Util::tex_to_noparse for extra speed!
 	  } else {
 #           DEPRECATED: Slow way, through the shell
 #	    system("latexmlmath --XMath=tempmath.xml --noparse \"$word\"");
@@ -193,7 +196,7 @@ sub text_math_to_XMath {
 #	    my ($xmathel)=$mdoc->getElementsByTagName('XMath');
 #	    unlink "tempmath.xml";
 
-#           New way: Using the LaMaPUn::Util API
+#           New way: Using the LLaMaPUn::Util API
 	    my ($xmathel)=tex_to_noparse('$'.$word.'$');
 	    my $newel = $xmathel->cloneNode(1);
 	    $mathel->addChild($newel);
@@ -401,7 +404,7 @@ sub handle_complex_xmtoks {
 sub purify_tokens {
   print STDERR "--------------- Find Complex Tokens ---------------\n" if $verbose;
   my ($class,$dom) = @_;
-  $dom=$class unless ($class eq 'LaMaPUn::Preprocessor::Purify');
+  $dom=$class unless ($class eq 'LLaMaPUn::Preprocessor::Purify');
   my @xmaths = $dom->getElementsByTagName('XMath');
   foreach my $xmath(@xmaths) {
     handle_complex_xmtoks($xmath);
@@ -411,7 +414,7 @@ sub purify_tokens {
 
 #########################################################
 # 3. Purge XMToks void of semantics back to plain text  #
-# Future: LaMaPUn::Pre::MathToText                      #
+# Future: LLaMaPUn::Pre::MathToText                      #
 #########################################################
 
 
@@ -430,7 +433,7 @@ sub text_XMath_to_text {
   print STDERR "--------------- XMath to Text ---------------\n" if $verbose;
   my ($class,$dom) = @_;
   my $mathid=0;
-  $dom=$class unless ($class eq 'LaMaPUn::Preprocessor::Purify');
+  $dom=$class unless ($class eq 'LLaMaPUn::Preprocessor::Purify');
   my @xmaths = $dom->getElementsByTagName('XMath');
   foreach my $xmath(@xmaths) {
     next unless ($xmath && $xmath->childNodes);
@@ -503,7 +506,7 @@ sub text_XMath_to_text {
 sub merge_math {
   print STDERR "--------------- Merge Math ---------------\n" if $verbose;
   my ($class,$dom) = @_;
-  $dom=$class unless ($class eq 'LaMaPUn::Preprocessor::Purify');
+  $dom=$class unless ($class eq 'LLaMaPUn::Preprocessor::Purify');
   my $count=0;
   my @mathels=$dom->getElementsByTagName('Math');
   foreach my $mathel(@mathels) {
@@ -570,11 +573,11 @@ __END__
 
 =head1 NAME
 
-C<LaMaPUn::Preprocessor::Purify> - Purification preprocessing of LaTeXML documents.
+C<LLaMaPUn::Preprocessor::Purify> - Purification preprocessing of LaTeXML documents.
 
 =head1 SYNOPSIS
 
-    use LaMaPUn::Preprocessor::Purify;
+    use LLaMaPUn::Preprocessor::Purify;
     $dom = purify_noparse($filepath,text_to_math=>0|1,math_to_text=>0|1,complex_tokens=>0|1,merge_math=>0|1,verbose=>0|1);
     $dom = text_math_to_XMath($dom);
     $dom = purify_tokens($dom);
