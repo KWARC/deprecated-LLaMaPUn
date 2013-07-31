@@ -17,7 +17,7 @@ The LLaMaPUn library consists of a wide range of processing tools for natural la
 ## See also
  * The official [project page](https://trac.kwarc.info/lamapun/) at Jacobs University 
 
-### Contact
+## Contact
 Feel free to send any feedback to the project maintainer at d.ginev@jacobs-university.de
 
 ---
