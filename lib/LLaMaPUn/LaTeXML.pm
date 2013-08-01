@@ -13,6 +13,7 @@
 # \=========================================================ooo==U==ooo=/ #
 
 package LLaMaPUn::LaTeXML;
+#use warnings;
 use strict;
 use FindBin;
 use lib "$FindBin::RealBin/../lib";
@@ -29,7 +30,8 @@ use Encode;
 use Carp;
 use Exporter;
 our @ISA = qw(Exporter);
-our @EXPORT = qw(&xmath_to_pmml &tex_to_pmml &tex_to_noparse &tex_to_xmath &parse_math_structure);
+our @EXPORT = qw(&xmath_to_pmml &tex_to_pmml &tex_to_noparse &tex_to_xmath &parse_math_structure 
+  &xml_to_xhtml &xml_to_TEI_xhtml);
 
 #Important! : This is an experimental sub that borrows (and hacks through) latexmlmath
 #             in order to process an array of TeX math formulas to PMML
@@ -111,20 +113,18 @@ print STUB $frontmatter;
 }
 
 sub tex_to_pmml {
-  conversion_driver("pmml",@_);
-}
-
+  conversion_driver("pmml",@_); }
 sub tex_to_noparse {
-  conversion_driver("noparse",@_);
-}
-
+  conversion_driver("noparse",@_); }
 sub tex_to_xmath {
-  conversion_driver("xmath",@_);
-}
+  conversion_driver("xmath",@_); }
 
 sub xmath_to_pmml {
-  post_driver("pmml",@_);
-}
+  post_driver(whatsin=>"xmath",whatsout=>"pmml",sources=>[@_]); }
+sub xml_to_xhtml {
+  post_driver(whatsin=>"xml",whatsout=>'xhtml',sources=>[@_]); }
+sub xml_to_TEI_xhtml {
+  post_driver(whatsin=>"xml",whatsout=>'TEI-xhtml',sources=>[@_]); }
 
 sub conversion_driver {
   my ($type,@args) = @_;
@@ -186,28 +186,52 @@ sub conversion_driver {
 }
 
 sub post_driver {
-  my ($type,@args) = @_;
+  my (%options) = @_;
+  my @sources = @{$options{sources}};
+  my $whatsin = $options{whatsin};
+  my $ltxmldoc;
+  my %PostOPS = (noresources=>1, parameters=>{}, verbosity=>0,sourceDirectory=>'.',siteDirectory=>".",nocache=>1,destination=>'.');
+  if ($whatsin eq 'xmath') {
+    # Math mode:
+    # Construct artificial LaTeXML document
+    $ltxmldoc = latexml_doc_constructor(@sources);
+    $ltxmldoc = $ltxmldoc->finalize();
+    my $doc = LaTeXML::Post::Document->new($ltxmldoc,
+    				 nocache=>1);
+    #Defaulted (TODO: make more general) to pmml if this block is reached
+    #======================================================================
+    # Postprocess to convert the math to whatever desired forms.
+    #======================================================================
+    # Since we can't easily find & extract all the various formats at once,
+    # let's just process each one separately.
 
-  # Construct artificial LaTeXML document
-  my $ltxmldoc = latexml_doc_constructor(@args);
-  $ltxmldoc = $ltxmldoc->finalize();
-  my $doc = LaTeXML::Post::Document->new($ltxmldoc,
-					 nocache=>1);
-  #Defaulted (TODO: make more general) to pmml if this block is reached
+    require LaTeXML::Post::MathML;
+    my $latexmlpost = LaTeXML::Post->new(verbosity=>0);
+    my($post) = $latexmlpost->ProcessChain($doc,
+        LaTeXML::Post::MathML::Presentation->new(
+            (verbosity=>0)));
+    
+   return $post->findnodes('//m:math');
+  } elsif ($whatsin eq 'xml') {
+    my $whatsout = $options{whatsout};
+    my $stylesheet = "LaTeXML-$whatsout.xsl";
+    # TODO: This should really all be supported in LaTeXML::Converter
+    # ... sigh ... punting and waiting for more time to incorporate it!
+    $ltxmldoc = shift @sources;
+    my $doc = LaTeXML::Post::Document->new($ltxmldoc,
+        nocache=>1);
+    my $latexmlpost = LaTeXML::Post->new(verbosity=>0);
+    require LaTeXML::Post::MathML;
+    require LaTeXML::Post::XMath;
+    require LaTeXML::Post::XSLT;
+    # TODO: Just hardwire XHTML in there, punting anything more meaningful for later
+    my($post) = $latexmlpost->ProcessChain($doc,
+        LaTeXML::Post::MathML::Presentation->new(%PostOPS),
+        LaTeXML::Post::XMath->new(%PostOPS),
+        LaTeXML::Post::XSLT->new(stylesheet=>$stylesheet,%PostOPS)
+        );
+  }
 
-  #======================================================================
-  # Postprocess to convert the math to whatever desired forms.
-  #======================================================================
-  # Since we can't easily find & extract all the various formats at once,
-  # let's just process each one separately.
-
-  require 'LaTeXML/Post/MathML.pm';
-  my $latexmlpost = LaTeXML::Post->new(verbosity=>0);
-  my($post) = $latexmlpost->ProcessChain($doc,
-      LaTeXML::Post::MathML::Presentation->new(
-          (verbosity=>0)));
-  
- return $post->findnodes('//m:math');
   
 #**********************************************************************
 }

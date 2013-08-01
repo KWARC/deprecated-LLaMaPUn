@@ -8,6 +8,7 @@ my $eval_return = eval {
   use LLaMaPUn::Util;
   use LLaMaPUn::Preprocessor;
   use LLaMaPUn::Preprocessor::Purify;
+  use LLaMaPUn::Preprocessor::MarkTokens;
   use LLaMaPUn::Tokenizer;
   1;
 };

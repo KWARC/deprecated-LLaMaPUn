@@ -13,9 +13,15 @@ and provide an outlook for a number of fixes and features to be added to the lib
  * **LLaMaPUn::Preprocessor**
    
    Preprocessing module carrying a sane transition from LaTeXML ".tex.xml|.noparse.xml" documents to plain text.
+
  * **LLaMaPUn::Preprocessor::Purify**
  
    Purification of Math and Textual modality in XML documents created via LaTeXML.
+
+ * **LLaMaPUn::Preprocessor::MarkTokens**
+ 
+   In-place tokenization for LaTeXML XML documents, marks sentences, words, formulas and tokens.
+
  * **LLaMaPUn::Tokenizer**
  
    Tokenization module for LaMaPUn normalized documents (plain text)

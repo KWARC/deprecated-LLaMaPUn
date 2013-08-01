@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 3;
+use Test::More tests => 4;
 
 use XML::LibXML;
 use LLaMaPUn::Preprocessor;
@@ -85,3 +85,11 @@ is($$body,"This is a sample sentence with ASCII MathExpr-doc0-purify0-m1 math. A
 my $second_math = $preprocessor->getMathEntry('MathExpr-doc0-S1-p1-m2');
 # AND test if the purifier found "jaguar" and "mouse" and united them
 is($second_math,'<Math mode="inline" xml:id="S1.p1.m2" tex="P(jaguar\mid mouse)=0"><XMath><XMTok role="UNKNOWN" font="italic">P</XMTok><XMTok role="OPEN">(</XMTok><XMTok role="UNKNOWN" meaning="UNKNOWN" font="italic">jaguar</XMTok><XMTok name="mid" role="VERTBAR">∣</XMTok><XMTok role="UNKNOWN" meaning="UNKNOWN" font="italic">mouse</XMTok><XMTok role="CLOSE">)</XMTok><XMTok meaning="equals" role="RELOP">=</XMTok><XMTok meaning="0" role="NUMBER">0</XMTok></XMath></Math>');
+
+#print STDERR "Tokenized Dom: \n",$purified_dom->toString(1),"\n\n";
+# Test the in-place tokenization
+use LLaMaPUn::Preprocessor::MarkTokens;
+my $marktokens = LLaMaPUn::Preprocessor::MarkTokens->new(document=>$purified_dom);
+my $tokenized_dom = $marktokens->process_document;
+
+ok($tokenized_dom);
