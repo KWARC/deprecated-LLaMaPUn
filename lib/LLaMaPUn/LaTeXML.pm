@@ -144,13 +144,13 @@ sub conversion_driver {
   my $linelength;
   
   @paths = map(pathname_canonical($_),@paths);
-  my $noparse = 1 if ($type eq "noparse");
+  my $mathparse = ($type eq "noparse") ? 'no' : 'RecDescent';
   my $latexml= LaTeXML->new(preload=>['LaTeX.pool',@preload], searchpaths=>[@paths],
 			    verbosity=>$verbosity, strict=>0,
 			    includeComments=>0,includeStyles=>undef,
 			    documentid=>undef,
           mathparser=>LaTeXML::MathParser->new(),
-			    nomathparse=>$noparse);
+			    mathparse=>$mathparse);
   
   # Digest and convert to LaTeXML's XML
   my $doc = LaTeXML::Post::Document->new($latexml->convertFile("literal:$texdoc"),

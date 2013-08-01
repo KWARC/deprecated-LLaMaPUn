@@ -376,20 +376,12 @@ sub mark_tokens {
     }
   }
 
-  #Next, add document unique IDs to tokens, starting at 1.
-  my $xpcn = XML::LibXML::XPathContext->new($root);
-  $xpcn->registerNs('ltx',"http://dlmf.nist.gov/LaTeXML");
-  my @mathtoks = $xpcn->findnodes('//ltx:XMTok');
-  foreach (@mathtoks) {
-    $_->setNodeName('token');
-  }
-
   my @allels = $root->findnodes('//*');
   my %id=();
   foreach (@allels) {
     my $name = $_->localname;
     $id{$name}++;
-    $_->setAttribute('xml:id',"$name.".$id{$name});
+    $_->setAttribute('xml:id',"$name.".$id{$name}) unless $_->getAttribute('xml:id');
   }
   # TODO : Add sentence ids and whichever else you need...
   $self->{DOCUMENT}=$normDoc;
