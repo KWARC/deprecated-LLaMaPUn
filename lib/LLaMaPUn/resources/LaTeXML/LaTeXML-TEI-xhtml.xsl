@@ -21,6 +21,8 @@
   <!-- Include all LaTeXML to xhtml modules -->
   <xsl:import href="urn:x-LaTeXML:XSLT:LaTeXML-all-xhtml.xsl"/>
   
+  <xsl:template match="/" mode="footer-generator-identifier"/>
+
   <xsl:template match="ltx:sentence">
     <xsl:element name="span" namespace="{$html_ns}">
       <xsl:attribute name="class">sentence</xsl:attribute>
