@@ -16,7 +16,6 @@ package LLaMaPUn::LaTeXML;
 #use warnings;
 use strict;
 use FindBin;
-use lib "$FindBin::RealBin/../lib";
 use Getopt::Long qw(:config no_ignore_case);
 use LaTeXML;
 use LaTeXML::Util::Pathname;
@@ -32,6 +31,8 @@ use Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT = qw(&xmath_to_pmml &tex_to_pmml &tex_to_noparse &tex_to_xmath &parse_math_structure 
   &xml_to_xhtml &xml_to_TEI_xhtml);
+
+our ($INSTALLDIR) = grep(-d $_, map("$_/LLaMaPUn", @INC));
 
 #Important! : This is an experimental sub that borrows (and hacks through) latexmlmath
 #             in order to process an array of TeX math formulas to PMML
@@ -190,7 +191,7 @@ sub post_driver {
   my @sources = @{$options{sources}};
   my $whatsin = $options{whatsin};
   my $ltxmldoc;
-  my %PostOPS = (noresources=>1, parameters=>{}, verbosity=>0,sourceDirectory=>'.',siteDirectory=>".",nocache=>1,destination=>'.');
+  my %PostOPS = (noresources=>1, parameters=>{}, verbosity=>-1,sourceDirectory=>'.',siteDirectory=>".",nocache=>1,destination=>'.');
   if ($whatsin eq 'xmath') {
     # Math mode:
     # Construct artificial LaTeXML document
@@ -206,33 +207,32 @@ sub post_driver {
     # let's just process each one separately.
 
     require LaTeXML::Post::MathML;
-    my $latexmlpost = LaTeXML::Post->new(verbosity=>0);
+    my $latexmlpost = LaTeXML::Post->new(%PostOPS);
     my($post) = $latexmlpost->ProcessChain($doc,
-        LaTeXML::Post::MathML::Presentation->new(
-            (verbosity=>0)));
+        LaTeXML::Post::MathML::Presentation->new(%PostOPS));
     
-   return $post->findnodes('//m:math');
-  } elsif ($whatsin eq 'xml') {
+   return $post->findnodes('//m:math'); }
+  elsif ($whatsin eq 'xml') {
     my $whatsout = $options{whatsout};
-    my $stylesheet = "LaTeXML-$whatsout.xsl";
+    my $stylesheet = "$INSTALLDIR/resources/LaTeXML/LaTeXML-$whatsout.xsl";
     # TODO: This should really all be supported in LaTeXML::Converter
     # ... sigh ... punting and waiting for more time to incorporate it!
     $ltxmldoc = shift @sources;
     my $doc = LaTeXML::Post::Document->new($ltxmldoc,
-        nocache=>1);
-    my $latexmlpost = LaTeXML::Post->new(verbosity=>0);
+        nocache=>1,%PostOPS);
+    my $latexmlpost = LaTeXML::Post->new(%PostOPS);
     require LaTeXML::Post::MathML;
     require LaTeXML::Post::XMath;
     require LaTeXML::Post::XSLT;
     # TODO: Just hardwire XHTML in there, punting anything more meaningful for later
+
     my($post) = $latexmlpost->ProcessChain($doc,
         LaTeXML::Post::MathML::Presentation->new(%PostOPS),
         LaTeXML::Post::XMath->new(%PostOPS),
         LaTeXML::Post::XSLT->new(stylesheet=>$stylesheet,%PostOPS)
         );
-  }
-
-  
+    return $post->getDocument;
+  }  
 #**********************************************************************
 }
 
