@@ -41,5 +41,9 @@ use LLaMaPUn::Preprocessor::MarkTokens;
 my $marktokens = LLaMaPUn::Preprocessor::MarkTokens->new(document=>$saved_dom);
 my $tokenized_dom = $marktokens->process_document;
 
+open OUT, '>', '/tmp/test.xml';
+print OUT $tokenized_dom->toString(1);
+close OUT;
+
 my $expected_tokenized = $parser->parse_file("t/documents/sample_tokenized.xml");
 is($tokenized_dom->toString(1),$expected_tokenized->toString(1));

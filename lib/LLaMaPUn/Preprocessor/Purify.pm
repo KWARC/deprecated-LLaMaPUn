@@ -21,6 +21,8 @@ use XML::LibXML;
 use WordNet::QueryData;
 use LLaMaPUn::Util;
 use LLaMaPUn::LaTeXML;
+use vars qw($LaTeXML_nsURI);
+$LaTeXML_nsURI = $LLaMaPUn::LaTeXML::LaTeXML_nsURI; # for backward compatibility
 use Scalar::Util qw(blessed);
 
 our @ISA = qw(Exporter);
@@ -164,26 +166,23 @@ sub text_math_to_XMath {
           print STDERR "Found math in text: $word\n" if $verbose;
           #1.2.6. If this is a math symbol, create a corresponding XMath element
           #1.2.6.1 The Scalar case
-          my $mathel = XML::LibXML::Element->new('Math');
+          my $mathel = $para->addNewChild($LaTeXML_nsURI, 'Math');
+          $mathel->unbindNode();
           $mathid++;
           $mathel->setAttribute("xml:id","purify0.m$mathid");
           if ($word=~/^[0-9]*[,\.]?[0-9]+$/) {
-            my $xmathel = XML::LibXML::Element->new('XMath');
-            my $xmtok = XML::LibXML::Element->new('XMTok');
+            my $xmathel = $mathel->addNewChild($LaTeXML_nsURI, 'XMath');
+            my $xmtok = $xmathel->addNewChild($LaTeXML_nsURI, 'XMTok');
             $xmtok->appendText($word);
             $xmtok->setAttribute('meaning',$word);
-            $xmtok->setAttribute('role','NUMBER');
-            $xmathel->addChild($xmtok);
-            $mathel->addChild($xmathel); }
+            $xmtok->setAttribute('role','NUMBER'); }
           #1.2.6.2 The Simple Identifier case
           elsif ($word=~/^[bcdefghjklmnopqrstuvwxyz]$/i) {
-            my $xmathel = XML::LibXML::Element->new('XMath');
-            my $xmtok = XML::LibXML::Element->new('XMTok');
+            my $xmathel = $mathel->addNewChild($LaTeXML_nsURI, 'XMath');
+            my $xmtok = $xmathel->addNewChild($LaTeXML_nsURI, 'XMTok');
             $xmtok->appendText($word);
             $xmtok->setAttribute('meaning','UNKNOWN');
-            $xmtok->setAttribute('role','UNKNOWN');
-            $xmathel->addChild($xmtok);
-            $mathel->addChild($xmathel); }
+            $xmtok->setAttribute('role','UNKNOWN'); }
           #1.2.6.3 The Complex case - use latexmlmath to do the job for us
           # Upgrade: Use LLaMaPUn::Util::tex_to_noparse for extra speed!
           else {
@@ -197,10 +196,12 @@ sub text_math_to_XMath {
 
             # New way: Using the LLaMaPUn::Util API
             my ($xmathel)=tex_to_noparse('$'.$word.'$');
-            my $newel = $xmathel->cloneNode(1);
-            $mathel->addChild($newel); }
+            my $newel = $mathel->addNewChild($LaTeXML_nsURI, $xmathel->nodeName()); 
+            $newel->replaceNode($xmathel->cloneNode(1));
+          }
           #1.2.6.4 Introduce the new element to the document
-          my $currtextnode = XML::LibXML::Element->new('text');
+          my $currtextnode = $para->addNewChild($LaTeXML_nsURI, 'text');
+          $currtextnode->unbindNode();
           my $bodytext = "$current_text_content ";
           $bodytext=~s/\s+$/ /;
           $currtextnode->appendText($bodytext);
@@ -215,7 +216,11 @@ sub text_math_to_XMath {
       #1.2.8. Introduce the purified <p> to the DOM.
       foreach my $pure_el(@purified_words) {
         $para->insertBefore($pure_el,$textel); }
-      my $currtextnode = XML::LibXML::Element->new('text') if $current_text_content;
+      my $currtextnode;
+      if ($current_text_content) {
+        $currtextnode = $para->addNewChild($LaTeXML_nsURI,'text');
+        $currtextnode->unbindNode();
+      }
       my $bodytext="$current_text_content ";
       $bodytext=~s/\s+$/ /;
       $currtextnode->appendText($bodytext) if $current_text_content;
@@ -286,7 +291,8 @@ sub check_math_word {
   #2.1.1  MathWords case - highest precedence
   if (($MathWords{$possible_word}) && (!$start_->isSameNode($end_))) {
     print STDERR "Found MathOp in Math: $possible_word\n" if $verbose;
-    my $cplxtok = XML::LibXML::Element->new('XMTok');
+    my $cplxtok = $root->addNewChild($LaTeXML_nsURI,'XMTok');
+    $cplxtok->unbindNode;
     $cplxtok->appendText($possible_word);
     my $role = $MathWords{$possible_word}{"role"};
     $role = 'UNKNOWN' unless $role;
@@ -311,7 +317,8 @@ sub check_math_word {
     {
       print STDERR "Found WordNet Word in Math: $possible_word\n" if $verbose;
       #possible_word is indeed a word - merge in 1 XMTok
-      my $cplxtok = XML::LibXML::Element->new('XMTok');
+      my $cplxtok = $root->addNewChild($LaTeXML_nsURI,'XMTok');
+      $cplxtok->unbindNode;
       $cplxtok->appendText($possible_word);
       $cplxtok->setAttribute('role','UNKNOWN');#can we do better?
       $cplxtok->setAttribute('meaning','UNKNOWN');#can we do better?
@@ -330,7 +337,8 @@ sub check_math_word {
 #2.1.3  #nonWordNet Case - least precedence
   else {if ($nonWordNet{$possible_word} && (!$start_->isSameNode($end_))) {
     print STDERR "Found nonWordNet Word in Math: $possible_word\n" if $verbose;
-    my $cplxtok = XML::LibXML::Element->new('XMTok');
+    my $cplxtok = $root->addNewChild($LaTeXML_nsURI,'XMTok');
+    $cplxtok->unbindNode;
     $cplxtok->appendText($possible_word);
     my $role = 'UNKNOWN';
     my $meaning = 'UNKNOWN';
@@ -435,56 +443,57 @@ sub text_XMath_to_text {
     foreach my $mnode(@mathnodes) {
       #First heuristic - recognizable word between spaces
       if (isHintSpace($mnode->nextSibling) && isHintSpace($mnode->previousSibling))
-  {#We are between spaces
-    my $possible_word=$mnode->textContent;
-    #Is this a recognizable word?
-    if ($nonWordNet{$possible_word}||check_wordnet_word($possible_word)) {
-      #Prepare a text element
-      print STDERR "Found NL word in Math: $possible_word\n" if $verbose;
-      my $newtextnode = XML::LibXML::Element->new('text');
-      #Were the XMhints at both sides?
-      my $lspace="";
-      my $rspace="";
-      $lspace=" " if ($mnode->previousSibling);
-      $rspace=" " if ($mnode->nextSibling);
-      $newtextnode->appendText("$lspace$possible_word$rspace");
-      #We know we are at the top-level XMath, so we need to cut around the $mnode (if needed)
-      my $mathroot = $xmath->parentNode;
-      my $proot = $mathroot->parentNode;
-      if (($mnode->previousSibling) && ($mnode->nextSibling)) {
-        $xmath->removeChild($mnode->previousSibling);
-        $xmath->removeChild($mnode->nextSibling);
-        #Move all nodes following $mnode to a new Math element to follow, then remove $mnode
-        my $followmath = XML::LibXML::Element->new('Math');
-        $mathid++;
-        $followmath->setAttribute("xml:id","purify1.m$mathid");
-        my $newxmathchild = XML::LibXML::Element->new('XMath');
-        $followmath->addChild($newxmathchild);
-        my $followxmath = $followmath->firstChild;
-        my $rightnode = $mnode->nextSibling;
-        while ($rightnode) {
-    my $newrightnode=$rightnode->nextSibling;
-    $followxmath->addChild($rightnode);
-    $xmath->removeChild($rightnode);
-    $rightnode=$newrightnode;
+      {#We are between spaces
+        my $possible_word=$mnode->textContent;
+        #Is this a recognizable word?
+        if ($nonWordNet{$possible_word}||check_wordnet_word($possible_word)) {
+          #Prepare a text element
+          print STDERR "Found NL word in Math: $possible_word\n" if $verbose;
+          my $newtextnode = $mnode->addNewChild($LaTeXML_nsURI, 'text');
+          $newtextnode->unbindNode();
+          #Were the XMhints at both sides?
+          my $lspace="";
+          my $rspace="";
+          $lspace=" " if ($mnode->previousSibling);
+          $rspace=" " if ($mnode->nextSibling);
+          $newtextnode->appendText("$lspace$possible_word$rspace");
+          #We know we are at the top-level XMath, so we need to cut around the $mnode (if needed)
+          my $mathroot = $xmath->parentNode;
+          my $proot = $mathroot->parentNode;
+          if (($mnode->previousSibling) && ($mnode->nextSibling)) {
+            $xmath->removeChild($mnode->previousSibling);
+            $xmath->removeChild($mnode->nextSibling);
+            #Move all nodes following $mnode to a new Math element to follow, then remove $mnode
+            my $followmath = $mnode->addNewChild($LaTeXML_nsURI, 'Math');
+            $followmath->unbindNode();
+            $mathid++;
+            $followmath->setAttribute("xml:id","purify1.m$mathid");
+            my $newxmathchild = $followmath->addNewChild($LaTeXML_nsURI, 'XMath');
+            my $followxmath = $followmath->firstChild;
+            my $rightnode = $mnode->nextSibling;
+            while ($rightnode) {
+              my $newrightnode=$rightnode->nextSibling;
+              $followxmath->addChild($rightnode);
+              $xmath->removeChild($rightnode);
+              $rightnode=$newrightnode;
+            }
+            $xmath->removeChild($mnode);
+            $proot->insertAfter($newtextnode,$mathroot);
+            $proot->insertAfter($followmath,$newtextnode);
+            #Done?
+          }
+          else {#It's in the beginning or end, hence deleting it is sufficient (and inserting on the right side)
+            $xmath->removeChild($mnode->previousSibling) if $mnode->previousSibling;
+            $xmath->removeChild($mnode->nextSibling) if $mnode->nextSibling;
+            if ($mnode->nextSibling) {
+              $proot->insertBefore($newtextnode,$mathroot);
+            } else {
+              $proot->insertAfter($newtextnode,$mathroot);
+            }
+            $xmath->removeChild($mnode);
+          }
         }
-        $xmath->removeChild($mnode);
-        $proot->insertAfter($newtextnode,$mathroot);
-        $proot->insertAfter($followmath,$newtextnode);
-        #Done?
       }
-      else {#It's in the beginning or end, hence deleting it is sufficient (and inserting on the right side)
-        $xmath->removeChild($mnode->previousSibling) if $mnode->previousSibling;
-        $xmath->removeChild($mnode->nextSibling) if $mnode->nextSibling;
-        if ($mnode->nextSibling) {
-    $proot->insertBefore($newtextnode,$mathroot);
-        } else {
-    $proot->insertAfter($newtextnode,$mathroot);
-        }
-        $xmath->removeChild($mnode);
-      }
-    }
-  }
       else {}#Second heuristic?
     }
   }
@@ -518,7 +527,8 @@ sub merge_math {
       my @XMnodes = $mathel->firstChild->getChildNodes;
       foreach my $newnode(@XMnodes) {
          $newnode->unbindNode;
-         $prevxmath->addChild($newnode);
+         my $place_holder = $prevxmath->addNewChild($LaTeXML_nsURI, $newnode->nodeName());
+         $place_holder->replaceNode($newnode);
       }
       my $root = $mathel->parentNode;
       $root->removeChild($mathel);
@@ -532,10 +542,11 @@ sub merge_math {
     unless ($_->hasChildNodes() && ($_->getElementsByTagName('Math'))) {
       my $eqel = $_;
       #Just claim the equation is a paragraph:
-      my $p = XML::LibXML::Element->new('p');
-      my @children = map($_->cloneNode(1),$eqel->childNodes);
-      foreach (@children) {
-  $p->addChild($_);
+      my $p = $eqel->addNewChild($LaTeXML_nsURI,'p');
+      $p->unbindNode();
+      foreach my $c($eqel->childNodes) {
+        my $new = $p->addNewChild($LaTeXML_nsURI, $c->nodeName());
+        $new->replaceNode($c->cloneNode(1));
       }
       $eqel->removeChildNodes();
       $eqel->replaceNode($p);

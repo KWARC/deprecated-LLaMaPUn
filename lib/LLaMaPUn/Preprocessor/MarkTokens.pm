@@ -21,9 +21,10 @@ use Scalar::Util qw(blessed);
 use LLaMaPUn::Util;
 use LLaMaPUn::Preprocessor;
 use LLaMaPUn::Tokenizer;
+use LLaMaPUn::LaTeXML;
+use vars qw($LaTeXML_nsURI);
+$LaTeXML_nsURI = $LLaMaPUn::LaTeXML::LaTeXML_nsURI; # for backward compatibility
 
-use vars qw($VERSION);
-$VERSION = "0.0.1";
 #**********************************************************************
 
 sub new {
@@ -165,14 +166,14 @@ sub mark_tokens {
       $child->unbindNode; }
 
     foreach my $sentence (@$sentsRef) {
-      my $sentnode = XML::LibXML::Element->new('sentence');
+      my $sentnode = $block->addNewChild($LaTeXML_nsURI,'sentence');
       my @baselayer = split(/\s+/,$sentence);
       foreach my $base(@baselayer) {
         my $basenode;
         if ($base=~/^MathExpr(.+)\d$/) { #Formula
-          $basenode = XML::LibXML::Element->new('formula'); }
+          $basenode = $sentnode->addNewChild($LaTeXML_nsURI,'formula'); }
         else { #Word
-          $basenode = XML::LibXML::Element->new('word'); }
+          $basenode = $sentnode->addNewChild($LaTeXML_nsURI,'word'); }
         #Form and attach atomic tokens
         #Hardest: MathExpr-doc0-m1-MathExpr-doc0-m2-stable-MathExpr-doc0-m3
         my @tokens;
@@ -196,9 +197,8 @@ sub mark_tokens {
             shift @idparts; #remove MathExpr?
             my $file=shift @idparts; #follows filename
             if ($file eq 'NoID') { # Missing id of formula, give up here
-              my $token = XML::LibXML::Element->new('token');
-              $token->appendTextNode('MissingFormula');
-              $basenode->addChild($token); }
+              my $token = $basenode->addNewChild($LaTeXML_nsURI,'token');
+              $token->appendTextNode('MissingFormula'); }
             else {
               my $xmlid=join(".",@idparts); #return id in original dotted form
               my @mnodes = ();
@@ -216,12 +216,12 @@ sub mark_tokens {
               while ($mnode->parentNode && ($mnode->parentNode->nodeName=~/^equation|equationgroup$/)) {
                 $mnode=$mnode->parentNode;
               }
-              my $newnode = $mnode->cloneNode(1);
-              $basenode->addChild($newnode);        
+              my $newnode = $basenode->addNewChild($LaTeXML_nsURI,$mnode->nodeName());
+              $newnode->replaceNode($mnode->cloneNode(1));
           }} 
           else {
             while (defined $part && ($part ne '') && $part=~s/(($w|\d)+|.)//) {
-              my $token = XML::LibXML::Element->new('token');
+              my $token = $basenode->addNewChild($LaTeXML_nsURI,'token');
               $token->appendTextNode($1);
               my $toktext = $1;
               while (($current_txtcontent) && ($current_txtcontent !~ /\Q$toktext\E/)) {#Align to the appropriate text node
@@ -256,12 +256,11 @@ sub mark_tokens {
                   $token->setAttribute("font",$fattr);
                 }
               }
-              $basenode->addChild($token); #Finally, add the token to the DOM tree
             }
           }
         }
         if (@parts > 0) {
-          my $token = XML::LibXML::Element->new('token');
+          my $token = $basenode->addNewChild($LaTeXML_nsURI,'token');
           $token->appendTextNode("-");
 
           #UGH, had to copy-paste code :( ideally, should be refactored (becomes unmaintainable...)
@@ -297,12 +296,11 @@ sub mark_tokens {
               $token->setAttribute("font",$fattr);
             }
             #END OF PASTE
-            $basenode->addChild($token);
           } 
         }
         #Handle trailing dashes (morse code motivated)
         if ($base=~/[^-]/ && $base=~/-$/) {
-          my $token = XML::LibXML::Element->new('token');
+          my $token = $basenode->addNewChild($LaTeXML_nsURI,'token');
           $token->appendTextNode("-");
     
           #UGH, had to copy-paste code :( ideally, should be refactored (becomes unmaintainable...)
@@ -339,7 +337,6 @@ sub mark_tokens {
             }
           }
           #END OF PASTE
-          $basenode->addChild($token);
         }
         my @base_children = $basenode->childNodes;
         next unless scalar(@base_children); #skip if empty!
@@ -364,15 +361,12 @@ sub mark_tokens {
             }
           }
         }
-
-        #Attach basenode to sentence
-        $sentnode->addChild($basenode);
       }
-      $block->addChild($sentnode);
     }
     foreach my $r(@rest) {
       $r->unbindNode;
-      $block->addChild($r);
+      my $newr = $block->addNewChild($LaTeXML_nsURI,$r->nodeName());
+      $newr->replaceNode($r);
     }
   }
 

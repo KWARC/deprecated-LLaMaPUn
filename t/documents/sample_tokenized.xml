@@ -66,7 +66,7 @@
           <token xml:id="token.16">ASCII</token>
         </word>
         <formula xml:id="formula.1">
-          <Math xmlns="http://dlmf.nist.gov/LaTeXML" xml:id="purify0.m1">
+          <Math xml:id="purify0.m1">
             <XMath xml:id="XMath.1">
               <XMTok meaning="1" role="NUMBER" xml:id="XMTok.1">1</XMTok>
               <XMTok meaning="plus" role="ADDOP" xml:id="XMTok.2">+</XMTok>
@@ -91,7 +91,7 @@
           <token xml:id="token.20">a</token>
         </word>
         <formula xml:id="formula.2">
-          <Math xmlns="http://dlmf.nist.gov/LaTeXML" mode="inline" xml:id="S1.p1.m1" tex="\sqrt{x}">
+          <Math mode="inline" xml:id="S1.p1.m1" tex="\sqrt{x}">
             <XMath xml:id="XMath.2">
               <XMApp xml:id="XMApp.1">
                 <XMTok meaning="square-root" xml:id="XMTok.6"/>
@@ -138,7 +138,7 @@
           <token xml:id="token.31">math</token>
         </word>
         <formula xml:id="formula.3">
-          <Math xmlns="http://dlmf.nist.gov/LaTeXML" mode="inline" xml:id="S1.p1.m2" tex="P(jaguar\mid mouse)=0">
+          <Math mode="inline" xml:id="S1.p1.m2" tex="P(jaguar\mid mouse)=0">
             <XMath xml:id="XMath.3">
               <XMTok role="UNKNOWN" font="italic" xml:id="XMTok.8">P</XMTok>
               <XMTok role="OPEN" xml:id="XMTok.9">(</XMTok>

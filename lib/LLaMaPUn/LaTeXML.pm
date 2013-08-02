@@ -33,6 +33,9 @@ our @EXPORT = qw(&xmath_to_pmml &tex_to_pmml &tex_to_noparse &tex_to_xmath &pars
   &xml_to_xhtml &xml_to_TEI_xhtml);
 
 our ($INSTALLDIR) = grep(-d $_, map("$_/LLaMaPUn", @INC));
+use vars qw($LaTeXML_nsURI);
+$LaTeXML_nsURI = "http://dlmf.nist.gov/LaTeXML";
+our $nsURI = $LaTeXML_nsURI;
 
 #Important! : This is an experimental sub that borrows (and hacks through) latexmlmath
 #             in order to process an array of TeX math formulas to PMML
@@ -107,7 +110,7 @@ print STUB $frontmatter;
  close(STUB);
 
  my $model = LaTeXML::Model->new(); 
- $model->registerNamespace('ltx',"http://dlmf.nist.gov/LaTeXML");
+ $model->registerNamespace('ltx',$nsURI);
  my $document = LaTeXML::Document->new_from_file($model,$filename);
  unlink($filename);
  $document;
@@ -191,7 +194,8 @@ sub post_driver {
   my @sources = @{$options{sources}};
   my $whatsin = $options{whatsin};
   my $ltxmldoc;
-  my %PostOPS = (noresources=>1, parameters=>{}, verbosity=>-1,sourceDirectory=>'.',siteDirectory=>".",nocache=>1,destination=>'.');
+  my %PostOPS = (validate=>0, noresources=>1, parameters=>{}, verbosity=>-1,
+    sourceDirectory=>'.',siteDirectory=>".",nocache=>1,destination=>'.');
   if ($whatsin eq 'xmath') {
     # Math mode:
     # Construct artificial LaTeXML document
@@ -289,7 +293,7 @@ sub new_from_file {
   Fatal("File $filename can't be accessed!\n") unless (-e $filename);
   my $doc = XML::LibXML->load_xml(location=>$filename);
   $model = LaTeXML::Model->new(); 
-  $model->registerNamespace('ltx',"http://dlmf.nist.gov/LaTeXML");
+  $model->registerNamespace('ltx',$nsURI);
   # parse the document
   bless { document=>$doc, node=>$doc, model=>$model,
           idstore=>{}, labelstore=>{},
