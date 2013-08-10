@@ -423,11 +423,11 @@ sub purify_tokens {
 sub isHintSpace {
   my ($node)=@_;
   return 1 unless $node;
-  if (($node->nodeName eq 'XMHint') && ($node->getAttribute('name') =~ /space/)) {
+  my $name = $node->getAttribute('name');
+  if (($node->nodeName eq 'XMHint') && $name && ($name =~ /space/)) {
     return  1;
   }
-  return 0;
-}
+  return 0; }
 
 #3.1. Detects complex Tokens which are void of semantics and exports them out of XMath
 sub text_XMath_to_text {

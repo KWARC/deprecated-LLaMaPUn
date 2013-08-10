@@ -78,14 +78,13 @@ sub __recTextContent {
       my $chpart = join(" ",split("\n",__recTextContent($child)))." ";
       $tc .= $chpart;
     }
-    $tc;
+    return $tc;
   }
   else {
     my ($part) = @{LLaMaPUn::Tokenizer::Sentence->normalize([$node->textContent])};
-    $part=~s/^\s//; #Detected problem with native ->textContent of LibXML -  apparently an extra space is deposited at the beginning.
-    $part;
-  }
-}
+    $part=~s/^\s// if $part; #Detected problem with native ->textContent of LibXML -  apparently an extra space is deposited at the beginning.
+    return $part||'';
+  }}
 
 sub mark_tokens {
   my ($self)=@_;
@@ -350,7 +349,8 @@ sub mark_tokens {
             my $atval = $attr->value;
             my $global = 1;
             foreach my $child($basenode->childNodes) {
-              next if ($child->getAttribute($atname) eq $atval);
+              my $atname_attribute = $child->getAttribute($atname);
+              next if (!$atname_attribute || !$atval || ($atname_attribute eq $atval));
               $global = 0;
             }
             if ($global) {
