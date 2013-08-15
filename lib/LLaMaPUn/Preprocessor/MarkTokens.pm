@@ -164,10 +164,15 @@ sub mark_tokens {
     foreach my $child(@ps) {
       $child->unbindNode; }
 
+    my $trailing_sentence_spaces = scalar(@$sentsRef)-1;
     foreach my $sentence (@$sentsRef) {
       my $sentnode = $block->addNewChild($LaTeXML_nsURI,'sentence');
+      $block->appendTextNode(" ") if $trailing_sentence_spaces;
       my @baselayer = split(/\s+/,$sentence);
+      my $leading_spaces = 0;
       foreach my $base(@baselayer) {
+        my $trailing_space_punct = ($base =~ /^[\.\?\!\:\,\;]$/);
+        $sentnode->appendTextNode(" ") if (($leading_spaces++) && (! $trailing_space_punct));
         my $basenode;
         if ($base=~/^MathExpr(.+)\d$/) { #Formula
           $basenode = $sentnode->addNewChild($LaTeXML_nsURI,'formula'); }
