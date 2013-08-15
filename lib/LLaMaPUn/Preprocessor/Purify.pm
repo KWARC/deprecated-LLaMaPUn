@@ -36,6 +36,7 @@ our $wn = WordNet::QueryData->new(%dirclause, noload => 1);
 
 sub purify_noparse {
   my ($class) = @_;
+  return unless $class; # Nothing to do here
   my ($dom,%options);
   if ($class eq 'LLaMaPUn::Preprocessor::Purify') {
     ($class,$dom,%options) = @_; 
