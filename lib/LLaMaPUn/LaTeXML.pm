@@ -191,7 +191,8 @@ sub conversion_driver {
 
 sub post_driver {
   my (%options) = @_;
-  my @sources = @{$options{sources}};
+  my @sources = grep {defined} @{$options{sources}||[]};
+  return unless @sources;
   my $whatsin = $options{whatsin};
   my $ltxmldoc;
   my %PostOPS = (validate=>0, noresources=>1, parameters=>{}, verbosity=>-1,
