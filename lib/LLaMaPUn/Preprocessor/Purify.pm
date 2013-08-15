@@ -423,7 +423,7 @@ sub purify_tokens {
 #3.0. Boolean sub checking whether a given XML Node is an XMHint space
 sub isHintSpace {
   my ($node)=@_;
-  return 1 unless $node;
+  return 0 unless ($node && (blessed($node) eq 'XML::LibXML::Element'));
   my $name = $node->getAttribute('name');
   if (($node->nodeName eq 'XMHint') && $name && ($name =~ /space/)) {
     return  1;

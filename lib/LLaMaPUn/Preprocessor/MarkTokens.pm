@@ -88,7 +88,7 @@ sub __recTextContent {
 
 sub mark_tokens {
   my ($self)=@_;
-  return if $self->{TOKENSMARKED};
+  return if ($self->{TOKENSMARKED} || (!blessed($self->{DOCUMENT})));
   my $root = $self->{DOCUMENT}->getDocumentElement;
   my $original = $root->cloneNode(1); #Copy the original document for reverse engeneering the math elements.
   my $origdoc = XML::LibXML::Document->new("1.0","UTF-8");
