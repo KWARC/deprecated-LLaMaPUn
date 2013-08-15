@@ -99,7 +99,6 @@ sub mark_tokens {
 
   my $normDoc = $preprocessor->getNormalizedDocumentObject; #Normalize with position math replacements.
   $root = $normDoc->getDocumentElement;
-
   #Assumption: All discourse is eventually embedded into a "textual" element as seen in @textual below.
   # Current list: p td caption contact date personname quote title toctitle keywords classification acknowledgements
   # Do inform the author if coverage is incomplete!
@@ -168,13 +167,19 @@ sub mark_tokens {
     foreach my $sentence (@$sentsRef) {
       my $sentnode = $block->addNewChild($LaTeXML_nsURI,'sentence');
       $block->appendTextNode(" ") if $trailing_sentence_spaces;
+      # Glue separated multimodal constructs like "$\alpha$ -equivalent" back together
+      $sentence =~ s/(\d)\s+(\-\w)/$1$2/g;
+      # Separate out glued punctuation at the end of a sentence
+      $sentence =~ s/(\S)([\.\?\!])$/$1 $2/;
       my @baselayer = split(/\s+/,$sentence);
       my $leading_spaces = 0;
       foreach my $base(@baselayer) {
         my $trailing_space_punct = ($base =~ /^[\.\?\!\:\,\;]$/);
         $sentnode->appendTextNode(" ") if (($leading_spaces++) && (! $trailing_space_punct));
         my $basenode;
-        if ($base=~/^MathExpr(.+)\d$/) { #Formula
+        if ($trailing_space_punct) { # Punctuation
+          $basenode = $sentnode->addNewChild($LaTeXML_nsURI,'punct'); }
+        elsif ($base=~/^MathExpr(.+)\d$/) { #Formula
           $basenode = $sentnode->addNewChild($LaTeXML_nsURI,'formula'); }
         else { #Word
           $basenode = $sentnode->addNewChild($LaTeXML_nsURI,'word'); }
@@ -226,8 +231,8 @@ sub mark_tokens {
           else {
             while (defined $part && ($part ne '') && $part=~s/(($w|\d)+|.)//) {
               my $token = $basenode->addNewChild($LaTeXML_nsURI,'token');
-              $token->appendTextNode($1);
               my $toktext = $1;
+              $token->appendTextNode($toktext);
               while (($current_txtcontent) && ($current_txtcontent !~ /\Q$toktext\E/)) {#Align to the appropriate text node
                 $current_txtnode = shift @txts;
                 $current_txtcontent = __recTextContent($current_txtnode);
@@ -262,46 +267,12 @@ sub mark_tokens {
               }
             }
           }
+          # If we still have @parts to go, insert a trailing dash:
+          if (@parts > 0) {
+            my $dash_token = $basenode->addNewChild($LaTeXML_nsURI,'token');
+            $dash_token->appendTextNode("-"); }
         }
-        if (@parts > 0) {
-          my $token = $basenode->addNewChild($LaTeXML_nsURI,'token');
-          $token->appendTextNode("-");
-
-          #UGH, had to copy-paste code :( ideally, should be refactored (becomes unmaintainable...)
-          my $toktext="-";
-          while ($current_txtcontent !~ /\Q$toktext\E/) {#Align to the appropriate text node
-            $current_txtnode = shift @txts;
-            $current_txtcontent = __recTextContent($current_txtnode);
-          }
-          $current_txtcontent =~ s/\Q$toktext\E//;#Subtract the current token from the text node content
-          $current_txtcontent =~ s/^(\s|$mathidtoken)//g;
-          if (blessed($current_txtnode) ne 'XML::LibXML::Text') {
-            my @txtattrs = $current_txtnode->attributes; #Transfer all node attributes to the new token
-            foreach my $attr (@txtattrs) {
-              next unless defined $attr;
-              $token->setAttribute($attr->nodeName,$attr->value)
-            }
-            if ($current_txtnode->nodeName eq "emph") { # Do some magic to handle emph properly
-              my $fattr = $token->getAttribute("font");
-              if (defined $fattr) {
-                $fattr.=" emph"; }
-              else {
-                $fattr="emph"; }
-              if (defined $current_txtnode->firstChild) {
-                my @innerattrs = $current_txtnode->firstChild->attributes;
-                foreach my $inattr (@innerattrs) {
-                  next unless defined $inattr;
-                  if ($inattr->nodeName eq "font") {
-                    $fattr.=" ".$inattr->value; }
-                  else {
-                    $token->setAttribute($inattr->nodeName,$inattr->value) }
-                }
-              }
-              $token->setAttribute("font",$fattr);
-            }
-            #END OF PASTE
-          } 
-        }
+        
         #Handle trailing dashes (morse code motivated)
         if ($base=~/[^-]/ && $base=~/-$/) {
           my $token = $basenode->addNewChild($LaTeXML_nsURI,'token');

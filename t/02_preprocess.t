@@ -41,6 +41,8 @@ is($second_math,'<Math mode="inline" xml:id="S1.p1.m2" tex="P(jaguar\mid mouse)=
 use LLaMaPUn::Preprocessor::MarkTokens;
 my $marktokens = LLaMaPUn::Preprocessor::MarkTokens->new(document=>$saved_dom);
 my $tokenized_dom = $marktokens->process_document;
-
+# open O, ">", "/tmp/tok.xml";
+# print O $tokenized_dom->toString(1);
+# close O;
 my $expected_tokenized = $parser->parse_file("t/documents/sample_tokenized.xml");
 is($tokenized_dom->toString(1),$expected_tokenized->toString(1));

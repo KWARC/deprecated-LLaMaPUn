@@ -280,7 +280,6 @@ sub parseMath_Document {
      my $model    = $state->getModel;   # The document model.
      my $document  = LaTeXML::Document->new_from_file($model,$filename);
      $model->loadSchema(); # If needed?
-     print STDERR "Document : $document\n\n";
      local $LaTeXML::DOCUMENT = $document;
      $state->getMathParser->parseMath($document,parser=>'Marpa');
      $document->finalize(); });

@@ -24,6 +24,7 @@ WriteMakefile(
     'WordNet::QueryData'=>0,
     'Scalar::Util'=>0,
     'LaTeXML'=>0,
+    'File::Slurp'=>0
   },
 );
 
