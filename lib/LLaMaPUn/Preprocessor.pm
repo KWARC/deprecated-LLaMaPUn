@@ -11,13 +11,14 @@
 # | Deyan Ginev <d.ginev@jacobs-university.de>                  #_#     | #
 # | http://kwarc.info/people/dginev                            (o o)    | #
 # \=========================================================ooo==U==ooo=/ #
-
 package LLaMaPUn::Preprocessor;
-use LLaMaPUn::Util;
-use Encode;
+use warnings;
 use strict;
+
 use Carp;
+use Encode;
 use Scalar::Util qw/blessed/;
+use LLaMaPUn::Util;
 
 use vars qw($VERSION);
 $VERSION = "0.0.1";
@@ -32,43 +33,46 @@ sub new {
   my ($doc,$name,$path)=(undef,undef,undef);
   if ($options{document}) {
     $doc=$options{document};
-    $doc=parse_file($options{document}) unless blessed($options{document});
-    ($path,$name)=splitFilepath($options{document}) unless blessed($options{document});
-  }
+    if (! blessed($doc)) {
+      ($path,$name)=splitFilepath($doc);
+      $doc=parse_file($doc);    
+    }}
   $options{replacemath}="position" unless $options{replacemath};
-  bless {DOCUMENT=>$doc,
-   NAME=>$name,
-   PATH=>$path,
-   REPLACEMATH=>$options{replacemath},
-   NORMALIZED=>0,
-         MATHCOUNT=>0,
-   CITECOUNT=>0,
-   REFCOUNT=>0,
-         MATHMAP=>{},
-         MATHIDMAP=>{},
-   CITEMAP=>{},
-   CITEIDMAP=>{},
-   REFMAP=>{},
-   REFIDMAP=>{}}, $class; }
+  bless {
+    DOCUMENT=>$doc,
+    NAME=>$name,
+    PATH=>$path,
+    REPLACEMATH=>$options{replacemath},
+    NORMALIZED=>0,
+    MATHCOUNT=>0,
+    CITECOUNT=>0,
+    REFCOUNT=>0,
+    MATHMAP=>{},
+    MATHIDMAP=>{},
+    CITEMAP=>{},
+    CITEIDMAP=>{},
+    REFMAP=>{},
+    REFIDMAP=>{}}, $class; }
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 sub setDocument {
   my ($self,$source)=@_;
-  $self->{DOCUMENT}=$source;
-  $self->{DOCUMENT}=parse_file($source) unless blessed($source);
-  my ($path,$name)=splitFilepath($source) unless blessed($source);
-  $self->{NORMALIZED}=0;
-  $self->{NAME}=$name;
-  $self->{PATH}=$path;
-}
-
+  return unless $source;
+  if (blessed($source)) {
+    $self->{DOCUMENT}=$source; }
+  else {
+    my ($path,$name)=splitFilepath($source);
+    $self->{DOCUMENT}=parse_file($source);
+    $self->{NAME}=$name;
+    $self->{PATH}=$path; }
+  $self->{NORMALIZED}=0; }
 
 #Core: The complex normalization towards plain text in all <p> elements
 #      also supporting some structures on the logic level
 sub normalize {
   my ($self,$target)=@_;
-  return if $self->{NORMALIZED};
+  return if $self->{NORMALIZED}; # Only normalize once per document
   my $doc = $self->{DOCUMENT};
   my $fid=$self->{NAME}||"doc0";
   my $fakeeq=0; #Fake equations, exposed after purification?
@@ -81,8 +85,7 @@ sub normalize {
   #TODO: Do something smart with <note>
   my @notes = $root->getElementsByTagName('note');
   foreach my $note(@notes) {
-    $note->unbindNode;
-  }
+    $note->unbindNode; }
 
   my @equations = $root->getElementsByTagName('equationgroup');
   foreach my $segment(@equations) {
@@ -97,16 +100,15 @@ sub normalize {
           ($math_node)=$math_node->getElementsByTagName('Math');
           $id=$math_node->getAttribute('xml:id');
         }}
-      $id=~s/\./-/g if $id;
-      $mark="NoID" unless (defined $id);
-      $mark="$fid-$id" unless $mark;
-
+      if ($id) {
+        $id=~s/\.(\d+)\./\.p$1\./g; # No single digits are allowed, assuming P
+        $id=~s/\./-/g;
+        $mark="$fid-$id"; }
+      else {
+        $mark="NoID"; }
       #my @xmath_nodes=$segment->getElementsByTagName('XMath');
       #my $mathseg=join('',map($_->toString,@xmath_nodes)); 
-      my $mathseg = $segment->toString;
-      $mathseg=~s/\n+//g;
-      $mathseg=~s/(\s+)/ /g;
-      $self->{MATHIDMAP}{"$mark"} = $mathseg; }
+      $self->{MATHIDMAP}{"$mark"} = $segment; }
     elsif ($self->{REPLACEMATH} eq "syntax") {
       #my @xmath_nodes=$segment->getElementsByTagName('XMath');
       #my $mathseg=join('',map($_->toString,@xmath_nodes)); 
@@ -138,16 +140,16 @@ sub normalize {
           # The Purify.pm module should grow to abolish tese to begin with.
           $fakeeq++;
           $id="fake$fakeeq"; } }
-      $id=~s/\./-/g if $id;
-      $mark="NoID" unless (defined $id);
-      $mark="$fid-$id" unless $mark;
+      if ($id) {
+        $id=~s/\.(\d+)\./\.p$1\./g; # No single digits are allowed, assuming P
+        $id=~s/\./-/g;
+        $mark="$fid-$id"; }
+      else {
+        $mark="NoID"; }
 
       #my @xmath_nodes=$segment->getElementsByTagName('XMath');
       #my $mathseg=join('',map($_->toString,@xmath_nodes)); 
-      my $mathseg = $segment->toString;
-      $mathseg=~s/\n+//g;
-      $mathseg=~s/(\s+)/ /g;
-      $self->{MATHIDMAP}{"$mark"} = $mathseg; }
+      $self->{MATHIDMAP}{"$mark"} = $segment; }
     elsif ($self->{REPLACEMATH} eq "syntax") {
       #my @xmath_nodes=$segment->getElementsByTagName('XMath');
       #my $mathseg=join('',map($_->toString,@xmath_nodes)); 
@@ -184,15 +186,15 @@ sub normalize {
       my $mark;
       if ($self->{REPLACEMATH} eq "position") {
         $id=$math_node->getAttribute('xml:id');
-        $id=~s/\./-/g if $id;
-        $mark="NoID" unless (defined $id);
+        if (!$id) {
+          $mark="NoID"; }
+        else {
+          $id=~s/\.(\d+)\./\.p$1\./g; # No single digits are allowed, assuming P
+          $id=~s/\./-/g; }
         $mark="$fid-$id" unless $mark;
         #my @xmath_nodes=$math_node->getElementsByTagName('XMath');
         #my $mathseg=join('',map($_->toString,@xmath_nodes)); 
-        my $mathseg = $math_node->toString;
-        $mathseg=~s/\n+//g;
-        $mathseg=~s/(\s+)/ /g;
-        $self->{MATHIDMAP}{"$mark"} = $mathseg; }
+        $self->{MATHIDMAP}{"$mark"} = $math_node; }
       elsif ($self->{REPLACEMATH} eq "syntax") {
         #my @xmath_nodes=$math_node->getElementsByTagName('XMath');
         #my $mathseg=join('',map($_->toString,@xmath_nodes)); 
@@ -214,10 +216,7 @@ sub normalize {
       if ($self->{REPLACEMATH} eq "position") {
         $mark="$fid-c$citeid";
         $citeid++;
-        my $citeseg=$cite_node->toString; 
-        $citeseg=~s/\n+//g; #Normalize empty lines
-        $citeseg=~s/(\s+)/ /g;#And spaces
-        $self->{CITEIDMAP}{"$mark"} = $citeseg; }
+        $self->{CITEIDMAP}{"$mark"} = $cite_node; }
       elsif ($self->{REPLACEMATH} eq "syntax") {
         my $citeseg=$cite_node->toString; 
         $citeseg=~s/\n+//g; #Normalize empty lines
@@ -237,10 +236,7 @@ sub normalize {
       if ($self->{REPLACEMATH} eq "position") {
         $mark="$fid-r$refid";
         $refid++;
-        my $refseg=$ref_node->toString; 
-        $refseg=~s/\n+//g; #Normalize empty lines
-        $refseg=~s/(\s+)/ /g;#And spaces
-        $self->{REFIDMAP}{"$mark"} = $refseg; }
+        $self->{REFIDMAP}{"$mark"} = $ref_node; }
       elsif ($self->{REPLACEMATH} eq "syntax") {
         my $refseg=$ref_node->toString; 
         $refseg=~s/\n+//g; #Normalize empty lines
@@ -377,19 +373,16 @@ sub getEntry {
     while (my ($math, $mid) = each %{$self->{uc($type)."MAP"}}) {
       return $math if $mid==$id;
     }
-    "";
-  }
+    return ""; }
   elsif ($self->{REPLACEMATH} eq "position") {
     $id=~s/\s+$//g; #remove trailing \n and whitespace
     $id=~s/\)$//;#remove ending )
-    require LLaMaPUn::Tokenizer;
-    my $wordtoken=LLaMaPUn::Tokenizer::Word->wordtokenstrict;
     my @parts=split(/-/,$id);
     shift @parts; #remove MathExpr/ourcitation/ourreference
     my $mark=join("-",@parts); #retrieve original mark
     return $self->{uc($type)."IDMAP"}{$mark};
   }
-  else { ""; }
+  else { return ""; }
 }
 
 sub getEntries {
@@ -403,52 +396,42 @@ sub getEntries {
   }
   else {
     undef;
-  }
-}
+  }}
 
 sub getMathEntry {
   my ($self,$id)=@_;
-  $self->getEntry("MATH",$id);
-}
+  $self->getEntry("MATH",$id); }
 
 sub getMathEntries {
   my ($self)=@_;
-  $self->getEntries("MATH");
-}
+  $self->getEntries("MATH"); }
 
 sub getCiteEntry {
   my ($self,$id)=@_;
-  $self->getEntry("CITE",$id);
-}
+  $self->getEntry("CITE",$id); }
 
 sub getCiteEntries {
   my ($self)=@_;
-  $self->getEntries("CITE");
-}
+  $self->getEntries("CITE"); }
 
 sub getRefEntry {
   my ($self,$id)=@_;
-  $self->getEntry("REF",$id);
-}
+  $self->getEntry("REF",$id); }
 
 sub getRefEntries {
   my ($self)=@_;
-  $self->getEntries("REF");
-}
+  $self->getEntries("REF"); }
 
 sub xmlid {
   my ($self,$math) = @_;
   $math=~s/\s+$//g; #remove trailing \n and whitespace
   chop $math if $math=~/\)$/;#remove )
-  require LLaMaPUn::Tokenizer;
-  my $wordtoken=LLaMaPUn::Tokenizer::Word->wordtokenstrict;
   my @parts=split(/-/,$math);
   shift @parts if $parts[0]=~/^MathExpr/; #remove MathExpr if present
   my $file=shift @parts; #remove the following filename
   my $xmlid=join(".",@parts); #return id in original dotted form
   $xmlid=~s/^s/S/;
-  $xmlid;
-}
+  $xmlid; }
 
 sub trimspaces {
   # Trim spaces
@@ -554,7 +537,7 @@ Returns an array reference to all normalized environments 'someEnvironment'
 =item C<< $math = $preprocessor->getMathEntry($replacement_id); >>
 
 1. When replacemath=>"syntax" : Given an entry id on input, retrieves the corresponding Math string.
-2. When replacemath=>"position" : Given a MathExpr-... id on input, retrieves the corresponding Math string.
+2. When replacemath=>"position" : Given a MathExpr-... id on input, retrieves the corresponding Math LibXML element.
 
 =item C<< %mathmap = $preprocessor->getMathEntries; >>
 
@@ -584,7 +567,6 @@ Getter method for the internal regexp matching the normalized Math IDs, obtained
 =item C<< $xmlid = LLaMaPUn::Preprocessor->xmlid($replacement_id); >>
 
 Converts the replacement math id to the original xml:id attribute of the source document.
-
 
 =back
 

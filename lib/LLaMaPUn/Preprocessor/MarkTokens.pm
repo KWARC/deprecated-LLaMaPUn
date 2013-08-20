@@ -1,11 +1,11 @@
 # /=====================================================================\ #
-# |  LLaMaPUn                                                            | #
+# |  LLaMaPUn                                                           | #
 # | Mark Tokens in LaTeXML XML documents                                | #
 # |=====================================================================| #
-# | Part of the LLaMaPUn project: http://kwarc.info/projects/LLaMaPUn/    | #
+# | Part of the LLaMaPUn project: http://kwarc.info/projects/LLaMaPUn/  | #
 # |  Research software, produced as part of work done by the            | #
 # |  KWARC group at Jacobs University,                                  | #
-# | Copyright (c) 2009 LLaMaPUn group                                    | #
+# | Copyright (c) 2009 LLaMaPUn group                                   | #
 # | Released under the GNU Public License                               | #
 # |---------------------------------------------------------------------| #
 # | Deyan Ginev <d.ginev@jacobs-university.de>                  #_#     | #
@@ -15,9 +15,11 @@
 package LLaMaPUn::Preprocessor::MarkTokens;
 use strict;
 use warnings;
+
 use Carp;
 use Encode;
 use Scalar::Util qw(blessed);
+
 use LLaMaPUn::Util;
 use LLaMaPUn::Preprocessor;
 use LLaMaPUn::Tokenizer;
@@ -35,13 +37,12 @@ sub new {
   #Initialize a tokenizer:
   my $tokenizer=LLaMaPUn::Tokenizer->new(input=>"text",token=>"sentence",mergeMath=>0, normalize=>1);
   
-
   if ($options{document}) {
     $doc=$options{document};
-    if (blessed($options{document}) ne 'XML::LibXML::Document') {
-      $doc=parse_file($options{document});
-      ($path,$name)=splitFilepath($options{document}); }
-  }
+    if (blessed($doc) ne 'XML::LibXML::Document') {
+      ($path,$name)=splitFilepath($doc);
+      $doc=parse_file($doc);
+    }}
   bless {DOCUMENT=>$doc,
    NAME=>$name,
    PATH=>$path,
@@ -86,6 +87,7 @@ sub __recTextContent {
     return $part||'';
   }}
 
+use Data::Dumper;
 sub mark_tokens {
   my ($self)=@_;
   return if ($self->{TOKENSMARKED} || (!blessed($self->{DOCUMENT})));
@@ -118,9 +120,6 @@ sub mark_tokens {
   my $tokenizer=$self->{TOKENIZER};
   my $w = $self->{W};
 
-  #Get an XPath context
-  my $xpc = XML::LibXML::XPathContext->new($original);
-
   #Capture all text in "textual" elements, such as <p>, <quote>, <date>, etc.
   my @textual = qw(td caption contact date personname quote title toctitle keywords classification acknowledgements);
   my @global_ps=$root->getElementsByTagName('p');
@@ -147,8 +146,9 @@ sub mark_tokens {
     #print STDERR "Sentences: ",join("\n",@$sentsRef);
     my @txts=();
     foreach my $pp(@ps) {
+      #print STDERR "PP: ",$pp->toString(1),"\n---\n";
       if (blessed($pp) ne 'XML::LibXML::Text') {
-        #push @txts, grep ($_->nodeName =~/text|emph/,$pp->childNodes);
+        #push @txts, grep ($_->nodeName =~/text|emph/,$pp->childNodes); }
         @txts = (@txts,$pp->childNodes); }
       else {
         push @txts, $pp; }
@@ -181,6 +181,8 @@ sub mark_tokens {
           $basenode = $sentnode->addNewChild($LaTeXML_nsURI,'punct'); }
         elsif ($base=~/^MathExpr(.+)\d$/) { #Formula
           $basenode = $sentnode->addNewChild($LaTeXML_nsURI,'formula'); }
+        elsif ($base=~/^our(reference|citation|QED)(.+)\d$/) { #Reference, citation formula
+          $basenode = $sentnode->addNewChild($LaTeXML_nsURI,'formula'); } # Pretend formulas for now, the markup gets stripped in the XHTML anyway
         else { #Word
           $basenode = $sentnode->addNewChild($LaTeXML_nsURI,'word'); }
         #Form and attach atomic tokens
@@ -192,7 +194,7 @@ sub mark_tokens {
         while (@parts>0) {
           my $part = shift @parts;
           next unless (defined $part && ($part ne ''));
-          if ($part=~/^MathExpr/) {
+          if ($part=~/^MathExpr|our(citation|reference|QED)/) {
             while (@parts && $parts[0]=~/\d|NoID$/) {
               my $idpart = shift @parts;
               if ($idpart!~/^[^0-9]/){ #Ids always start with a letter, avoids things such as $K$-3 i.e. "MathExpr-m1-3"
@@ -202,32 +204,28 @@ sub mark_tokens {
               $part.="-$idpart";
             }
             #Full id gathered, now recover <Math|equation|equationgroup> origin:
+            #print STDERR "Mark: $part\n";
+            #my $recovered = $preprocessor->getMathEntry($part);
+            #print STDERR "Recovered: ",$recovered,"\n";
             my @idparts=split(/-/,$part);
             shift @idparts; #remove MathExpr?
             my $file=shift @idparts; #follows filename
             if ($file eq 'NoID') { # Missing id of formula, give up here
               my $token = $basenode->addNewChild($LaTeXML_nsURI,'token');
-              $token->appendTextNode('MissingFormula'); }
+              $token->appendTextNode('MissingArtefact'); }
             else {
-              my $xmlid=join(".",@idparts); #return id in original dotted form
-              my @mnodes = ();
-              my $mnode; my $xmlid_t = $xmlid;
-              while (!$mnode && $xmlid_t) {
-                @mnodes = $xpc->findnodes('//*[@xml:id="'.$xmlid.'"]');
-                $mnode= shift @mnodes;
-                chop $xmlid_t unless $mnode;
-              }
-              if (!$mnode) {
+              my $math_node = $preprocessor->getMathEntry($part);
+              if (!$math_node) {
                 #TODO: Clear out from Preprocessor/Purifier things like $X$3 that ruin the IDs.
-                carp "$xmlid leads to undefined node!\n" unless $mnode;
+                carp "$part leads to undefined node!\n" unless $math_node;
                 next;
               }
-              while ($mnode->parentNode && ($mnode->parentNode->nodeName=~/^equation|equationgroup$/)) {
-                $mnode=$mnode->parentNode;
+              while ($math_node->parentNode && ($math_node->parentNode->nodeName=~/^equation|equationgroup$/)) {
+                $math_node=$math_node->parentNode;
               }
-              my $newnode = $basenode->addNewChild($LaTeXML_nsURI,$mnode->nodeName());
-              $newnode->replaceNode($mnode->cloneNode(1));
-          }} 
+              my $newnode = $basenode->addNewChild($LaTeXML_nsURI,$math_node->nodeName());
+              $newnode->replaceNode($math_node);
+          }}
           else {
             while (defined $part && ($part ne '') && $part=~s/(($w|\d)+|.)//) {
               my $token = $basenode->addNewChild($LaTeXML_nsURI,'token');
