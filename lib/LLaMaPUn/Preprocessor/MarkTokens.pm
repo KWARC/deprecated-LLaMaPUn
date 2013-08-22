@@ -16,7 +16,6 @@ package LLaMaPUn::Preprocessor::MarkTokens;
 use strict;
 use warnings;
 
-use Carp;
 use Encode;
 use Scalar::Util qw(blessed);
 
@@ -224,7 +223,7 @@ sub mark_tokens {
               my $math_node = $preprocessor->getEntry($part);
               if (!$math_node) {
                 #TODO: Clear out from Preprocessor/Purifier things like $X$3 that ruin the IDs.
-                carp "$part leads to undefined node!\n" unless $math_node;
+                print STDERR "Error:MarkTokens:Lookup $part leads to undefined node!\n";
                 next;
               }
               while ($math_node->parentNode && ($math_node->parentNode->nodeName=~/^equation|equationgroup$/)) {
