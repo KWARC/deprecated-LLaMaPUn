@@ -6,6 +6,7 @@ use Test::More tests => 7;
 use XML::LibXML;
 use LLaMaPUn::Preprocessor;
 use LLaMaPUn::Preprocessor::Purify;
+use LLaMaPUn::Preprocessor::MarkTokens;
 use Scalar::Util qw/blessed/;
 
 # Generated via:
@@ -55,7 +56,6 @@ is($ref->toString,'<ref href="http://planetmath.org/CumulativeDistributionFuncti
 
 #print STDERR "Tokenized Dom: \n",$test_purified_dom->toString(1),"\n\n";
 # MarkTokens, Test I
-use LLaMaPUn::Preprocessor::MarkTokens;
 my $marktokens = LLaMaPUn::Preprocessor::MarkTokens->new(document=>$test_saved_dom);
 my $test_tokenized_dom = $marktokens->process_document;
 my $test_expected_tokenized = $parser->parse_file("t/documents/sample_tokenized.xml");

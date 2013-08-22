@@ -196,7 +196,7 @@ sub normalize {
           $id=~s/\.(\d+)\./.p$1./g; # No single digits are allowed, assuming P
           $id=~s/(\D)\./$1$zero./g; # Same problem with words without trailing digits
           $id=~s/\./-/g; }
-        $mark="$fid-$id" unless $mark;
+        $mark="$fid-$id";
         #my @xmath_nodes=$math_node->getElementsByTagName('XMath');
         #my $mathseg=join('',map($_->toString,@xmath_nodes)); 
         $self->{MATHIDMAP}{"$mark"} = $math_node; }

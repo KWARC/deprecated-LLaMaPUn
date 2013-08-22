@@ -38,7 +38,8 @@ sub new {
   
   if ($options{document}) {
     $doc=$options{document};
-    if (blessed($doc) ne 'XML::LibXML::Document') {
+    my $dclass = blessed($doc);
+    if ((!$dclass) || ($dclass ne 'XML::LibXML::Document')) {
       ($path,$name)=splitFilepath($doc);
       $doc=parse_file($doc);
     }}
@@ -209,6 +210,7 @@ sub mark_tokens {
               }
               $part.="-$idpart";
             }
+            # print STDERR "warning:marktokens:info Base: $base\n\tPart recovered: $part\n";
             #Full id gathered, now recover <Math|equation|equationgroup> origin:
             ## print STDERR "Mark: $part\n";
             #my $recovered = $preprocessor->getMathEntry($part);
