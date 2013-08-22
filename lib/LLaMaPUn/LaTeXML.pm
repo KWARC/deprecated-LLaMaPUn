@@ -195,7 +195,7 @@ sub post_driver {
   return unless @sources;
   my $whatsin = $options{whatsin};
   my $ltxmldoc;
-  my %PostOPS = (validate=>0, noresources=>1, parameters=>{}, verbosity=>-1,
+  my %PostOPS = (validate=>0, noresources=>1, verbosity=>-1,
     sourceDirectory=>'.',siteDirectory=>".",nocache=>1,destination=>'.');
   if ($whatsin eq 'xmath') {
     # Math mode:
@@ -232,10 +232,13 @@ sub post_driver {
     # TODO: Just hardwire XHTML in there, punting anything more meaningful for later
 
     my($post) = $latexmlpost->ProcessChain($doc,
-        LaTeXML::Post::MathML::Presentation->new(%PostOPS),
-        LaTeXML::Post::XMath->new(%PostOPS),
-        LaTeXML::Post::XSLT->new(stylesheet=>$stylesheet,%PostOPS)
-        );
+      LaTeXML::Post::MathML::Presentation->new(%PostOPS),
+      LaTeXML::Post::XMath->new(%PostOPS),
+      LaTeXML::Post::XSLT->new(
+        stylesheet=>$stylesheet,
+        parameters=>{CSS=>['http://latexml.mathweb.org/css/external/LaTeXML.css']},
+        noresources=>1,
+        %PostOPS));
     return $post->getDocument;
   }  
 #**********************************************************************
