@@ -82,7 +82,8 @@ sub __recTextContent {
     return $tc;
   }
   else {
-    my ($part) = @{LLaMaPUn::Tokenizer::Sentence->normalize([$node->textContent])};
+    my $tc = $node->textContent;
+    my ($part) = @{LLaMaPUn::Tokenizer::Sentence->normalize([$tc])};
     #Detected problem with native ->textContent of LibXML -  apparently an extra space is deposited at the beginning.
     $part=~s/^\s//g if $part;
     return $part||'';
@@ -98,6 +99,7 @@ sub mark_tokens {
 
   my $normDoc = $preprocessor->getNormalizedDocumentObject; #Normalize with position math replacements.
   $root = $normDoc->getDocumentElement;
+  # print STDERR $root->toString(1);
   #Assumption: All discourse is eventually embedded into a "textual" element as seen in @textual below.
   # Current list: p td caption contact date personname quote title toctitle keywords classification acknowledgements
   # Do inform the author if coverage is incomplete!
@@ -130,7 +132,7 @@ sub mark_tokens {
   while (@global_ps) {
     my $p = shift @global_ps;
     next unless $p; # Skip if undefined
-    #print STDERR "\n----\nCurrent textual element: ",$p->toString(1),"\n";
+    # print STDERR "\n----\nCurrent textual element: ",$p->toString(1),"\n";
     my $block = $p->parentNode;
     next unless $block && !($block->nodeName eq "#document-fragment" || $block->nodeName eq "bibliography"); # No top level elements (also skips <textual>s that are already unbound, but still in the array)! Also, skip bibliography for now.
     
@@ -140,22 +142,26 @@ sub mark_tokens {
     my $text = join(" ",map(__recTextContent($_),@ps));
 
     my $sentsRef = $tokenizer->tokenize($text);
-    #print STDERR "Sentences: ",join("\n",@$sentsRef);
+    # print STDERR "Sentences: ",join("\n",@$sentsRef);
     my @txts=();
     foreach my $pp(@ps) {
-      #print STDERR "PP: ",$pp->toString(1),"\n---\n";
+      # clprint STDERR "PP: ",$pp->toString(1),"\n---\n";
       if (blessed($pp) ne 'XML::LibXML::Text') {
-        #push @txts, grep ($_->nodeName =~/text|emph/,$pp->childNodes); }
         @txts = (@txts,$pp->childNodes); }
       else {
         push @txts, $pp; }
     }
-
     #Prepare original text elements in order to ensure attribute preservation:
-    my $current_txtnode = shift @txts;
-    my $current_txtcontent = __recTextContent($current_txtnode);# unless $current_txtnode=~/XML::LibXML::Text/;
+    my $current_txtcontent;
+    my $current_txtnode;
+    while ( ((!$current_txtcontent) || ($current_txtcontent!~/\S/)) && scalar(@txts)) {
+      $current_txtnode = shift @txts;
+      $current_txtcontent = __recTextContent($current_txtnode);# unless $current_txtnode=~/XML::LibXML::Text/;
+    }
+    # print STDERR $current_txtnode->toString(1),"\n";
+    # print STDERR $current_txtcontent,"\n";
+    # print STDERR "Num: ",scalar(@txts),"\n";
     my $mathidtoken = LLaMaPUn::Preprocessor->mathidtoken;
-
     #First cleanup existing children, then introduce <sentence>s instead.
     foreach my $child(@ps) {
       $child->unbindNode; }
@@ -205,9 +211,9 @@ sub mark_tokens {
               $part.="-$idpart";
             }
             #Full id gathered, now recover <Math|equation|equationgroup> origin:
-            #print STDERR "Mark: $part\n";
+            ## print STDERR "Mark: $part\n";
             #my $recovered = $preprocessor->getMathEntry($part);
-            #print STDERR "Recovered: ",$recovered,"\n";
+            ## print STDERR "Recovered: ",$recovered,"\n";
             my @idparts=split(/-/,$part);
             shift @idparts; #remove MathExpr?
             my $file=shift @idparts; #follows filename
@@ -232,36 +238,46 @@ sub mark_tokens {
               my $token = $basenode->addNewChild($LaTeXML_nsURI,'token');
               my $toktext = $1;
               $token->appendTextNode($toktext);
-              while (($current_txtcontent) && ($current_txtcontent !~ /\Q$toktext\E/)) {#Align to the appropriate text node
+              # print STDERR "TokText: $toktext\n";
+              # print STDERR "ccontent: $current_txtcontent\n";
+              while (($current_txtcontent !~ /\Q$toktext\E/) && scalar(@txts)) {#Align to the appropriate text node
                 $current_txtnode = shift @txts;
                 $current_txtcontent = __recTextContent($current_txtnode);
+                # print STDERR "next_content: $current_txtcontent\n";
               }
+              # print STDERR join("--",map {$_->nodeName} @txts),"\n";
               $current_txtcontent =~ s/\Q$toktext\E//;#Subtract the current token from the text node content
               $current_txtcontent =~ s/^(\s|$mathidtoken)//g;
-              
+              # print STDERR "New content: $current_txtcontent\n";
               if (blessed($current_txtnode) ne 'XML::LibXML::Text') {
                 my @txtattrs = $current_txtnode->attributes; #Transfer all node attributes to the new token
-                foreach my $attr (@txtattrs) {
-                  next unless defined $attr;
-                  $token->setAttribute($attr->nodeName,$attr->value)
-                }
+                foreach my $attr (grep(defined,@txtattrs)) {
+                  my $attr_name = $attr->nodeName;
+                  next if $attr_name eq 'xml:id';
+                  $token->setAttribute($attr_name,$attr->value) }
                 if ($current_txtnode->nodeName eq "emph") { # Do some magic to handle emph properly
-                  my $fattr = $token->getAttribute("font");
+                  my $fattr = $token->getAttribute("class");
                   if (defined $fattr) {
-                    $fattr.=" emph"; }
+                    $fattr.=" ltx_emph"; }
                   else {
-                    $fattr="emph"; }
+                    $fattr="ltx_emph"; }
                   if (defined $current_txtnode->firstChild) {
                     my @innerattrs = $current_txtnode->firstChild->attributes;
                     foreach my $inattr (@innerattrs) {
-                      next unless defined $inattr;
-                      if ($inattr->nodeName eq "font") {
+                      next unless blessed($inattr);
+                      my $in_attr_name = $inattr->nodeName;
+                      next if $in_attr_name eq 'xml:id';
+                      if ( $in_attr_name eq "class") {
                         $fattr.=" ".$inattr->value; }
                       else {
-                        $token->setAttribute($inattr->nodeName,$inattr->value); }
+                        $token->setAttribute($in_attr_name,$inattr->value); }
                     }
                   }
-                  $token->setAttribute("font",$fattr);
+                  $token->setAttribute("class",$fattr);
+                  # Wrap the token in a <emph>
+                  my $emph = $basenode->addNewChild($LaTeXML_nsURI,'emph');
+                  $token->replaceNode($emph);
+                  $emph->addChild($token);
                 }
               }
             }
@@ -288,26 +304,30 @@ sub mark_tokens {
           if (blessed($current_txtnode) ne 'XML::LibXML::Text') {
             my @txtattrs = $current_txtnode->attributes; #Transfer all node attributes to the new token
             foreach my $attr (@txtattrs) {
-              next unless defined $attr;
-              $token->setAttribute($attr->nodeName,$attr->value)
+              next unless blessed($attr);
+              my $attr_name = $attr->nodeName;
+              next if $attr_name eq 'xml:id';
+              $token->setAttribute($attr_name,$attr->value)
             }
             if ($current_txtnode->nodeName eq "emph") { # Do some magic to handle emph properly
-              my $fattr = $token->getAttribute("font");
+              my $fattr = $token->getAttribute("class");
               if (defined $fattr) {
-                $fattr.=" emph"; }
+                $fattr.=" ltx_emph"; }
               else {
-                $fattr="emph"; }
+                $fattr="ltx_emph"; }
               if (defined $current_txtnode->firstChild) {
                 my @innerattrs = $current_txtnode->firstChild->attributes;
                 foreach my $inattr (@innerattrs) {
-                  next unless defined $inattr;
-                  if ($inattr->nodeName eq "font") {
+                  next unless blessed($inattr);
+                  my $in_attr_name = $inattr->nodeName;
+                  next if $in_attr_name eq 'xml:id';
+                  if ($in_attr_name eq "class") {
                     $fattr.=" ".$inattr->value; }
                   else {
-                    $token->setAttribute($inattr->nodeName,$inattr->value) }
+                    $token->setAttribute($in_attr_name,$inattr->value) }
                 }
               }
-              $token->setAttribute("font",$fattr);
+              $token->setAttribute("class",$fattr);
             }
           }
           #END OF PASTE
@@ -320,7 +340,9 @@ sub mark_tokens {
           my $ftok = $basenode->firstChild;
           my @testat = $ftok->attributes;
           foreach my $attr(@testat) {
+            next unless blessed($attr);
             my $atname = $attr->nodeName;
+            next if $atname eq 'xml:id'; # Not copying those over
             my $atval = $attr->value;
             my $global = 1;
             foreach my $child($basenode->childNodes) {

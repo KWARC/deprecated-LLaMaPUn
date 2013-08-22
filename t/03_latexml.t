@@ -28,5 +28,5 @@ my $planetmath_expected_content = read_file($planetmath_tei);
 is($planetmath_tei_dom->toString(1),$planetmath_expected_content);
 
 # open O, ">", "/tmp/test.xhtml";
-# print O $tei_xhtml_dom->toString(1);
+# print O $planetmath_tei_dom->toString(1);
 # close O;

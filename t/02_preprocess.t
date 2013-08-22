@@ -68,5 +68,5 @@ my $planetmath_expected_tokenized = $parser->parse_file("t/documents/entry216_to
 is($planetmath_tokenized_dom->toString(1),$planetmath_expected_tokenized->toString(1));
 
 # open O, ">", "/tmp/test.xml";
-# print O $test_tokenized_dom->toString(1);
+# print O $planetmath_tokenized_dom->toString(1);
 # close O;
