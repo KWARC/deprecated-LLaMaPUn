@@ -27,6 +27,7 @@ $VERSION = "0.0.1";
 
 #Regexp for MathIDs:
 our $mathidtoken = qr/MathExpr(\w*)([-](\w+)(\d+))+/;
+our $zero = 0; # I am amazed I had to resort to this...
 sub mathidtoken { $mathidtoken; }
 
 sub new {
@@ -103,6 +104,7 @@ sub normalize {
         }}
       if ($id) {
         $id=~s/\.(\d+)\./.p$1./g; # No single digits are allowed, assuming P
+        $id=~s/(\D)\./$1$zero./g; # Same problem with words without trailing digits
         $id=~s/\./-/g;
         $mark="$fid-$id"; }
       else {
@@ -143,6 +145,7 @@ sub normalize {
           $id="fake$fakeeq"; } }
       if ($id) {
         $id=~s/\.(\d+)\./.p$1./g; # No single digits are allowed, assuming P
+        $id=~s/(\D)\./$1$zero./g; # Same problem with words without trailing digits
         $id=~s/\./-/g;
         $mark="$fid-$id"; }
       else {
@@ -191,6 +194,7 @@ sub normalize {
           $mark="NoID"; }
         else {
           $id=~s/\.(\d+)\./.p$1./g; # No single digits are allowed, assuming P
+          $id=~s/(\D)\./$1$zero./g; # Same problem with words without trailing digits
           $id=~s/\./-/g; }
         $mark="$fid-$id" unless $mark;
         #my @xmath_nodes=$math_node->getElementsByTagName('XMath');
