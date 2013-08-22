@@ -83,7 +83,8 @@ sub __recTextContent {
   }
   else {
     my ($part) = @{LLaMaPUn::Tokenizer::Sentence->normalize([$node->textContent])};
-    $part=~s/^\s// if $part; #Detected problem with native ->textContent of LibXML -  apparently an extra space is deposited at the beginning.
+    #Detected problem with native ->textContent of LibXML -  apparently an extra space is deposited at the beginning.
+    $part=~s/^\s//g if $part;
     return $part||'';
   }}
 
@@ -92,10 +93,6 @@ sub mark_tokens {
   my ($self)=@_;
   return if ($self->{TOKENSMARKED} || (!blessed($self->{DOCUMENT})));
   my $root = $self->{DOCUMENT}->getDocumentElement;
-  my $original = $root->cloneNode(1); #Copy the original document for reverse engeneering the math elements.
-  my $origdoc = XML::LibXML::Document->new("1.0","UTF-8");
-  $origdoc->adoptNode($original);
-  $origdoc->setDocumentElement($original);
   my $preprocessor = $self->{PREPROCESSOR};
   $preprocessor->setDocument($self->{DOCUMENT});
 
@@ -166,7 +163,9 @@ sub mark_tokens {
     my $trailing_sentence_spaces = scalar(@$sentsRef)-1;
     foreach my $sentence (@$sentsRef) {
       my $sentnode = $block->addNewChild($LaTeXML_nsURI,'sentence');
-      $block->appendTextNode(" ") if $trailing_sentence_spaces;
+      if ($trailing_sentence_spaces) {
+        my $text = $block->addNewChild($LaTeXML_nsURI,'text');
+        $text->appendText(" "); }
       # Glue separated multimodal constructs like "$\alpha$ -equivalent" back together
       $sentence =~ s/(\d)\s+(\-\w)/$1$2/g;
       # Separate out glued punctuation at the end of a sentence
@@ -175,13 +174,15 @@ sub mark_tokens {
       my $leading_spaces = 0;
       foreach my $base(@baselayer) {
         my $trailing_space_punct = ($base =~ /^[\.\?\!\:\,\;]$/);
-        $sentnode->appendTextNode(" ") if (($leading_spaces++) && (! $trailing_space_punct));
+        if (($leading_spaces++) && (! $trailing_space_punct)) {
+          my $text = $sentnode->addNewChild($LaTeXML_nsURI,'text');
+          $text->appendText(" "); }
         my $basenode;
         if ($trailing_space_punct) { # Punctuation
           $basenode = $sentnode->addNewChild($LaTeXML_nsURI,'punct'); }
         elsif ($base=~/^MathExpr(.+)\d$/) { #Formula
           $basenode = $sentnode->addNewChild($LaTeXML_nsURI,'formula'); }
-        elsif ($base=~/^our(reference|citation|QED)(.+)\d$/) { #Reference, citation formula
+        elsif ($base=~/^our(citation|reference|QED)(.+)\d$/) { #Reference, citation formula
           $basenode = $sentnode->addNewChild($LaTeXML_nsURI,'formula'); } # Pretend formulas for now, the markup gets stripped in the XHTML anyway
         else { #Word
           $basenode = $sentnode->addNewChild($LaTeXML_nsURI,'word'); }
@@ -214,7 +215,7 @@ sub mark_tokens {
               my $token = $basenode->addNewChild($LaTeXML_nsURI,'token');
               $token->appendTextNode('MissingArtefact'); }
             else {
-              my $math_node = $preprocessor->getMathEntry($part);
+              my $math_node = $preprocessor->getEntry($part);
               if (!$math_node) {
                 #TODO: Clear out from Preprocessor/Purifier things like $X$3 that ruin the IDs.
                 carp "$part leads to undefined node!\n" unless $math_node;

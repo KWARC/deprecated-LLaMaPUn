@@ -14,6 +14,7 @@
 package LLaMaPUn::Preprocessor;
 use warnings;
 use strict;
+use feature 'switch';
 
 use Carp;
 use Encode;
@@ -101,7 +102,7 @@ sub normalize {
           $id=$math_node->getAttribute('xml:id');
         }}
       if ($id) {
-        $id=~s/\.(\d+)\./\.p$1\./g; # No single digits are allowed, assuming P
+        $id=~s/\.(\d+)\./.p$1./g; # No single digits are allowed, assuming P
         $id=~s/\./-/g;
         $mark="$fid-$id"; }
       else {
@@ -141,7 +142,7 @@ sub normalize {
           $fakeeq++;
           $id="fake$fakeeq"; } }
       if ($id) {
-        $id=~s/\.(\d+)\./\.p$1\./g; # No single digits are allowed, assuming P
+        $id=~s/\.(\d+)\./.p$1./g; # No single digits are allowed, assuming P
         $id=~s/\./-/g;
         $mark="$fid-$id"; }
       else {
@@ -189,7 +190,7 @@ sub normalize {
         if (!$id) {
           $mark="NoID"; }
         else {
-          $id=~s/\.(\d+)\./\.p$1\./g; # No single digits are allowed, assuming P
+          $id=~s/\.(\d+)\./.p$1./g; # No single digits are allowed, assuming P
           $id=~s/\./-/g; }
         $mark="$fid-$id" unless $mark;
         #my @xmath_nodes=$math_node->getElementsByTagName('XMath');
@@ -251,30 +252,15 @@ sub normalize {
       my $text_node = XML::LibXML::Text->new(" ourreference$mark ");
       $ref_node->replaceNode($text_node);
     }
-    @tonormalize=$segment->getElementsByTagName('acronym');
-    foreach my $math_node(@tonormalize) {
-      my $text_node = XML::LibXML::Text->new(" ");
-      $math_node->replaceNode($text_node);
-    }
-    @tonormalize=$segment->getElementsByTagName('anchor');
-    foreach my $math_node(@tonormalize) {
-      my $text_node = XML::LibXML::Text->new(" ");
-      $math_node->replaceNode($text_node);
-    }
-    @tonormalize=$segment->getElementsByTagName('rule');
-    foreach my $math_node(@tonormalize) {
-      my $text_node = XML::LibXML::Text->new(" ");
-      $math_node->replaceNode($text_node);
-    }
-    @tonormalize=$segment->getElementsByTagName('note');
-    foreach my $math_node(@tonormalize) {
-      my $text_node = XML::LibXML::Text->new(" ");
-      $math_node->replaceNode($text_node);
-    }
-    @tonormalize=$segment->getElementsByTagName('break');
-    foreach my $math_node(@tonormalize) {
-      my $text_node = XML::LibXML::Text->new("\n");
-      $math_node->replaceNode($text_node);
+    # Pluck out any unsupported tag:
+    my @unsupported_tags = qw/acronym anchor rule note break/;
+    foreach my $tag(@unsupported_tags) {
+      my @unsupported_elements = $segment->getElementsByTagName($tag);
+      foreach my $unsupported_element(@unsupported_elements) {
+        my $space = ($tag eq 'break') ? "\n" : " ";
+        my $text_node = XML::LibXML::Text->new($space);
+        $unsupported_element->replaceNode($text_node);
+      }
     }
   }
   $self->{DOCUMENT}=$doc;
@@ -366,8 +352,14 @@ sub getNormalizedDocumentObject {
 }
 
 sub getEntry {
-  my ($self,$type,$id)=@_;
+  my ($self,$id)=@_;
   $self->normalize unless $self->{NORMALIZED};
+  my $type;
+  given ($id) {
+    when (/^MathExpr/) {$type = "MATH";}
+    when (/^ourcitation/) {$type = "CITE";}
+    when (/^ourreference/) {$type = "REF";}
+  }
   if ($self->{REPLACEMATH} eq "syntax") {
     $id=~s/(.+)-(\d+)$/$2/;
     while (my ($math, $mid) = each %{$self->{uc($type)."MAP"}}) {
@@ -386,41 +378,19 @@ sub getEntry {
 }
 
 sub getEntries {
-  my ($self,$type)=@_;
+  my ($self)=@_;
   $self->normalize unless $self->{NORMALIZED};
-  if ($self->{REPLACEMATH} eq "syntax") {
-    %{$self->{uc($type)."MAP"}};
+  my %entries;
+  foreach my $type(qw/MATH REF CITE/) {
+    if ($self->{REPLACEMATH} eq "syntax") {
+      %entries = (%entries,%{$self->{uc($type)."MAP"}});
+    }
+    elsif ($self->{REPLACEMATH} eq "position") {
+      %entries=(%entries,%{$self->{uc($type)."IDMAP"}});
+    }
   }
-  elsif ($self->{REPLACEMATH} eq "position") {
-    %{$self->{uc($type)."IDMAP"}};
-  }
-  else {
-    undef;
-  }}
-
-sub getMathEntry {
-  my ($self,$id)=@_;
-  $self->getEntry("MATH",$id); }
-
-sub getMathEntries {
-  my ($self)=@_;
-  $self->getEntries("MATH"); }
-
-sub getCiteEntry {
-  my ($self,$id)=@_;
-  $self->getEntry("CITE",$id); }
-
-sub getCiteEntries {
-  my ($self)=@_;
-  $self->getEntries("CITE"); }
-
-sub getRefEntry {
-  my ($self,$id)=@_;
-  $self->getEntry("REF",$id); }
-
-sub getRefEntries {
-  my ($self)=@_;
-  $self->getEntries("REF"); }
+  return %entries;
+}
 
 sub xmlid {
   my ($self,$math) = @_;

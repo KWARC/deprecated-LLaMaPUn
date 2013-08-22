@@ -1,0 +1,23 @@
+\documentclass{article}
+\usepackage{planetmath-specials}
+\usepackage{pmath}
+\usepackage{amssymb}
+%\usepackage{amsmath}
+%\usepackage{amsfonts}
+%\usepackage{graphicx}
+%\usepackage{xypic}
+\begin{document}
+\PMlinkescapeword{continuous}
+\PMlinkescapeword{information}
+\PMlinkescapeword{satisfy}
+
+Let $X$ be a continuous random variable. The function $f_X\colon\mathbb{R} \to [0,1]$ defined as $ f_X(x) = \frac{\partial F_X}{\partial x} $, where $ F_X(x)$ is the \PMlinkname{cumulative distribution function}{CumulativeDistributionFunction} of $X$, is called the \emph{continuous density function} of $X$.
+Please note that if $X$ is a continuous random variable, then $f_X(x)$ does not equal $P[X=x]$; for more information read the article on cumulative distribution functions.
+
+Analogously to the discrete case, this function must satisfy:
+
+\begin{enumerate}
+\item $f_X(x) \geq 0$ for all $x$
+\item $\int_{x}^{} {f_X(x) dx} = 1$
+\end{enumerate}
+\end{document}
