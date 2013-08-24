@@ -1,4 +1,4 @@
-<img src="doc/transparent_llama_sir.png" alt="LLaMaPUn Logo" style="width: 400px;"/>
+<img src="doc/transparent_llama_sir.png" alt="LLaMaPUn Logo" width="400"/>
 
 The **LLaMaPUn** library consists of a wide range of processing tools for natural language and mathematics.
 
