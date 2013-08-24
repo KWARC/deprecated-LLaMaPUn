@@ -75,6 +75,7 @@ sub setDocument {
 sub normalize {
   my ($self,$target)=@_;
   return if $self->{NORMALIZED}; # Only normalize once per document
+  $self->{NORMALIZED}=1; # Mark as done.
   my $doc = $self->{DOCUMENT};
   my $fid=$self->{NAME}||"doc0";
   my $fakeeq=0; #Fake equations, exposed after purification?

@@ -99,7 +99,6 @@ sub mark_tokens {
 
   my $normDoc = $preprocessor->getNormalizedDocumentObject; #Normalize with position math replacements.
   $root = $normDoc->getDocumentElement;
-  # print STDERR $root->toString(1);
   #Assumption: All discourse is eventually embedded into a "textual" element as seen in @textual below.
   # Current list: p td caption contact date personname quote title toctitle keywords classification acknowledgements
   # Do inform the author if coverage is incomplete!
