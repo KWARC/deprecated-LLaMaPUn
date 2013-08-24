@@ -25,7 +25,12 @@ and provide an outlook for a number of fixes and features to be added to the lib
  * **LLaMaPUn::Tokenizer**
  
    Tokenization module for LaMaPUn normalized documents (plain text)
- 
+
+ * **LLaMaPUn::LaTeXML**
+   
+   Convenience API, building on top of the LaTeXML libraries.
+   Also adds support for a TEI-near XHTML conversion.
+
  * More to be migrated...
 
 ## Externals
