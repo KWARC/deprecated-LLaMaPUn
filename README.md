@@ -1,7 +1,7 @@
 <img src="doc/transparent_llama_sir.png" alt="LLaMaPUn Logo" width="400"/>
 
 The **LLaMaPUn** library consists of a wide range of processing tools for natural language and mathematics.
-
+[![Build Status](https://secure.travis-ci.org/dginev/LLaMaPUn.png?branch=master)](http://travis-ci.org/dginev/LLaMaPUn)
 ---
 
 **Disclaimer:** This Github repository is currently undergoing gradual migration from the original [subversion repository](https://svn.kwarc.info/repos/lamapun/lib/).
