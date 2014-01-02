@@ -149,11 +149,14 @@ sub conversion_driver {
   
   @paths = map(pathname_canonical($_),@paths);
   my $mathparse = ($type eq "noparse") ? 'no' : 'RecDescent';
+  # Backwards compatibility
+  my $nomathparse = ($type eq "noparse") ? 1 : 0;
   my $latexml= LaTeXML->new(preload=>['LaTeX.pool',@preload], searchpaths=>[@paths],
 			    verbosity=>$verbosity, strict=>0,
 			    includeComments=>0,includeStyles=>undef,
 			    documentid=>undef,
           mathparser=>LaTeXML::MathParser->new(),
+          nomathparse=>$nomathparse,
 			    mathparse=>$mathparse);
   
   # Digest and convert to LaTeXML's XML
