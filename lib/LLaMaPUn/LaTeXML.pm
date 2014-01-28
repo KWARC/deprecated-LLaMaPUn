@@ -17,7 +17,7 @@ package LLaMaPUn::LaTeXML;
 use strict;
 use FindBin;
 use Getopt::Long qw(:config no_ignore_case);
-use LaTeXML;
+use LaTeXML::Core;
 use LaTeXML::Util::Pathname;
 # latexmlpost
 use File::Spec;
@@ -109,9 +109,9 @@ print STUB $frontmatter;
  print STUB $backmatter;
  close(STUB);
 
- my $model = LaTeXML::Model->new(); 
+ my $model = LaTeXML::Common::Model->new(); 
  $model->registerNamespace('ltx',$nsURI);
- my $document = LaTeXML::Document->new_from_file($model,$filename);
+ my $document = LaTeXML::Core::Document->new_from_file($model,$filename);
  unlink($filename);
  $document;
 }
@@ -151,7 +151,7 @@ sub conversion_driver {
   my $mathparse = ($type eq "noparse") ? 'no' : 'RecDescent';
   # Backwards compatibility
   my $nomathparse = ($type eq "noparse") ? 1 : 0;
-  my $latexml= LaTeXML->new(preload=>['LaTeX.pool',@preload], searchpaths=>[@paths],
+  my $latexml= LaTeXML::Core->new(preload=>['LaTeX.pool',@preload], searchpaths=>[@paths],
 			    verbosity=>$verbosity, strict=>0,
 			    includeComments=>0,includeStyles=>undef,
 			    documentid=>undef,
@@ -223,7 +223,7 @@ sub post_driver {
   elsif ($whatsin eq 'xml') {
     my $whatsout = $options{whatsout};
     my $stylesheet = "$INSTALLDIR/resources/LaTeXML/LaTeXML-$whatsout.xsl";
-    # TODO: This should really all be supported in LaTeXML::Converter
+    # TODO: This should really all be supported in LaTeXML
     # ... sigh ... punting and waiting for more time to incorporate it!
     $ltxmldoc = shift @sources;
     my $doc = LaTeXML::Post::Document->new($ltxmldoc,
@@ -262,7 +262,7 @@ sub parse_math_structure {
     $destination = $source;
     $destination =~ s/\.(.+)$/.tex.xml/;
   }
-  my $latexml= LaTeXML->new(preload=>[@preload], searchpaths=>[@paths],
+  my $latexml= LaTeXML::Core->new(preload=>[@preload], searchpaths=>[@paths],
 			    verbosity=>$verbosity, strict=>$strict,
 			    includeComments=>$comments,inputencoding=>$inputencoding,
 			    includeStyles=>$includestyles,
@@ -278,27 +278,27 @@ sub parse_math_structure {
   print PARSEDOUT $serialized if $serialized;
   close PARSEDOUT;
 }
-package LaTeXML;
+package LaTeXML::Core;
 sub parseMath_Document {
   my($self,$filename)=@_;
   $self->withState(sub {
      my($state)=@_;
      my $model    = $state->getModel;   # The document model.
-     my $document  = LaTeXML::Document->new_from_file($model,$filename);
+     my $document  = LaTeXML::Core::Document->new_from_file($model,$filename);
      $model->loadSchema(); # If needed?
-     local $LaTeXML::DOCUMENT = $document;
+     local $LaTeXML::Core::DOCUMENT = $document;
      $state->getMathParser->parseMath($document,parser=>'Marpa');
      $document->finalize(); });
 }
 1;
 
-package LaTeXML::Document;
+package LaTeXML::Core::Document;
 use XML::LibXML;
 sub new_from_file {
   my($class,$model,$filename)=@_;
   Fatal("File $filename can't be accessed!\n") unless (-e $filename);
   my $doc = XML::LibXML->load_xml(location=>$filename);
-  $model = LaTeXML::Model->new(); 
+  $model = LaTeXML::Common::Model->new(); 
   $model->registerNamespace('ltx',$nsURI);
   # parse the document
   bless { document=>$doc, node=>$doc, model=>$model,
@@ -311,7 +311,7 @@ package LLaMaPUn::LaTeXML;
 sub tex_normalize {
   my @results;
   foreach my $tex(@_) {
-    my $latexml= LaTeXML->new(preload=>[], searchpaths=>["."],
+    my $latexml= LaTeXML::Core->new(preload=>[], searchpaths=>["."],
                               verbosity=>0, strict=>0,
                               includeComments=>0,includeStyles=>undef,
                               documentid=>undef);

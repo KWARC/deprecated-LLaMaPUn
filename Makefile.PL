@@ -25,7 +25,7 @@ WriteMakefile(
     'XML::LibXML'=>1.62,
     'WordNet::QueryData'=>0,
     'Scalar::Util'=>0,
-    'LaTeXML'=>0,
+    'LaTeXML'=>'0.7.99',
     'File::Slurp'=>0
   },
 );
