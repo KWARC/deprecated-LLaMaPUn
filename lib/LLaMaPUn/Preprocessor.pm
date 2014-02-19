@@ -104,7 +104,7 @@ sub normalize {
           $id=$math_node->getAttribute('xml:id');
         }}
       if ($id) {
-        $id=~s/\.(\d+)\./.p$1./g; # No single digits are allowed, assuming P
+        $id=~s/\.(\d+)/.p$1/g; # No single digits are allowed, assuming P
         $id=~s/(\D)\./$1$zero./g; # Same problem with words without trailing digits
         $id=~s/\./-/g;
         $mark="$fid-$id"; }
@@ -145,7 +145,7 @@ sub normalize {
           $fakeeq++;
           $id="fake$fakeeq"; } }
       if ($id) {
-        $id=~s/\.(\d+)\./.p$1./g; # No single digits are allowed, assuming P
+        $id=~s/\.(\d+)/.p$1/g; # No single digits are allowed, assuming P
         $id=~s/(\D)\./$1$zero./g; # Same problem with words without trailing digits
         $id=~s/\./-/g;
         $mark="$fid-$id"; }
@@ -194,7 +194,7 @@ sub normalize {
         if (!$id) {
           $mark="NoID"; }
         else {
-          $id=~s/\.(\d+)\./.p$1./g; # No single digits are allowed, assuming P
+          $id=~s/\.(\d+)/.p$1/g; # No single digits are allowed, assuming P
           $id=~s/(\D)\./$1$zero./g; # Same problem with words without trailing digits
           $id=~s/\./-/g; }
         $mark="$fid-$id";
