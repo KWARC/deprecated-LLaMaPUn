@@ -99,6 +99,7 @@ sub mark_tokens {
 
   my $normDoc = $preprocessor->getNormalizedDocumentObject; #Normalize with position math replacements.
   $root = $normDoc->getDocumentElement;
+
   #Assumption: All discourse is eventually embedded into a "textual" element as seen in @textual below.
   # Current list: p td caption contact date personname quote title toctitle keywords classification acknowledgements
   # Do inform the author if coverage is incomplete!
@@ -187,7 +188,7 @@ sub mark_tokens {
           $basenode = $sentnode->addNewChild($LaTeXML_nsURI,'punct'); }
         elsif ($base=~/^MathExpr(.+)\d$/) { #Formula
           $basenode = $sentnode->addNewChild($LaTeXML_nsURI,'formula'); }
-        elsif ($base=~/^our(citation|reference|QED)(.+)\d$/) { #Reference, citation formula
+        elsif ($base=~/^our(citation|reference)(.+)\d$/) { #Reference, citation formula
           $basenode = $sentnode->addNewChild($LaTeXML_nsURI,'formula'); } # Pretend formulas for now, the markup gets stripped in the XHTML anyway
         else { #Word
           $basenode = $sentnode->addNewChild($LaTeXML_nsURI,'word'); }
@@ -200,7 +201,7 @@ sub mark_tokens {
         while (@parts>0) {
           my $part = shift @parts;
           next unless (defined $part && ($part ne ''));
-          if ($part=~/^MathExpr|our(citation|reference|QED)/) {
+          if ($part=~/^MathExpr|our(citation|reference)/) {
             while (@parts && $parts[0]=~/\d|NoID$/) {
               my $idpart = shift @parts;
               if ($idpart!~/^[^0-9]/){ #Ids always start with a letter, avoids things such as $K$-3 i.e. "MathExpr-m1-3"
