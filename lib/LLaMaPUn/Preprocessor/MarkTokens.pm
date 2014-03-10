@@ -118,6 +118,7 @@ sub mark_tokens {
 
   my $tokenizer=$self->{TOKENIZER};
   my $w = $self->{W};
+  my ($sentence_id,$word_id,$token_id) = (0,0,0);
 
   #Capture all text in "textual" elements, such as <p>, <quote>, <date>, etc.
   my @textual = qw(td caption contact date personname quote title toctitle keywords classification acknowledgements);
@@ -169,6 +170,7 @@ sub mark_tokens {
     my $trailing_sentence_spaces = scalar(@$sentsRef)-1;
     foreach my $sentence (@$sentsRef) {
       my $sentnode = $block->addNewChild($LaTeXML_nsURI,'sentence');
+      $sentnode->setAttribute('xml:id','sentence.'.(++$sentence_id)) if ref $sentnode;
       if ($trailing_sentence_spaces) {
         my $text = $block->addNewChild($LaTeXML_nsURI,'text');
         $text->appendText(" "); }
@@ -192,6 +194,7 @@ sub mark_tokens {
           $basenode = $sentnode->addNewChild($LaTeXML_nsURI,'formula'); } # Pretend formulas for now, the markup gets stripped in the XHTML anyway
         else { #Word
           $basenode = $sentnode->addNewChild($LaTeXML_nsURI,'word'); }
+        $basenode->setAttribute('xml:id','word.'.(++$word_id)) if ref $basenode;
         #Form and attach atomic tokens
         #Hardest: MathExpr-doc0-m1-MathExpr-doc0-m2-stable-MathExpr-doc0-m3
         my @tokens;
@@ -220,6 +223,7 @@ sub mark_tokens {
             my $file=shift @idparts; #follows filename
             if ($file eq 'NoID') { # Missing id of formula, give up here
               my $token = $basenode->addNewChild($LaTeXML_nsURI,'token');
+              $token->setAttribute('xml:id','token.'.(++$token_id)) if ref $token;
               $token->appendTextNode('MissingArtefact'); }
             else {
               my $math_node = $preprocessor->getEntry($part);
@@ -239,6 +243,7 @@ sub mark_tokens {
               my $token = $basenode->addNewChild($LaTeXML_nsURI,'token');
               my $toktext = $1;
               $token->appendTextNode($toktext);
+              $token->setAttribute('xml:id','token.'.(++$token_id)) if ref $token;
               # print STDERR "TokText: $toktext\n";
               # print STDERR "ccontent: $current_txtcontent\n";
               while (($current_txtcontent !~ /\Q$toktext\E/) && scalar(@txts)) {#Align to the appropriate text node
@@ -278,6 +283,7 @@ sub mark_tokens {
                   # Wrap the token in a <emph>
                   my $emph = $basenode->addNewChild($LaTeXML_nsURI,'emph');
                   $token->replaceNode($emph);
+                  $token->setAttribute('xml:id','token.'.(++$token_id)) if ref $token;
                   $emph->addChild($token);
                 }
               }
@@ -286,12 +292,14 @@ sub mark_tokens {
           # If we still have @parts to go, insert a trailing dash:
           if (@parts > 0) {
             my $dash_token = $basenode->addNewChild($LaTeXML_nsURI,'token');
+            $dash_token->setAttribute('xml:id','token.'.(++$token_id)) if ref $dash_token;
             $dash_token->appendTextNode("-"); }
         }
         
         #Handle trailing dashes (morse code motivated)
         if ($base=~/[^-]/ && $base=~/-$/) {
           my $token = $basenode->addNewChild($LaTeXML_nsURI,'token');
+          $token->setAttribute('xml:id','token.'.(++$token_id)) if ref $token;
           $token->appendTextNode("-");
     
           #UGH, had to copy-paste code :( ideally, should be refactored (becomes unmaintainable...)
@@ -368,14 +376,6 @@ sub mark_tokens {
     }
   }
 
-  my @allels = $root->findnodes('//*');
-  my %id=();
-  foreach (@allels) {
-    my $name = $_->localname;
-    $id{$name}++;
-    $_->setAttribute('xml:id',"$name.".$id{$name}) unless $_->getAttribute('xml:id');
-  }
-  # TODO : Add sentence ids and whichever else you need...
   $self->{DOCUMENT}=$normDoc;
   $self->{TOKENSMARKED}=1;  
 }
