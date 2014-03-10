@@ -1,5 +1,6 @@
 use strict;
 use warnings;
+use utf8;
 
 use Test::More tests => 7;
 
@@ -10,7 +11,7 @@ use LLaMaPUn::Preprocessor::MarkTokens;
 use Scalar::Util qw/blessed/;
 
 # Generated via:
-# latexmlc --nopost --parse=no $tex_fragment
+# latexmlc --nopost --parse=no --nocomments --nodefaultresources --timestamp=0 $tex_fragment
 my $tex_fragment = "t/documents/sample_document.tex";
 
 my $parser=XML::LibXML->new();
@@ -36,12 +37,14 @@ my $abstract = $preprocessor->getNormalizedElement('abstract');
 my $body = $preprocessor->getNormalizedBody;
 
 is($$abstract,"A test for LLaMaPUn::Preprocessor");
-is($$body,"This is a sample sentence with ASCII MathExpr-doc0-purify0-m1 math. And a MathExpr-doc0-S1-p1-m1 square root. And then an example of text in math MathExpr-doc0-S1-p1-m2.");
+is($$body,"This is a sample sentence with ASCII MathExpr-doc0-purify0-m1 math. And a MathExpr-doc0-S1-p1-m1 square root. "
+         ."And then an example of text in math MathExpr-doc0-S1-p1-m2. "
+         ."A trickier test of tokenization- how about MathExpr-doc0-S1-p1-m3 -convergent?");
 
 # Test the math lookup table
 my $second_math = $preprocessor->getEntry('MathExpr-doc0-S1-p1-m2');
 # AND test if the purifier found "jaguar" and "mouse" and united them
-is($second_math->toString,'<Math mode="inline" xml:id="S1.p1.m2" tex="P(jaguar\mid mouse)=0"><XMath><XMTok role="UNKNOWN" font="italic">P</XMTok><XMTok role="OPEN">(</XMTok><XMTok role="UNKNOWN" meaning="UNKNOWN" font="italic">jaguar</XMTok><XMTok name="mid" role="VERTBAR">|</XMTok><XMTok role="UNKNOWN" meaning="UNKNOWN" font="italic">mouse</XMTok><XMTok role="CLOSE">)</XMTok><XMTok meaning="equals" role="RELOP">=</XMTok><XMTok meaning="0" role="NUMBER">0</XMTok></XMath></Math>');
+is($second_math->toString,'<Math mode="inline" xml:id="S1.p1.m2" tex="P(jaguar\mid mouse)=0"><XMath><XMTok role="UNKNOWN" font="italic">P</XMTok><XMTok role="OPEN">(</XMTok><XMTok role="UNKNOWN" meaning="UNKNOWN" font="italic">jaguar</XMTok><XMTok name="mid" role="VERTBAR">∣</XMTok><XMTok role="UNKNOWN" meaning="UNKNOWN" font="italic">mouse</XMTok><XMTok role="CLOSE">)</XMTok><XMTok meaning="equals" role="RELOP">=</XMTok><XMTok meaning="0" role="NUMBER">0</XMTok></XMath></Math>');
 
 # Preprocess, Test II
 $preprocessor->setDocument($planetmath_purified_dom);
@@ -52,7 +55,7 @@ $body = $preprocessor->getNormalizedBody;
 $second_math = $preprocessor->getEntry('MathExpr-doc0-p1-p1-m2');
 is(blessed($second_math),'XML::LibXML::Element');
 my $ref = $preprocessor->getEntry('ourreference-doc0-r0');
-is($ref->toString,'<ref href="http://planetmath.org/CumulativeDistributionFunction" resource="pmarticle:CumulativeDistributionFunction" property="pm:linksTo">cumulative distribution function</ref>');
+is($ref->toString,'<ref href="http://planetmath.org/CumulativeDistributionFunction" about="" property="pm:linksTo" resource="pmarticle:CumulativeDistributionFunction">cumulative distribution function</ref>');
 
 #print STDERR "Tokenized Dom: \n",$test_purified_dom->toString(1),"\n\n";
 # MarkTokens, Test I
@@ -68,5 +71,5 @@ my $planetmath_expected_tokenized = $parser->parse_file("t/documents/entry216_to
 is($planetmath_tokenized_dom->toString(1),$planetmath_expected_tokenized->toString(1));
 
 # open O, ">", "/tmp/test.xml";
-# print O $planetmath_tokenized_dom->toString(1);
+# print O $test_tokenized_dom->toString(1);
 # close O;
