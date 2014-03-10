@@ -153,7 +153,7 @@ sub conversion_driver {
   my $nomathparse = ($type eq "noparse") ? 1 : 0;
   my $latexml= LaTeXML::Core->new(preload=>['LaTeX.pool',@preload], searchpaths=>[@paths],
 			    verbosity=>$verbosity, strict=>0,
-			    includeComments=>0,includeStyles=>undef,
+			    includeComments=>0,includeStyles=>0,
 			    documentid=>undef,
           mathparser=>LaTeXML::MathParser->new(),
           nomathparse=>$nomathparse,
@@ -251,10 +251,9 @@ sub post_driver {
 #Formula-tree plugin for LaTeXML Math Parser
 sub parse_math_structure {
   my ($source,$destination) = @_;
-  my($verbosity,$strict,$comments,$noparse,$includestyles)=(1,0,1,0,0);
+  my ($verbosity,$strict,$noparse)=(1,0,0);
   my ($format,$help,$showversion)=('xml');
   my ($documentid);
-  my $inputencoding;
   my $mode = 'auto';
   my @paths = ('.');
   my (@preload,@debugs);
@@ -264,8 +263,7 @@ sub parse_math_structure {
   }
   my $latexml= LaTeXML::Core->new(preload=>[@preload], searchpaths=>[@paths],
 			    verbosity=>$verbosity, strict=>$strict,
-			    includeComments=>$comments,inputencoding=>$inputencoding,
-			    includeStyles=>$includestyles,
+			    includeComments=>0,includeStyles=>0,
           mathparser=>LaTeXML::MathParser->new(),
 			    documentid=>$documentid,
 			    mathparse=>'Marpa');
@@ -313,7 +311,7 @@ sub tex_normalize {
   foreach my $tex(@_) {
     my $latexml= LaTeXML::Core->new(preload=>[], searchpaths=>["."],
                               verbosity=>0, strict=>0,
-                              includeComments=>0,includeStyles=>undef,
+                              includeComments=>0,includeStyles=>0,
                               documentid=>undef);
   
     # Digest, then UnTeX
