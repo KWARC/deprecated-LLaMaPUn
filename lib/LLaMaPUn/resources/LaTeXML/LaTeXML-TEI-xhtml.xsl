@@ -25,7 +25,9 @@
 
   <xsl:template match="ltx:sentence">
     <xsl:element name="span" namespace="{$html_ns}">
-      <xsl:call-template name="add_id"/>
+      <xsl:if test="@xml:id">
+        <xsl:attribute name="id"><xsl:value-of select="@xml:id"/></xsl:attribute>
+      </xsl:if>
       <xsl:call-template name="add_attributes"/>
       <xsl:apply-templates select="." mode="begin"/>
       <xsl:apply-templates/>
@@ -35,7 +37,9 @@
 
   <xsl:template match="ltx:word">
     <xsl:element name="span" namespace="{$html_ns}">
-      <xsl:call-template name="add_id"/>
+      <xsl:if test="@xml:id">
+        <xsl:attribute name="id"><xsl:value-of select="@xml:id"/></xsl:attribute>
+      </xsl:if>
       <xsl:call-template name="add_attributes"/>
       <xsl:apply-templates select="." mode="begin"/>
       <xsl:apply-templates/>
