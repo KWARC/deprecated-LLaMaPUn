@@ -13,7 +13,7 @@
 # \=========================================================ooo==U==ooo=/ #
 
 package LLaMaPUn::LaTeXML;
-#use warnings;
+use warnings;
 use strict;
 use FindBin;
 use Getopt::Long qw(:config no_ignore_case);
@@ -23,6 +23,11 @@ use LaTeXML::Util::Pathname;
 use File::Spec;
 use LaTeXML::Post;
 use LaTeXML::Util::ObjectDB;
+require LaTeXML::Post::Scan;
+require LaTeXML::Post::CrossRef;
+require LaTeXML::Post::MathML::Presentation;
+require LaTeXML::Post::XMath;
+require LaTeXML::Post::XSLT;
 
 use XML::LibXML;
 use Encode;
@@ -41,6 +46,7 @@ our $nsURI = $LaTeXML_nsURI;
 #             in order to process an array of TeX math formulas to PMML
 # TODO: Generalize preloading, and beware of impossible to convert elements
 
+# TODO: Use --whatsin=math instead! This needs updating...
 sub tex_doc_constructor {
   my $texbody="";
   foreach my $tex(@_) {
@@ -108,6 +114,7 @@ print STUB $frontmatter;
  }
  print STUB $backmatter;
  close(STUB);
+
 
  my $model = LaTeXML::Common::Model->new(); 
  $model->registerNamespace('ltx',$nsURI);
@@ -179,7 +186,6 @@ sub conversion_driver {
   
   our %OPTIONS = (verbosity=>$verbosity||0);
 
-  require 'LaTeXML/Post/MathML.pm';
   my $latexmlpost = LaTeXML::Post->new(verbosity=>$verbosity||0);
   my($post) = $latexmlpost->ProcessChain($doc,
       LaTeXML::Post::MathML::Presentation->new(
@@ -214,7 +220,6 @@ sub post_driver {
     # Since we can't easily find & extract all the various formats at once,
     # let's just process each one separately.
 
-    require LaTeXML::Post::MathML;
     my $latexmlpost = LaTeXML::Post->new(%PostOPS);
     my($post) = $latexmlpost->ProcessChain($doc,
         LaTeXML::Post::MathML::Presentation->new(%PostOPS));
@@ -228,15 +233,16 @@ sub post_driver {
     $ltxmldoc = shift @sources;
     my $doc = LaTeXML::Post::Document->new($ltxmldoc,
         nocache=>1,%PostOPS);
-    my $latexmlpost = LaTeXML::Post->new(%PostOPS);
-    require LaTeXML::Post::MathML;
-    require LaTeXML::Post::XMath;
-    require LaTeXML::Post::XSLT;
-    # TODO: Just hardwire XHTML in there, punting anything more meaningful for later
 
+    my $latexmlpost = LaTeXML::Post->new(%PostOPS);
+    # TODO: Just hardwire XHTML in there, punting anything more meaningful for later
+    my $DB = LaTeXML::Util::ObjectDB->new(%PostOPS);
     my($post) = $latexmlpost->ProcessChain($doc,
-      LaTeXML::Post::MathML::Presentation->new(%PostOPS),
+      LaTeXML::Post::Scan->new(db => $DB, %PostOPS),
+      LaTeXML::Post::CrossRef->new(db => $DB, format => 'xhtml',
+          number_sections => 1, %PostOPS),
       LaTeXML::Post::XMath->new(%PostOPS),
+      LaTeXML::Post::MathML::Presentation->new(%PostOPS),
       LaTeXML::Post::XSLT->new(
         stylesheet=>$stylesheet,
         parameters=>{CSS=>['http://latexml.mathweb.org/css/external/LaTeXML.css']},
