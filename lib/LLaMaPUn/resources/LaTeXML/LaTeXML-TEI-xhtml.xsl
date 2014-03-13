@@ -29,9 +29,7 @@
         <xsl:attribute name="id"><xsl:value-of select="@xml:id"/></xsl:attribute>
       </xsl:if>
       <xsl:call-template name="add_attributes"/>
-      <xsl:apply-templates select="." mode="begin"/>
       <xsl:apply-templates/>
-      <xsl:apply-templates select="." mode="end"/>
     </xsl:element>
   </xsl:template>
 
@@ -41,9 +39,7 @@
         <xsl:attribute name="id"><xsl:value-of select="@xml:id"/></xsl:attribute>
       </xsl:if>
       <xsl:call-template name="add_attributes"/>
-      <xsl:apply-templates select="." mode="begin"/>
       <xsl:apply-templates/>
-      <xsl:apply-templates select="." mode="end"/>
     </xsl:element>
   </xsl:template>
 
@@ -64,9 +60,7 @@
 	      doctype-system = "http://www.w3.org/Math/DTD/mathml2/xhtml-math11-f.dtd"
 	      media-type     = 'application/xhtml+xml'
 	      encoding       = 'utf-8'/>
-
   <!-- Note: If you want namespace prefixes (eg. for MathML & SVG),
        Redefine the root template ("/") and add prefixed namespace declarations
        (eg.xmlns:m="http://www.w3.org/1998/Math/MathML") -->
-  
 </xsl:stylesheet>
