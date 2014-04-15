@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 // JSON
-#include <json-c/json.h>
+#include <json.h>
 
 char* cortex_stringify_response(json_object* response, size_t *size) {
   const char* string_response = json_object_to_json_string(response);

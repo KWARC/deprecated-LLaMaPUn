@@ -2,6 +2,7 @@ project(LLaMaPUn C)
 cmake_minimum_required(VERSION 2.8)
 SET( ${PROJECT_NAME}_MAJOR_VERSION 0 )
 SET( ${PROJECT_NAME}_MINOR_VERSION 1 )
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR})
 
 # Compiler flags
 SET(COMMON_FLAGS
@@ -9,10 +10,10 @@ SET(COMMON_FLAGS
 SET(CMAKE_C_FLAGS
     "${CMAKE_C_FLAGS} ${COMMON_FLAGS}")
 
-find_library(LIBJSON json)
 find_library(uthash uthash)
+find_package(Json REQUIRED)
 find_package(LibXml2 REQUIRED)
-include_directories(${LIBXML2_INCLUDE_DIR})
+include_directories(${LIBXML2_INCLUDE_DIR} ${JSON_INCLUDE_DIRS})
 
 include_directories("third-party")
 
@@ -23,7 +24,7 @@ add_library(llamapun_utils llamapun_utils.c)
 add_library(llamapun_senna_pos llamapun_senna_pos.c)
 
 add_executable(TestSENNA tests/senna_post_test.c)
-target_link_libraries(TestSENNA llamapun_utils llamapun_senna_pos ${LIBJSON} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
+target_link_libraries(TestSENNA llamapun_utils llamapun_senna_pos ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 
 enable_testing()
 add_test(SENNA_POS_Test TestSENNA WORKING_DIRECTORY "tests")
