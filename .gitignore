@@ -1,4 +1,5 @@
 blib/
+build/
 .build/
 _build/
 cover_db/
@@ -17,3 +18,4 @@ pm_to_blib
 *~
 \#*
 .\#*
+CMakeLists.txt.user

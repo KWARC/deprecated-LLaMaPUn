@@ -27,7 +27,7 @@ json_object* dom_to_pos_annotations (xmlDocPtr doc) {
     log_message = "Fatal:LibXML:parse Failed to parse document.";
     return cortex_response_json("",log_message,-4); }
   xmlXPathContextPtr xpath_context;
-  xmlXPathObjectPtr xpath_result;
+  xmlXPathObjectPtr xpath_sentence_result;
   xpath_context = xmlXPathNewContext(doc);
   if(xpath_context == NULL) {
     fprintf(stderr,"Error: unable to create new XPath context\n");
@@ -35,21 +35,23 @@ json_object* dom_to_pos_annotations (xmlDocPtr doc) {
     log_message = "Fatal:LibXML:XPath unable to create new XPath context\n";
     return cortex_response_json("",log_message,-4); }
 
-  /* Register XHTML namespace */
+  /* Register XHTML, MathML namespaces */
   xmlXPathRegisterNs(xpath_context,  BAD_CAST "xhtml", BAD_CAST "http://www.w3.org/1999/xhtml");
-  xmlChar *xpath = (xmlChar*) "//xhtml:span[@class='ltx_sentence']";
-
+  xmlXPathRegisterNs(xpath_context,  BAD_CAST "m", BAD_CAST "http://www.w3.org/1998/Math/MathML");
+  xmlChar *sentence_xpath = (xmlChar*) "//xhtml:span[@class='ltx_sentence']";
+  /* Generically normalize all "formula" elements to "MathFormula" */
+  // TODO
   /* Find sentences: */
-  xpath_result = xmlXPathEvalExpression(xpath, xpath_context);
-  if(xpath_result == NULL) {
-    fprintf(stderr,"Error: unable to evaluate xpath expression \"%s\"\n", xpath);
+  xpath_sentence_result = xmlXPathEvalExpression(sentence_xpath, xpath_context);
+  if(xpath_sentence_result == NULL) {
+    fprintf(stderr,"Error: unable to evaluate sentence xpath expression \"%s\"\n", sentence_xpath);
     xmlXPathFreeContext(xpath_context);
     xmlFreeDoc(doc);
     log_message = "Fatal:LibXML:XPath unable to evaluate xpath expression\n";
     return cortex_response_json("",log_message,-4); }
 
   /* Sentence nodes: */
-  xmlNodeSetPtr sentences_nodeset = xpath_result->nodesetval;
+  xmlNodeSetPtr sentences_nodeset = xpath_sentence_result->nodesetval;
   /* Traverse each sentence and tag words */
   xmlChar *words_xpath = (xmlChar*) "//xhtml:span[@class='ltx_word']";
   int sentence_index;
@@ -63,19 +65,25 @@ json_object* dom_to_pos_annotations (xmlDocPtr doc) {
       xmlXPathFreeContext(xpath_sentence_context);
       continue; }
     xmlNodeSetPtr words_nodeset = words_xpath_result->nodesetval;
-//    const xmlChar **words;
-//    xmlChar **ids;
-//    const xmlChar **words_pointer = words;
-//    xmlChar **ids_pointer = ids;
-//    int words_index;
-//    for (words_index=0; words_index < words_nodeset->nodeNr; words_index++) {
-//      xmlNodePtr word_node = words_nodeset->nodeTab[words_index];
-//      *words_pointer++ = xmlNodeGetContent(word_node);
-//      *ids_pointer++ = xmlGetProp(word_node,"id");
-//    }
+    char* word_input_string;
+    size_t sentence_size;
+    FILE *word_stream;
+    word_stream = open_memstream (&word_input_string, &sentence_size);
+    char **ids = (char **)malloc(words_nodeset->nodeNr);
+    char **ids_pointer = ids;
+    int words_index;
+    for (words_index=0; words_index < words_nodeset->nodeNr; words_index++) {
+      xmlNodePtr word_node = words_nodeset->nodeTab[words_index];
+      char* word_content = (char*) xmlNodeGetContent(word_node);
+      fprintf(word_stream, "%s", word_content);
+      fprintf(word_stream," ");
+      *ids_pointer++ = strdup((char*)xmlGetProp(word_node,(xmlChar*)"id"));
+    }
+    fclose(word_stream);
+    printf("Word input string: \n%s\n",word_input_string);
     // Obtain POS tags:
-    char* opt_path = NULL;
-    int *pos_labels = NULL;
+    //char* opt_path = NULL;
+    //int *pos_labels = NULL;
     //SENNA_POS *pos = SENNA_POS_new(opt_path, "third-party/senna/data/pos.dat");
     //pos_labels = SENNA_POS_forward(pos, tokens->word_idx, tokens->caps_idx, tokens->suff_idx, tokens->n);
 

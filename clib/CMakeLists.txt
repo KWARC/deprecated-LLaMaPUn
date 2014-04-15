@@ -26,4 +26,4 @@ add_executable(TestSENNA tests/senna_post_test.c)
 target_link_libraries(TestSENNA llamapun_utils llamapun_senna_pos ${LIBJSON} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 
 enable_testing()
-add_test(SENNA_POS_Test TestSENNA)
+add_test(SENNA_POS_Test TestSENNA WORKING_DIRECTORY "tests")
