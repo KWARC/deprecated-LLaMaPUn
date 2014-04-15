@@ -9,7 +9,7 @@ SET(COMMON_FLAGS
 SET(CMAKE_C_FLAGS
     "${CMAKE_C_FLAGS} ${COMMON_FLAGS}")
 
-find_library(LIBJSON json-c)
+find_library(LIBJSON json)
 find_library(uthash uthash)
 find_package(LibXml2 REQUIRED)
 include_directories(${LIBXML2_INCLUDE_DIR})

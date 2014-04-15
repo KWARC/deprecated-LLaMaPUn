@@ -1,6 +1,29 @@
-language: perl
-perl:
-  - "5.16"
-  - "5.14"
-  - "5.12"
-  - "5.10"
+# Think of reintroducing Perl a bit later...
+# language: perl
+# perl:
+#   - "5.16"
+#   - "5.14"
+#   - "5.12"
+#   - "5.10"
+env:
+
+before_install:
+ - lsb_release -a
+ - sudo apt-get update
+install:
+ - sudo apt-get install cmake
+ - sudo apt-get install make
+ - sudo apt-get install libxml2-dev
+ - sudo apt-get install libjson0-dev
+ - sudo apt-get install uthash-dev
+
+language: c
+compiler:
+ - gcc
+ - clang
+script:
+ - cd clib
+ - mkdir -p build
+ - cd build && cmake ..
+ - make
+ - make test
