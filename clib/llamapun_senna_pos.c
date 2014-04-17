@@ -77,7 +77,7 @@ json_object* dom_to_pos_annotations (xmlDocPtr doc) {
   /* Initialize SENNA toolkit components: */
   int *pos_labels = NULL;
   char *opt_path = "../third-party/senna/";
-  /* inputs */
+  /* SENNA inputs */
   SENNA_Hash *word_hash = SENNA_Hash_new(opt_path, "hash/words.lst");
   SENNA_Hash *caps_hash = SENNA_Hash_new(opt_path, "hash/caps.lst");
   SENNA_Hash *suff_hash = SENNA_Hash_new(opt_path, "hash/suffix.lst");
@@ -88,7 +88,7 @@ json_object* dom_to_pos_annotations (xmlDocPtr doc) {
   SENNA_Hash *gazo_hash = SENNA_Hash_new_with_admissible_keys(opt_path, "hash/ner.org.lst", "data/ner.org.dat");
   SENNA_Hash *gazp_hash = SENNA_Hash_new_with_admissible_keys(opt_path, "hash/ner.per.lst", "data/ner.per.dat");
 
-  /* labels */
+  /* SENNA labels */
   SENNA_Hash *pos_hash = SENNA_Hash_new(opt_path, "hash/pos.lst");
   SENNA_Hash *chk_hash = SENNA_Hash_new(opt_path, "hash/chk.lst");
   SENNA_Hash *pt0_hash = SENNA_Hash_new(opt_path, "hash/pt0.lst");
@@ -101,7 +101,8 @@ json_object* dom_to_pos_annotations (xmlDocPtr doc) {
   SENNA_Tokenizer *tokenizer = SENNA_Tokenizer_new(word_hash, caps_hash, suff_hash, gazt_hash, gazl_hash, gazm_hash, gazo_hash, gazp_hash, 1);
   SENNA_POS *pos = SENNA_POS_new(opt_path, "data/pos.dat");
 
-
+  /* Response JSON object */
+  json_object* response = json_object_new_object();
   /* Find sentences: */
   xmlXPathObjectPtr xpath_sentence_result = xmlXPathEvalExpression(sentence_xpath, xpath_context);
   if(xpath_sentence_result == NULL) {
@@ -142,7 +143,6 @@ json_object* dom_to_pos_annotations (xmlDocPtr doc) {
     }
     //xmlElemDump(word_stream,doc,sentence);
     fclose(word_stream);
-    printf("%s\n",word_input_string);
     // Obtain POS tags:
     SENNA_Tokens* tokens = SENNA_Tokenizer_tokenize(tokenizer, word_input_string);
     if(tokens->n == 0)
@@ -151,8 +151,8 @@ json_object* dom_to_pos_annotations (xmlDocPtr doc) {
     int token_index;
     for(token_index = 0; token_index < tokens->n; token_index++)
     {
-        printf("%15s", tokens->words[token_index]);
-        printf("\t%10s", SENNA_Hash_key(pos_hash, pos_labels[token_index]));
+        json_object_object_add(response,ids[token_index],
+                               json_object_new_string(SENNA_Hash_key(pos_hash, pos_labels[token_index])));
     }
     /* We obtain the corresponding list of POS tags for the list of words */
     /* We return a JSON object that has "ID => POS tag" as result structure.*/
@@ -160,5 +160,5 @@ json_object* dom_to_pos_annotations (xmlDocPtr doc) {
 
   // Freedom
   xmlXPathFreeContext(xpath_context);
-  return NULL; // TODO Return a proper json object
+  return response; // TODO Return a proper json object
 }

@@ -18,9 +18,19 @@ int main() {
   if (doc == NULL) {
     perror("Test XHTML document could not be parsed, failing");
     return 1; }
-  dom_to_pos_annotations(doc);
-
+  json_object* response = dom_to_pos_annotations(doc);
+  /* Clean up libxml objects */
   xmlFreeDoc(doc);
   xmlCleanupParser();
+
+  int words_total = 0;
+  char *key; struct json_object *val; struct lh_entry *entry;
+  for(entry = json_object_get_object(response)->head; (entry ? (key = (char*)entry->k, val = (struct json_object*)entry->v, entry) : 0); entry = entry->next) {
+    words_total++;
+  }
+  if (words_total != 6193) {
+    perror("POS tagged words -- count mismatch");
+    return 1;  }
+
   return 0;
 }
