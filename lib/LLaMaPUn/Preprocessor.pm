@@ -14,7 +14,6 @@
 package LLaMaPUn::Preprocessor;
 use warnings;
 use strict;
-use feature 'switch';
 
 use Carp;
 use Encode;
@@ -360,11 +359,9 @@ sub getEntry {
   my ($self,$id)=@_;
   $self->normalize unless $self->{NORMALIZED};
   my $type;
-  given ($id) {
-    when (/^MathExpr/) {$type = "MATH";}
-    when (/^ourcitation/) {$type = "CITE";}
-    when (/^ourreference/) {$type = "REF";}
-  }
+  if ($id =~ /^MathExpr/) { $type = "MATH"; }
+  elsif ($id =~ /^ourcitation/) {$type = "CITE";}
+  elsif ($id =~ /^ourreference/) {$type = "REF";}
   if ($self->{REPLACEMATH} eq "syntax") {
     $id=~s/(.+)-(\d+)$/$2/;
     while (my ($math, $mid) = each %{$self->{uc($type)."MAP"}}) {

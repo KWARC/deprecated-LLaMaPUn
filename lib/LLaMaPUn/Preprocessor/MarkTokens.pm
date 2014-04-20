@@ -182,11 +182,14 @@ sub mark_tokens {
       my $leading_spaces = 0;
       foreach my $base(@baselayer) {
         my $trailing_space_punct = ($base =~ /^[\.\?\!\:\,\;]$/);
-        if (($leading_spaces++) && (! $trailing_space_punct)) {
+        my $space_neutral_punct;
+        if (!$trailing_space_punct) {
+          $space_neutral_punct = ($base =~ /^[\"\']$/); }
+        if (($leading_spaces++) && (! $trailing_space_punct)) { # Only add spaces to non-trailing punctuation
           my $text = $sentnode->addNewChild($LaTeXML_nsURI,'text');
           $text->appendText(" "); }
         my $basenode;
-        if ($trailing_space_punct) { # Punctuation
+        if ($trailing_space_punct || $space_neutral_punct) { # Any punctuation
           $basenode = $sentnode->addNewChild($LaTeXML_nsURI,'punct'); }
         elsif ($base=~/^MathExpr(.+)\d$/) { #Formula
           $basenode = $sentnode->addNewChild($LaTeXML_nsURI,'formula'); }

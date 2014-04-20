@@ -232,7 +232,7 @@ sub normalize {
 package LLaMaPUn::Tokenizer::Word;
 use base qw(LLaMaPUn::Tokenizer);
 use strict;
-use encoding 'utf8';
+use utf8;
 
 #TODO: Test if dates work. Written on 26.10.2010
 #All special Unicode alphabetical latin symbols:
