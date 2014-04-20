@@ -28,9 +28,12 @@ int main() {
   for(entry = json_object_get_object(response)->head; (entry ? (key = (char*)entry->k, val = (struct json_object*)entry->v, entry) : 0); entry = entry->next) {
     words_total++;
   }
-  if (words_total != 6193) {
-    perror("POS tagged words -- count mismatch");
+  if (words_total != 6189) {
+    printf("POS tagged words -- count mismatch, got %d \n",words_total);
     return 1;  }
+//  char* rdfxml_pos = pos_labels_to_rdfxml(response);
+//  printf("%s",rdfxml_pos);
+
 
   return 0;
 }

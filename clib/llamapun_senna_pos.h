@@ -7,3 +7,5 @@
 #include <libxml/xpathInternals.h>
 
 json_object* dom_to_pos_annotations (xmlDocPtr doc);
+
+char* pos_labels_to_rdfxml (json_object* labels);

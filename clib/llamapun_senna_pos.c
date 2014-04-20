@@ -143,22 +143,28 @@ json_object* dom_to_pos_annotations (xmlDocPtr doc) {
     }
     //xmlElemDump(word_stream,doc,sentence);
     fclose(word_stream);
-    // Obtain POS tags:
+    /* Get the list of tokens from the input string */
     SENNA_Tokens* tokens = SENNA_Tokenizer_tokenize(tokenizer, word_input_string);
     if(tokens->n == 0)
       continue;
+    /* Obtain the corresponding list of POS tags for the list of words */
     pos_labels = SENNA_POS_forward(pos, tokens->word_idx, tokens->caps_idx, tokens->suff_idx, tokens->n);
     int token_index;
-    for(token_index = 0; token_index < tokens->n; token_index++)
-    {
+    for(token_index = 0; token_index < tokens->n; token_index++) {
+
         json_object_object_add(response,ids[token_index],
                                json_object_new_string(SENNA_Hash_key(pos_hash, pos_labels[token_index])));
     }
-    /* We obtain the corresponding list of POS tags for the list of words */
-    /* We return a JSON object that has "ID => POS tag" as result structure.*/
   }
 
   // Freedom
   xmlXPathFreeContext(xpath_context);
-  return response; // TODO Return a proper json object
+  /* We return a JSON object that has "ID => POS tag" as result structure.*/
+  return response;
 }
+
+//char* pos_labels_to_rdfxml (json_object* labels) {
+//  for(entry = json_object_get_object(labels)->head; (entry ? (key = (char*)entry->k, val = (struct json_object*)entry->v, entry) : 0); entry = entry->next) {
+  
+//  }
+//}
