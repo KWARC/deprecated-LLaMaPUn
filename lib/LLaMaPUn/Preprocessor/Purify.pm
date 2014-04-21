@@ -18,7 +18,6 @@ use strict;
 use Carp;
 use Encode;
 use XML::LibXML;
-use WordNet::QueryData;
 use LLaMaPUn::Util;
 use LLaMaPUn::LaTeXML;
 use vars qw($LaTeXML_nsURI);
@@ -29,10 +28,16 @@ our @ISA = qw(Exporter);
 our @EXPORT = qw( &purify_noparse &text_math_to_XMath &purify_tokens &text_XMath_to_text &merge_math);
 our $verbose=0;
 
-#my $wn = WordNet::QueryData->new(dir=>locate_external("WordNet-dict")."/", noload => 1);
 our ($wordnetdir) = grep {-d $_} ('/usr/share/wordnet/','/usr/local/wordnet/dict/');
 our %dirclause = ($wordnetdir ? (dir=>$wordnetdir) : ());
-our $wn = WordNet::QueryData->new(%dirclause, noload => 1);
+
+our $wordnet_installed;
+BEGIN {
+my $eval_return = eval {require WordNet::QueryData; 1;};
+if ($eval_return && !$@) {
+  # WordNet::QueryData is available, use it:
+  $wordnet_installed = 1; } }
+our $wn = $wordnet_installed && WordNet::QueryData->new(%dirclause, noload => 1);
 
 sub purify_noparse {
   my ($class) = @_;

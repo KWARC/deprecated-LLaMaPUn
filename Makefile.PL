@@ -23,7 +23,7 @@ WriteMakefile(
   PREREQ_PM => { 
     "Lingua::EN::Sentence" => 0,
     'XML::LibXML'=>1.62,
-    'WordNet::QueryData'=>0,
+    # 'WordNet::QueryData'=>0, # (Optional, so that we're easy to deploy on custom systems)
     'Scalar::Util'=>0,
     'LaTeXML'=>'0.7.99',
     'File::Slurp'=>0
