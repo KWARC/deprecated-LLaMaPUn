@@ -90,13 +90,13 @@ json_object* dom_to_pos_annotations (xmlDocPtr doc) {
 
   /* SENNA labels */
   SENNA_Hash *pos_hash = SENNA_Hash_new(opt_path, "hash/pos.lst");
-  SENNA_Hash *chk_hash = SENNA_Hash_new(opt_path, "hash/chk.lst");
-  SENNA_Hash *pt0_hash = SENNA_Hash_new(opt_path, "hash/pt0.lst");
-  SENNA_Hash *ner_hash = SENNA_Hash_new(opt_path, "hash/ner.lst");
-  SENNA_Hash *vbs_hash = SENNA_Hash_new(opt_path, "hash/vbs.lst");
-  SENNA_Hash *srl_hash = SENNA_Hash_new(opt_path, "hash/srl.lst");
-  SENNA_Hash *psg_left_hash = SENNA_Hash_new(opt_path, "hash/psg-left.lst");
-  SENNA_Hash *psg_right_hash = SENNA_Hash_new(opt_path, "hash/psg-right.lst");
+  // SENNA_Hash *chk_hash = SENNA_Hash_new(opt_path, "hash/chk.lst");
+  // SENNA_Hash *pt0_hash = SENNA_Hash_new(opt_path, "hash/pt0.lst");
+  // SENNA_Hash *ner_hash = SENNA_Hash_new(opt_path, "hash/ner.lst");
+  // SENNA_Hash *vbs_hash = SENNA_Hash_new(opt_path, "hash/vbs.lst");
+  // SENNA_Hash *srl_hash = SENNA_Hash_new(opt_path, "hash/srl.lst");
+  // SENNA_Hash *psg_left_hash = SENNA_Hash_new(opt_path, "hash/psg-left.lst");
+  // SENNA_Hash *psg_right_hash = SENNA_Hash_new(opt_path, "hash/psg-right.lst");
 
   SENNA_Tokenizer *tokenizer = SENNA_Tokenizer_new(word_hash, caps_hash, suff_hash, gazt_hash, gazl_hash, gazm_hash, gazo_hash, gazp_hash, 1);
   SENNA_POS *pos = SENNA_POS_new(opt_path, "data/pos.dat");

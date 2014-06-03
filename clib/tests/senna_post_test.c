@@ -16,7 +16,7 @@ int main() {
 
   xmlDoc* doc = xmlReadFile(TEST_XHTML_DOCUMENT, NULL, 0);
   if (doc == NULL) {
-    perror("Test XHTML document could not be parsed, failing");
+    fprintf(stderr,"Test XHTML document could not be parsed, failing");
     return 1; }
   json_object* response = dom_to_pos_annotations(doc);
   /* Clean up libxml objects */
@@ -24,16 +24,19 @@ int main() {
   xmlCleanupParser();
 
   int words_total = 0;
-  char *key; struct json_object *val; struct lh_entry *entry;
-  for(entry = json_object_get_object(response)->head; (entry ? (key = (char*)entry->k, val = (struct json_object*)entry->v, entry) : 0); entry = entry->next) {
+  // char *key; struct json_object *val; struct lh_entry *entry;
+  // for(entry = json_object_get_object(response)->head; (entry ? (key = (char*)entry->k, val = (struct json_object*)entry->v, entry) : 0); entry = entry->next) {
+  //   words_total++;
+  // }
+  struct lh_entry *entry;
+  for(entry = json_object_get_object(response)->head; (entry ? 1 : 0); entry = entry->next) {
     words_total++;
   }
+
   if (words_total != 6189) {
-    printf("POS tagged words -- count mismatch, got %d \n",words_total);
+    fprintf(stderr,"POS tagged words -- count mismatch, got %d \n",words_total);
     return 1;  }
-//  char* rdfxml_pos = pos_labels_to_rdfxml(response);
-//  printf("%s",rdfxml_pos);
 
-
+  // all OK
   return 0;
 }
