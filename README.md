@@ -1,7 +1,7 @@
 <img src="doc/transparent_llama_sir.png" alt="LLaMaPUn Logo" width="400"/>
 
 The **LLaMaPUn** library *will* consist of a wide range of processing tools for natural language and mathematics.
-[![Build Status](https://secure.travis-ci.org/dginev/LLaMaPUn.png?branch=master)](http://travis-ci.org/dginev/LLaMaPUn)
+[![Build Status](https://secure.travis-ci.org/KWARC/LLaMaPUn.png?branch=master)](http://travis-ci.org/dginev/LLaMaPUn)
 ---
 **New:** Efforts have started in adopting third-party tools (such as the [SENNA](http://ml.nec-labs.com/senna/) NLP toolkit) and adapting them to the focus of mathematical documents. As such, the current build target is refocused on the C programming language, but the intention is to reunify all components with Perl.
 
