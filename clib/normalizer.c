@@ -10,11 +10,9 @@ void init_normalizer() {
 	UnSetOption(fspec);
 
 	//Initialize in and out stream
-	size_t insize, outsize;
-	char *instrptr;
-	char *outstrptr;
-	morpha_instream = open_memstream(&instrptr, &insize);
-	morpha_outstream = open_memstream(&outstrptr, &outsize);
+	size_t insize, outsize;   //we're not interested in the size
+	morpha_instream = open_memstream(&morpha_instream_buff_ptr, &insize);
+	morpha_outstream = open_memstream(&morpha_outstream_buff_ptr, &outsize);
 
 	yyout = morpha_outstream;
 	yyin = morpha_instream;
@@ -24,8 +22,8 @@ void init_normalizer() {
 	read_verbstem("morpha/verbstem.list");
 }
 
-void normalize(char *word, char *normalized, size_t size) {
-	fprintf(morpha_instream, "%s", word);
+void normalize(const char *sentence, char **normalized) {
+	fprintf(morpha_instream, "%s", sentence);
 
 	int c;
 	while ((c = getc(morpha_instream)) != EOF) {
@@ -33,11 +31,20 @@ void normalize(char *word, char *normalized, size_t size) {
 		BEGIN(state);
 		yylex();
 	}
+		
+	BEGIN(state);
+	yylex();
 
-	fgets(normalized, size, morpha_outstream);
+	fclose(morpha_outstream);
+	*normalized = morpha_outstream_buff_ptr;
+
+	size_t outsize;
+	morpha_outstream = open_memstream(&morpha_outstream_buff_ptr, &outsize);
 }
 
 void close_normalizer() {
 	fclose(morpha_instream);
 	fclose(morpha_outstream);
+	free(morpha_instream_buff_ptr);
+	free(morpha_outstream_buff_ptr);
 }
