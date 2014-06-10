@@ -3,7 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <uthash.h>
-#include <json-c/json.h>
+#include <json.h>
 
 #include "stopwords.h"
 

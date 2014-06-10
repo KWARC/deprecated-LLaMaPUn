@@ -1,6 +1,6 @@
 #include "../stopwords.h"
 #include <stdio.h>
-#include <json-c/json.h>
+#include <json.h>
 #include <unistd.h>
 
 
