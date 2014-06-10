@@ -1,9 +1,14 @@
 #include "../stopwords.h"
 #include <stdio.h>
 #include <json-c/json.h>
+#include <unistd.h>
 
 
 int main(void) {
+	//if (!access("../stopwords.json", R_OK)) {
+	//	fprintf(stderr, "test stopwords -- cannot open \"../stopwords.json\"\n");
+	//	return 1;
+	//}
 	read_stopwords(json_object_from_file("../stopwords.json"));
 	int errors = 0;
 

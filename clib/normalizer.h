@@ -2,6 +2,7 @@
 
 #ifndef NORMALIZER_H_INCLUDED
 #define NORMALIZER_H_INCLUDED
+#include <stdio.h>
 
 FILE *morpha_instream;
 FILE *morpha_outstream;

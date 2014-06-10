@@ -24,6 +24,7 @@ add_library(SENNA_POS third-party/senna/SENNA_POS.c)
 add_library(SENNA_Tokenizer third-party/senna/SENNA_Tokenizer.c)
 add_library(llamapun_utils llamapun_utils.c)
 add_library(llamapun_senna_pos llamapun_senna_pos.c)
+add_library(stopwords stopwords.c)
 
 target_link_libraries(SENNA_Hash SENNA_utils)
 target_link_libraries(SENNA_Tokenizer SENNA_Hash SENNA_utils)
@@ -35,6 +36,9 @@ target_link_libraries(llamapun_senna_pos
                                         llamapun_utils ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 add_executable(TestSENNA tests/senna_post_test.c)
 target_link_libraries(TestSENNA llamapun_senna_pos ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
+add_executable(TestSTOPWORDS tests/stopwords_test.c)
+target_link_libraries(TestSTOPWORDS stopwords ${JSON_LIBRARIES} ${uthash_LIBRARIES})
 
 enable_testing()
 add_test(SENNA_POS_Test TestSENNA WORKING_DIRECTORY "tests")
+add_test(STOPWORDS_Test TestSTOPWORDS WORKING_DIRECTORY "tests")
