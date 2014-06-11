@@ -1,5 +1,3 @@
-//gcc -O -Dinteractive ...
-
 #ifndef NORMALIZER_H_INCLUDED
 #define NORMALIZER_H_INCLUDED
 #include <stdio.h>

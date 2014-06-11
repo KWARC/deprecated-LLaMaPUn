@@ -1,4 +1,5 @@
-#include "morpha/morpha.yy.c"
+#define interactive   /*required for morpha to work properly*/
+#include "third-party/morpha/morpha.yy.c"
 #include "normalizer.h"
 #include <stdio.h>
 
@@ -19,7 +20,7 @@ void init_normalizer() {
 
 	state = any;
 
-	read_verbstem("morpha/verbstem.list");
+	read_verbstem("third-party/morpha/verbstem.list");
 }
 
 void normalize(const char *sentence, char **normalized) {

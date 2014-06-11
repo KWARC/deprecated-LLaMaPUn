@@ -13,8 +13,8 @@ struct stopword_element *STOPWORDS = NULL;
 
 
 struct stopword_element {
-  char *word; /* we'll use this field as the key */
-  UT_hash_handle hh; /* makes this structure hashable */
+  char *word;
+  UT_hash_handle hh;
 };
 
 
