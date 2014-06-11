@@ -25,6 +25,11 @@ add_library(SENNA_Tokenizer third-party/senna/SENNA_Tokenizer.c)
 add_library(llamapun_utils llamapun_utils.c)
 add_library(llamapun_senna_pos llamapun_senna_pos.c)
 add_library(stopwords stopwords.c)
+add_library(normalizer normalizer.c)
+add_library(llamapun_ngrams llamapun_ngrams.c)
+
+#morpha yields many warnings
+set_source_files_properties(normalizer.c PROPERTIES COMPILE_FLAGS " -w ")
 
 target_link_libraries(SENNA_Hash SENNA_utils)
 target_link_libraries(SENNA_Tokenizer SENNA_Hash SENNA_utils)
@@ -33,6 +38,8 @@ target_link_libraries(SENNA_POS SENNA_utils SENNA_Hash SENNA_nn)
 target_link_libraries(llamapun_utils ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 target_link_libraries(llamapun_senna_pos
                                         SENNA_utils SENNA_Hash SENNA_nn SENNA_Tokenizer SENNA_POS
+                                        llamapun_utils ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
+target_link_libraries(llamapun_ngrams stopwords normalizer
                                         llamapun_utils ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 add_executable(TestSENNA tests/senna_post_test.c)
 target_link_libraries(TestSENNA llamapun_senna_pos ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})

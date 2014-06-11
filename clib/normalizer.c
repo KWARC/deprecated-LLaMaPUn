@@ -1,4 +1,5 @@
 #define interactive   /*required for morpha to work properly*/
+#include <ctype.h>
 #include "third-party/morpha/morpha.yy.c"
 #include "normalizer.h"
 #include <stdio.h>
