@@ -16,7 +16,7 @@
 // LLaMaPUn Utils
 #include "llamapun_utils.h"
 #include "stopwords.h"
-#include "normalizer.h"
+#include "stemmer.h"
 
 
 struct stringcount {
@@ -60,7 +60,7 @@ json_object* get_ngrams (xmlDocPtr doc) {
     perror("Failed to create XHTML namespace");  }
 
   xmlChar *sentence_xpath = (xmlChar*) "//xhtml:span[@class='ltx_sentence']";
-  /* Generically normalize all "math" elements to "MathFormula" words */
+  /* Generically stem all "math" elements to "MathFormula" words */
   xmlChar* math_xpath = (xmlChar*) "//m:math";
   xmlXPathObjectPtr xpath_math_result = xmlXPathEvalExpression(math_xpath,xpath_context);
   if (xpath_math_result != NULL) { // Nothing to do if there's no math in the document
@@ -76,7 +76,7 @@ json_object* get_ngrams (xmlDocPtr doc) {
       xmlReplaceNode(math_node,new_math_word);
     }
   }
-  /* Normalize all "a" anchor elements to their text content */
+  /* Stem all "a" anchor elements to their text content */
   xmlChar* anchor_xpath = (xmlChar*) "//xhtml:a";
   xmlXPathObjectPtr xpath_anchor_result = xmlXPathEvalExpression(anchor_xpath,xpath_context);
   if (xpath_anchor_result != NULL) { // Nothing to do if there's no math in the document
@@ -94,7 +94,6 @@ json_object* get_ngrams (xmlDocPtr doc) {
   }
 
   //initialize everything for counting ngrams
-  init_normalizer();
   struct stringcount *unigram_hash = NULL;
   struct stringcount * bigram_hash = NULL;
   struct stringcount *trigram_hash = NULL;
@@ -120,7 +119,7 @@ json_object* get_ngrams (xmlDocPtr doc) {
   int sentence_index;
   //loop over sentences
   for (sentence_index=0; sentence_index < sentences_nodeset->nodeNr; sentence_index++) {
-    init_normalizer();    //WORKAROUND: FOR SOME REASON IT DOESN'T WORK OUTSIDE THE LOOP...
+    init_stemmer();    //WORKAROUND: FOR SOME REASON IT DOESN'T WORK OUTSIDE THE LOOP...
                           //TO BE FIXED!
     xmlNodePtr sentence = sentences_nodeset->nodeTab[sentence_index];
     xmlXPathContextPtr xpath_sentence_context = xmlXPathNewContext((xmlDocPtr)sentence);
@@ -148,9 +147,9 @@ json_object* get_ngrams (xmlDocPtr doc) {
     fclose(word_stream);
 
     //prepare for ngram extraction
-    char *normalized;
-    normalize(word_input_string, &normalized);
-    char *index = normalized;
+    char *stemmed;
+    morpha_stem(word_input_string, &stemmed);
+    char *index = stemmed;
     char *tmp1,*tmp2,*tmp;
     int foundStopword;
     int foundEnd = 0;
@@ -259,9 +258,9 @@ json_object* get_ngrams (xmlDocPtr doc) {
   
     } while (!foundEnd);
       free(word_input_string);
-      free(normalized);
+      free(stemmed);
 
-  close_normalizer();
+  close_stemmer();
   }
 
   free_stopwords();

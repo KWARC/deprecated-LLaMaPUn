@@ -25,11 +25,11 @@ add_library(SENNA_Tokenizer third-party/senna/SENNA_Tokenizer.c)
 add_library(llamapun_utils llamapun_utils.c)
 add_library(llamapun_senna_pos llamapun_senna_pos.c)
 add_library(stopwords stopwords.c)
-add_library(normalizer normalizer.c)
+add_library(stemmer stemmer.c)
 add_library(llamapun_ngrams llamapun_ngrams.c)
 
 #morpha yields many warnings
-set_source_files_properties(normalizer.c PROPERTIES COMPILE_FLAGS " -w ")
+set_source_files_properties(stemmer.c PROPERTIES COMPILE_FLAGS " -w ")
 
 target_link_libraries(SENNA_Hash SENNA_utils)
 target_link_libraries(SENNA_Tokenizer SENNA_Hash SENNA_utils)
@@ -39,19 +39,19 @@ target_link_libraries(llamapun_utils ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIB
 target_link_libraries(llamapun_senna_pos
                                         SENNA_utils SENNA_Hash SENNA_nn SENNA_Tokenizer SENNA_POS
                                         llamapun_utils ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
-target_link_libraries(llamapun_ngrams stopwords normalizer
+target_link_libraries(llamapun_ngrams stopwords stemmer
                                         llamapun_utils ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 add_executable(TestSENNA tests/senna_post_test.c)
 target_link_libraries(TestSENNA llamapun_senna_pos ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 add_executable(TestSTOPWORDS tests/stopwords_test.c)
 target_link_libraries(TestSTOPWORDS stopwords ${JSON_LIBRARIES} ${uthash_LIBRARIES})
-add_executable(TestNORMALIZER tests/normalizer_test.c)
-target_link_libraries(TestNORMALIZER normalizer)
+add_executable(TestSTEMMER tests/stemmer_test.c)
+target_link_libraries(TestSTEMMER stemmer)
 add_executable(TestNGRAMS tests/ngrams_test.c)
 target_link_libraries(TestNGRAMS llamapun_ngrams ${JSON_LIBRARIES} ${LIBXML2_LIBRARIES})
 
 enable_testing()
 add_test(SENNA_POS_Test TestSENNA WORKING_DIRECTORY "tests")
 add_test(STOPWORDS_Test TestSTOPWORDS WORKING_DIRECTORY "tests")
-add_test(NORMALIZER_Test TestNORMALIZER WORKING_DIRECTORY "tests")
+add_test(STEMMER_Test TestSTEMMER WORKING_DIRECTORY "tests")
 add_test(NGRAMS_Test TestNGRAMS WORKING_DIRECTORY "tests")
