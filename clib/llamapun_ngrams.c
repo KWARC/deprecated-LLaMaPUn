@@ -3,7 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
-
+#include <unistd.h>
 // Hashes
 #include <uthash.h>
 // JSON
@@ -25,7 +25,8 @@ struct stringcount {
   UT_hash_handle hh;
 };
 
-void add_ngram(const char *string, struct stringcount *sc) {
+/*void add_ngram(const char *string, struct stringcount *sc) {  //does't work (macros??)
+  //FILE *f = fopen("log.txt", "a");
   struct stringcount *tmp;
   HASH_FIND_STR(sc, string, tmp);
   if (tmp == NULL) {
@@ -36,7 +37,7 @@ void add_ngram(const char *string, struct stringcount *sc) {
   } else {    //ngram is already in hash
     tmp->counter++;
   }
-}
+}*/
 
 json_object* get_ngrams (xmlDocPtr doc) {
   char* log_message;
@@ -97,6 +98,11 @@ json_object* get_ngrams (xmlDocPtr doc) {
   struct stringcount *unigram_hash = NULL;
   struct stringcount * bigram_hash = NULL;
   struct stringcount *trigram_hash = NULL;
+  if (access("../stopwords.json", R_OK)) {
+    fprintf(stderr, "Error: Cannot open \"../stopwords.json\"\n");
+    return NULL;
+  }
+  read_stopwords(json_object_from_file("../stopwords.json"));
 
   //Evaluate XPath
   xmlXPathObjectPtr xpath_sentence_result = xmlXPathEvalExpression(sentence_xpath, xpath_context);
@@ -114,6 +120,8 @@ json_object* get_ngrams (xmlDocPtr doc) {
   int sentence_index;
   //loop over sentences
   for (sentence_index=0; sentence_index < sentences_nodeset->nodeNr; sentence_index++) {
+    init_normalizer();    //WORKAROUND: FOR SOME REASON IT DOESN'T WORK OUTSIDE THE LOOP...
+                          //TO BE FIXED!
     xmlNodePtr sentence = sentences_nodeset->nodeTab[sentence_index];
     xmlXPathContextPtr xpath_sentence_context = xmlXPathNewContext((xmlDocPtr)sentence);
     xmlXPathRegisterNs(xpath_sentence_context,  BAD_CAST "xhtml", BAD_CAST "http://www.w3.org/1999/xhtml");
@@ -133,7 +141,7 @@ json_object* get_ngrams (xmlDocPtr doc) {
       xmlNodePtr word_node = words_nodeset->nodeTab[words_index];
       char* word_content = (char*) xmlNodeGetContent(word_node);
       fprintf(word_stream, "%s", word_content);
-      fprintf(word_stream," ");
+      if (words_index < word_count - 1) fprintf(word_stream," ");   //no trailing space!!
     }
 
     //xmlElemDump(word_stream,doc,sentence);
@@ -145,9 +153,9 @@ json_object* get_ngrams (xmlDocPtr doc) {
     char *index = normalized;
     char *tmp1,*tmp2,*tmp;
     int foundStopword;
-    int foundEnd;
+    int foundEnd = 0;
     int nonstopcounter;
-  
+
     //do the actual ngram extraction (iteratively)
     do {
       //step 1: remove leading stop words
@@ -187,14 +195,25 @@ json_object* get_ngrams (xmlDocPtr doc) {
       
       //step 3: process leading "non-stop" words
       tmp2 = index;   //tmp2 is starting position for next iteration
+      struct stringcount *tmp_strcount;
       while (nonstopcounter--) {
         index = tmp2;
         tmp = index;
         //unigram
         while (!(isspace(*tmp) || !*tmp)) tmp++;
         *tmp = '\0';
-        //printf("UNIGRAM: %s\n", index);
-        add_ngram(index, unigram_hash);
+        //add_ngram(index, unigram_hash);
+
+        HASH_FIND_STR(unigram_hash, index, tmp_strcount);
+        if (tmp_strcount == NULL) {
+          tmp_strcount = (struct stringcount *) malloc(sizeof(struct stringcount));
+          tmp_strcount->string = strdup(index);
+          tmp_strcount->counter = 1;
+          HASH_ADD_KEYPTR(hh, unigram_hash, tmp_strcount->string, strlen(tmp_strcount->string), tmp_strcount);
+        } else {    //ngram is already in hash
+          tmp_strcount->counter++;
+        }
+
         *tmp = ' ';
         while (isspace(*++tmp));
         tmp2 = tmp;    //next index
@@ -202,29 +221,50 @@ json_object* get_ngrams (xmlDocPtr doc) {
         //bigram
         while (!(isspace(*tmp) || !*tmp)) tmp++;
         *tmp = '\0';
-        //printf("BIGRAM: %s\n", index);
-        add_ngram(index, bigram_hash);
+        //add_ngram(index, bigram_hash);
+        
+        HASH_FIND_STR(bigram_hash, index, tmp_strcount);
+        if (tmp_strcount == NULL) {
+          tmp_strcount = (struct stringcount *) malloc(sizeof(struct stringcount));
+          tmp_strcount->string = strdup(index);
+          tmp_strcount->counter = 1;
+          HASH_ADD_KEYPTR(hh, bigram_hash, tmp_strcount->string, strlen(tmp_strcount->string), tmp_strcount);
+        } else {    //ngram is already in hash
+          tmp_strcount->counter++;
+        }
+
         *tmp = ' ';
         while (isspace(*++tmp));
         if (nonstopcounter < 2) continue;
         //trigram
         while (!(isspace(*tmp) || !*tmp)) tmp++;
         *tmp = '\0';
-        //printf("TRIGRAM: %s\n", index);
-        add_ngram(index, trigram_hash);
+        //add_ngram(index, trigram_hash);
+
+        HASH_FIND_STR(trigram_hash, index, tmp_strcount);
+        if (tmp_strcount == NULL) {
+          tmp_strcount = (struct stringcount *) malloc(sizeof(struct stringcount));
+          tmp_strcount->string = strdup(index);
+          tmp_strcount->counter = 1;
+          HASH_ADD_KEYPTR(hh, trigram_hash, tmp_strcount->string, strlen(tmp_strcount->string), tmp_strcount);
+        } else {    //ngram is already in hash
+          tmp_strcount->counter++;
+        }
+
         *tmp = ' ';
         while (isspace(*++tmp));
       }
       index = tmp2;
 
-      free(word_input_string);
-      free(normalized);
   
     } while (!foundEnd);
+      free(word_input_string);
+      free(normalized);
+
+  close_normalizer();
   }
 
   free_stopwords();
-  close_normalizer();
   xmlXPathFreeContext(xpath_context);
 
 
