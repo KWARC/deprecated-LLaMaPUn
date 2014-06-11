@@ -5,10 +5,10 @@
 
 
 int main(void) {
-	//if (!access("../stopwords.json", R_OK)) {
-	//	fprintf(stderr, "test stopwords -- cannot open \"../stopwords.json\"\n");
-	//	return 1;
-	//}
+	if (access("../stopwords.json", R_OK)) {
+		fprintf(stderr, "test stopwords -- cannot open \"../stopwords.json\"\n");
+		return 1;
+	}
 	read_stopwords(json_object_from_file("../stopwords.json"));
 	int errors = 0;
 
