@@ -19,33 +19,17 @@ int main() {
     return 1; }
   json_object* response = get_ngrams(doc);
 
-  /* FILE *f = fopen("output.txt", "w");
+  FILE *f = fopen("ngrams.txt", "w");
   fprintf(f, "%s", json_object_to_json_string(response));
-  fclose(f); */
+  fclose(f); 
 
   /* Clean up libxml objects */
   xmlFreeDoc(doc);
   xmlCleanupParser();
 
-//  //check the number of the unigram "fraction"
-//  /*json_object_object_foreach(response, key, value) {
-//    if (!strcmp(key, "unigrams")) {
-//      json_object_object_foreach(value, key2, value2) {
-//        if (!strcmp(key, "fraction")) {
-//          printf("%d occurences\n", value2);
-//          break;
-//        }
-//      }
-//      break;
-//    }
-//  }*/
-//
   json_object* tmp;
 
-
-
   //check the number of occurences of the unigram "fraction"
-
   tmp = json_object_object_get(response, "unigrams");
   tmp = json_object_object_get(tmp, "fraction");
   if (json_object_get_int(tmp) != 3) {

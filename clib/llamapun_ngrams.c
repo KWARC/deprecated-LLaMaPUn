@@ -60,7 +60,7 @@ json_object* get_ngrams (xmlDocPtr doc) {
     perror("Failed to create XHTML namespace");  }
 
   xmlChar *sentence_xpath = (xmlChar*) "//xhtml:span[@class='ltx_sentence']";
-  /* Generically stem all "math" elements to "MathFormula" words */
+  /* Generically stem all "math" elements to "[MathFormula]" words */
   xmlChar* math_xpath = (xmlChar*) "//m:math";
   xmlXPathObjectPtr xpath_math_result = xmlXPathEvalExpression(math_xpath,xpath_context);
   if (xpath_math_result != NULL) { // Nothing to do if there's no math in the document
@@ -70,7 +70,7 @@ json_object* get_ngrams (xmlDocPtr doc) {
       xmlNodePtr math_node = math_nodeset->nodeTab[math_index];
       xmlNodePtr new_math_word = xmlNewNode(xhtml_ns, BAD_CAST "span");
       xmlNewProp(new_math_word, BAD_CAST "class", BAD_CAST "ltx_word");
-      xmlNodePtr math_stub_text = xmlNewText(BAD_CAST "MathFormula");
+      xmlNodePtr math_stub_text = xmlNewText(BAD_CAST "[MathFormula]");
       xmlSetProp(new_math_word,BAD_CAST "id", BAD_CAST xmlGetProp(math_node,BAD_CAST "id"));
       xmlAddChild(new_math_word,math_stub_text);
       xmlReplaceNode(math_node,new_math_word);
@@ -135,10 +135,26 @@ json_object* get_ngrams (xmlDocPtr doc) {
     word_stream = open_memstream (&word_input_string, &sentence_size);
     int word_count = words_nodeset->nodeNr;
     int words_index;
+    int isnumber;
+    size_t tmpindex;
     for (words_index=0; words_index < word_count; words_index++) {
       xmlNodePtr word_node = words_nodeset->nodeTab[words_index];
       char* word_content = (char*) xmlNodeGetContent(word_node);
-      fprintf(word_stream, "%s", word_content);
+      //add word_content to word_stream (replace numbers by "[number]")
+      isnumber = 1;
+      tmpindex = 0;
+      while (tmpindex < strlen(word_content)) {
+        if (!(isdigit(word_content[tmpindex]) || word_content[tmpindex] == '.')) {
+          isnumber = 0;
+          break;
+        }
+        tmpindex++;
+      }
+      if (isnumber) {
+        fprintf(word_stream, "[number]");
+      } else {
+        fprintf(word_stream, "%s", word_content);
+      }
       if (words_index < word_count - 1) fprintf(word_stream," ");   //no trailing space!!
     }
 
