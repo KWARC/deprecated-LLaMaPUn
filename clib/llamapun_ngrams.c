@@ -94,6 +94,7 @@ json_object* get_ngrams (xmlDocPtr doc) {
   }
 
   //initialize everything for counting ngrams
+  init_stemmer();
   struct stringcount *unigram_hash = NULL;
   struct stringcount * bigram_hash = NULL;
   struct stringcount *trigram_hash = NULL;
@@ -119,8 +120,6 @@ json_object* get_ngrams (xmlDocPtr doc) {
   int sentence_index;
   //loop over sentences
   for (sentence_index=0; sentence_index < sentences_nodeset->nodeNr; sentence_index++) {
-    init_stemmer();    //WORKAROUND: FOR SOME REASON IT DOESN'T WORK OUTSIDE THE LOOP...
-                          //TO BE FIXED!
     xmlNodePtr sentence = sentences_nodeset->nodeTab[sentence_index];
     xmlXPathContextPtr xpath_sentence_context = xmlXPathNewContext((xmlDocPtr)sentence);
     xmlXPathRegisterNs(xpath_sentence_context,  BAD_CAST "xhtml", BAD_CAST "http://www.w3.org/1999/xhtml");
@@ -257,12 +256,11 @@ json_object* get_ngrams (xmlDocPtr doc) {
 
   
     } while (!foundEnd);
-      free(word_input_string);
-      free(stemmed);
-
-  close_stemmer();
+    free(word_input_string);
+    free(stemmed);
   }
 
+  close_stemmer();
   free_stopwords();
   xmlXPathFreeContext(xpath_context);
 
