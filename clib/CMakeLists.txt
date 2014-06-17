@@ -11,9 +11,12 @@ SET(CMAKE_C_FLAGS
     "${CMAKE_C_FLAGS} ${COMMON_FLAGS}")
 
 find_library(uthash uthash)
+#FIND_LIBRARY( ICONV_LIBRARY NAMES iconv)
+#find_package(iconv REQUIRED)
+FIND_LIBRARY(ICONV_LIBRARIES NAMES iconv libiconv libiconv-2 c)
 find_package(Json REQUIRED)
 find_package(LibXml2 REQUIRED)
-include_directories(${LIBXML2_INCLUDE_DIR} ${JSON_INCLUDE_DIRS})
+include_directories(${LIBXML2_INCLUDE_DIR} ${JSON_INCLUDE_DIRS} ${ICONV_INCLUDE_DIR})
 
 include_directories("third-party")
 
@@ -27,6 +30,7 @@ add_library(llamapun_senna_pos llamapun_senna_pos.c)
 add_library(stopwords stopwords.c)
 add_library(stemmer stemmer.c)
 add_library(llamapun_ngrams llamapun_ngrams.c)
+add_library(unicode_normalizer unicode_normalizer.c)
 
 #morpha yields many warnings
 set_source_files_properties(stemmer.c PROPERTIES COMPILE_FLAGS " -w ")
@@ -49,9 +53,12 @@ add_executable(TestSTEMMER tests/stemmer_test.c)
 target_link_libraries(TestSTEMMER stemmer)
 add_executable(TestNGRAMS tests/ngrams_test.c)
 target_link_libraries(TestNGRAMS llamapun_ngrams ${JSON_LIBRARIES} ${LIBXML2_LIBRARIES})
+add_executable(TestUnicodeNormalizer tests/unicode_normalizer_test.c)
+target_link_libraries(TestUnicodeNormalizer unicode_normalizer ${ICONV_LIBRARIES})
 
 enable_testing()
 add_test(SENNA_POS_Test TestSENNA WORKING_DIRECTORY "tests")
 add_test(STOPWORDS_Test TestSTOPWORDS WORKING_DIRECTORY "tests")
 add_test(STEMMER_Test TestSTEMMER WORKING_DIRECTORY "tests")
 add_test(NGRAMS_Test TestNGRAMS WORKING_DIRECTORY "tests")
+add_test(UNICODE_NORMALIZER_Test TestUnicodeNormalizer WORKING_DIRECTORY "tests")
