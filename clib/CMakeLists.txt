@@ -33,7 +33,9 @@ add_library(ngram_merge ngram_merge.c)
 
 #morpha yields many warnings
 set_source_files_properties(stemmer.c PROPERTIES COMPILE_FLAGS " -w ")
+#required for parsing json
 set_source_files_properties(ngram_merge.c PROPERTIES COMPILE_FLAGS " -std=c99 ")
+
 target_link_libraries(SENNA_Hash SENNA_utils)
 target_link_libraries(SENNA_Tokenizer SENNA_Hash SENNA_utils)
 target_link_libraries(SENNA_nn SENNA_utils)

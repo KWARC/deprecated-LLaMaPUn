@@ -17,8 +17,8 @@ install:
  - sudo apt-get install libjson0-dev
  - sudo apt-get install uthash-dev
  - sudo wget http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.14.tar.gz
- - sudo tar -xvzf libiconv-1.11.tar.gz
- - cd libiconv-1.11
+ - sudo tar -xvzf libiconv-1.14.tar.gz
+ - cd libiconv-1.14
  - sudo ./configure --prefix=/usr/local/libiconv
  - sudo make
  - sudo make install
