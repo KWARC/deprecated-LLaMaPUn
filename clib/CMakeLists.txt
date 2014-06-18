@@ -11,8 +11,6 @@ SET(CMAKE_C_FLAGS
     "${CMAKE_C_FLAGS} ${COMMON_FLAGS}")
 
 find_library(uthash uthash)
-#FIND_LIBRARY( ICONV_LIBRARY NAMES iconv)
-#find_package(iconv REQUIRED)
 FIND_LIBRARY(ICONV_LIBRARIES NAMES iconv libiconv libiconv-2 c)
 find_package(Json REQUIRED)
 find_package(LibXml2 REQUIRED)
@@ -31,10 +29,11 @@ add_library(stopwords stopwords.c)
 add_library(stemmer stemmer.c)
 add_library(llamapun_ngrams llamapun_ngrams.c)
 add_library(unicode_normalizer unicode_normalizer.c)
+add_library(ngram_merge ngram_merge.c)
 
 #morpha yields many warnings
 set_source_files_properties(stemmer.c PROPERTIES COMPILE_FLAGS " -w ")
-
+set_source_files_properties(ngram_merge.c PROPERTIES COMPILE_FLAGS " -std=c99 ")
 target_link_libraries(SENNA_Hash SENNA_utils)
 target_link_libraries(SENNA_Tokenizer SENNA_Hash SENNA_utils)
 target_link_libraries(SENNA_nn SENNA_utils)
