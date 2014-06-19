@@ -17,6 +17,8 @@
 #include "llamapun_utils.h"
 #include "stopwords.h"
 #include "stemmer.h"
+#include "llamapun_ngrams.h"
+#include "unicode_normalizer.h"
 
 
 struct stringcount {
@@ -163,12 +165,21 @@ json_object* get_ngrams (xmlDocPtr doc) {
 
     //prepare for ngram extraction
     char *stemmed;
-    morpha_stem(word_input_string, &stemmed);
-    char *index = stemmed;
     char *tmp1,*tmp2,*tmp;
+    normalize_unicode(word_input_string, &tmp);
+    morpha_stem(tmp, &stemmed);
+    free(tmp);
+    char *index = stemmed;
     int foundStopword;
     int foundEnd = 0;
     int nonstopcounter;
+
+/*
+    FILE *f = fopen("log.txt", "a");
+    //fprintf(f, " +++ NEW SENTENCE +++ ");
+    fprintf(f, "%s", word_input_string);
+    fclose(f);
+*/
 
     //do the actual ngram extraction (iteratively)
     do {

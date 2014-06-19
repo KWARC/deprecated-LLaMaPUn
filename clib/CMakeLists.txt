@@ -29,7 +29,7 @@ add_library(stopwords stopwords.c)
 add_library(stemmer stemmer.c)
 add_library(llamapun_ngrams llamapun_ngrams.c)
 add_library(unicode_normalizer unicode_normalizer.c)
-add_library(ngram_merge ngram_merge.c)
+#add_library(ngram_merge ngram_merge.c)
 
 #morpha yields many warnings
 set_source_files_properties(stemmer.c PROPERTIES COMPILE_FLAGS " -w ")
@@ -53,7 +53,7 @@ target_link_libraries(TestSTOPWORDS stopwords ${JSON_LIBRARIES} ${uthash_LIBRARI
 add_executable(TestSTEMMER tests/stemmer_test.c)
 target_link_libraries(TestSTEMMER stemmer)
 add_executable(TestNGRAMS tests/ngrams_test.c)
-target_link_libraries(TestNGRAMS llamapun_ngrams ${JSON_LIBRARIES} ${LIBXML2_LIBRARIES})
+target_link_libraries(TestNGRAMS llamapun_ngrams unicode_normalizer ${ICONV_LIBRARIES} ${JSON_LIBRARIES} ${LIBXML2_LIBRARIES})
 add_executable(TestUnicodeNormalizer tests/unicode_normalizer_test.c)
 target_link_libraries(TestUnicodeNormalizer unicode_normalizer ${ICONV_LIBRARIES})
 
