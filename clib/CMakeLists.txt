@@ -4,9 +4,9 @@ SET( ${PROJECT_NAME}_MAJOR_VERSION 0 )
 SET( ${PROJECT_NAME}_MINOR_VERSION 1 )
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR})
 
-# Compiler flags
+# Compiler flags (fPIC required for packaging)
 SET(COMMON_FLAGS
-    "-Wall -W -Wextra")
+    "-Wall -W -Wextra -fPIC")
 SET(CMAKE_C_FLAGS
     "${CMAKE_C_FLAGS} ${COMMON_FLAGS}")
 
@@ -27,7 +27,8 @@ add_library(llamapun_utils llamapun_utils.c)
 add_library(llamapun_senna_pos llamapun_senna_pos.c)
 add_library(stopwords stopwords.c)
 add_library(stemmer stemmer.c)
-add_library(llamapun_ngrams SHARED llamapun_ngrams.c)
+add_library(llamapun_ngrams_package SHARED llamapun_ngrams.c)
+add_library(llamapun_ngrams STATIC llamapun_ngrams.c)
 add_library(unicode_normalizer unicode_normalizer.c)
 #add_library(ngram_merge ngram_merge.c)
 
@@ -46,6 +47,8 @@ target_link_libraries(llamapun_senna_pos
                                         llamapun_utils ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 target_link_libraries(llamapun_ngrams stopwords stemmer
                                         llamapun_utils ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
+target_link_libraries(llamapun_ngrams_package stopwords stemmer llamapun_utils
+                                        ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 add_executable(TestSENNA tests/senna_post_test.c)
 target_link_libraries(TestSENNA llamapun_senna_pos ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 add_executable(TestSTOPWORDS tests/stopwords_test.c)

@@ -68,16 +68,9 @@ void normalize_unicode(char *input, char **output) {
 
     iconv(conv, &inptr, &inlength, &outptr, &outlength);
 
-<<<<<<< HEAD
     *outptr = '\0';
     *output = strdup(tmp);
     free(tmp);
     
-=======
-    //*output = strdup(tmp);
-    *outptr = '\0';
-    *output = tmp;
-
->>>>>>> ef438d6c8b1d72aab922bea967d6d7e70838d02e
 	iconv_close(conv);
 }
