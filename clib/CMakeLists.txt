@@ -27,7 +27,7 @@ add_library(llamapun_utils llamapun_utils.c)
 add_library(llamapun_senna_pos llamapun_senna_pos.c)
 add_library(stopwords stopwords.c)
 add_library(stemmer stemmer.c)
-add_library(llamapun_ngrams llamapun_ngrams.c)
+add_library(llamapun_ngrams SHARED llamapun_ngrams.c)
 add_library(unicode_normalizer unicode_normalizer.c)
 #add_library(ngram_merge ngram_merge.c)
 
