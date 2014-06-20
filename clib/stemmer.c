@@ -20,8 +20,7 @@ void init_stemmer() {
 	read_verbstem("third-party/morpha/verbstem.list");
 }
 
-//from http://stackoverflow.com/questions/779875/what-is-the-function-to-replace-string-in-c
-// You must free the result if result is non-NULL.
+//based on example from http://stackoverflow.com/questions/779875/what-is-the-function-to-replace-string-in-c
 char *str_replace(char *orig, char *rep, char *with) {
     char *result; // the return string
     char *ins;    // the next insert point
@@ -63,6 +62,7 @@ char *str_replace(char *orig, char *rep, char *with) {
         orig += len_front + len_rep; // move to next "end of rep"
     }
     strcpy(tmp, orig);
+    //free(orig);
     return result;
 }
 
@@ -73,6 +73,8 @@ void morpha_stem(const char *sentence, char **stemmed) {
 
 	yyout = morpha_outstream;
 	yyin = morpha_instream;
+
+	sentence = str_replace(sentence, "'s", "'S");   //otherwise the s gets removed
 
 	fprintf(morpha_instream, "%s", sentence);
 
@@ -89,6 +91,7 @@ void morpha_stem(const char *sentence, char **stemmed) {
 	fclose(morpha_outstream);
 	*stemmed = morpha_outstream_buff_ptr;
 	*stemmed = str_replace(*stemmed, "formulum", "formula");
+	*stemmed = str_replace(*stemmed, "vium", "via");
 	free(morpha_outstream_buff_ptr);
 
 	//size_t outsize;
