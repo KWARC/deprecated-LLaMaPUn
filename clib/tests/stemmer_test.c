@@ -8,8 +8,11 @@ int main(void) {
 	init_stemmer();
 
 	char *stemmed;
+	char *test;
 
-	morpha_stem("there are numbers", &stemmed);
+	test = strdup("there are numbers");
+	morpha_stem(test, &stemmed);
+	free(test);
 
 	if (strcmp(stemmed, "there be number")) {
 		fprintf(stderr, "test normalizer -- wrong result: %s\n", stemmed);
@@ -19,7 +22,9 @@ int main(void) {
 
 	free(stemmed);
 
-	morpha_stem("Let x be the greatest common denominator of y we are going to prove the following", &stemmed);
+	test = strdup("Let x be the greatest common denominator of y we are going to prove the following");
+	morpha_stem(test, &stemmed);
+	free(test);
 
 	if (strcmp(stemmed, "let x be the greatest common denominator of y we be go to prove the follow")) {
 		fprintf(stderr, "test normalizer -- wrong result: %s\n", stemmed);

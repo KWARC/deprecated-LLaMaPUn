@@ -13,12 +13,11 @@ void init_stemmer() {
 	UnSetOption(tag_output);
 	UnSetOption(fspec);
 
-	//Initialize in and out stream
-	
 	state = any;
 
 	read_verbstem("third-party/morpha/verbstem.list");
 }
+
 
 //based on example from http://stackoverflow.com/questions/779875/what-is-the-function-to-replace-string-in-c
 char *str_replace(char *orig, char *rep, char *with) {
@@ -66,7 +65,39 @@ char *str_replace(char *orig, char *rep, char *with) {
     return result;
 }
 
+
+char *word_replace(char *orig, char *rep, char *with) {
+	size_t size;
+	char *outstring;
+	FILE *stream = open_memstream(&outstring, &size);
+	char *tmp = orig;
+
+	//now process word by word
+	int found_end = 0;
+	while (!found_end) {
+		while (*tmp != ' ' && *tmp != '\0') {
+			tmp++;
+		}
+		if (*tmp == '\0') found_end = 1;
+		*tmp = '\0';
+		if (strcmp(orig, rep)) {  //if word doesn't have to be replaced
+			fprintf(stream, "%s", orig);
+		} else {	//word has to be replaced
+			fprintf(stream, "%s", with);
+		}
+		if (!found_end) *tmp = ' ';
+		putc(*tmp, stream);
+		orig = ++tmp;   //next word
+	}
+	fclose(stream);
+	return outstring;
+}
+
 void morpha_stem(const char *sentence, char **stemmed) {
+	FILE *l = fopen("LOG.txt", "a");
+	fprintf(l, "C: %s\n", sentence);
+	fclose(l);
+	char *tmp;
 	size_t insize, outsize;   //we're not interested in the size
 	morpha_instream = open_memstream(&morpha_instream_buff_ptr, &insize);
 	morpha_outstream = open_memstream(&morpha_outstream_buff_ptr, &outsize);
@@ -74,7 +105,7 @@ void morpha_stem(const char *sentence, char **stemmed) {
 	yyout = morpha_outstream;
 	yyin = morpha_instream;
 
-	sentence = str_replace(sentence, "'s", "'S");   //otherwise the s gets removed
+	sentence = word_replace(sentence, "'s", "'S");   //otherwise the s gets removed
 
 	fprintf(morpha_instream, "%s", sentence);
 
@@ -89,10 +120,13 @@ void morpha_stem(const char *sentence, char **stemmed) {
 	yylex();
 
 	fclose(morpha_outstream);
-	*stemmed = morpha_outstream_buff_ptr;
-	*stemmed = str_replace(*stemmed, "formulum", "formula");
-	*stemmed = str_replace(*stemmed, "vium", "via");
+	//*stemmed = morpha_outstream_buff_ptr;
+	*stemmed = word_replace(morpha_outstream_buff_ptr, "formulum", "formula");
+
 	free(morpha_outstream_buff_ptr);
+	tmp = word_replace(*stemmed, "vium", "via");
+	free(*stemmed);
+	*stemmed = tmp;
 
 	//size_t outsize;
 	//morpha_outstream = open_memstream(&morpha_outstream_buff_ptr, &outsize);
