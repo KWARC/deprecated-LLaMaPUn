@@ -27,9 +27,10 @@ add_library(llamapun_utils llamapun_utils.c)
 add_library(llamapun_senna_pos llamapun_senna_pos.c)
 add_library(stopwords stopwords.c)
 add_library(stemmer stemmer.c)
-add_library(llamapun_ngrams_package SHARED llamapun_ngrams.c)
-add_library(llamapun_ngrams STATIC llamapun_ngrams.c)
+add_library(llamapun_ngrams llamapun_ngrams.c)
 add_library(unicode_normalizer unicode_normalizer.c)
+add_library(llamapun_cortex_interface llamapun_cortex_interface.c)
+add_library(llamapun SHARED llamapun_cortex_interface.c)
 #add_library(ngram_merge ngram_merge.c)
 
 #morpha yields many warnings
@@ -47,7 +48,7 @@ target_link_libraries(llamapun_senna_pos
                                         llamapun_utils ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 target_link_libraries(llamapun_ngrams stopwords stemmer
                                         llamapun_utils ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
-target_link_libraries(llamapun_ngrams_package stopwords stemmer llamapun_utils
+target_link_libraries(llamapun llamapun_ngrams stopwords stemmer llamapun_utils
                                         ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 add_executable(TestSENNA tests/senna_post_test.c)
 target_link_libraries(TestSENNA llamapun_senna_pos ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
@@ -66,3 +67,6 @@ add_test(STOPWORDS_Test TestSTOPWORDS WORKING_DIRECTORY "tests")
 add_test(STEMMER_Test TestSTEMMER WORKING_DIRECTORY "tests")
 add_test(NGRAMS_Test TestNGRAMS WORKING_DIRECTORY "tests")
 add_test(UNICODE_NORMALIZER_Test TestUnicodeNormalizer WORKING_DIRECTORY "tests")
+
+install(TARGETS llamapun DESTINATION lib)
+install(FILES llamapun_cortex_interface.h llamapun_utils.h stopwords.h unicode_normalizer.h llamapun_ngrams.h stemmer.h DESTINATION include/llamapun)

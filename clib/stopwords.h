@@ -1,7 +1,7 @@
 #ifndef STOPWORDS_H_INCLUDED
 #define STOPWORDS_H_INCLUDED
 
-#include <json.h>
+#include <json/json.h>
 
 void read_stopwords(json_object *);
 void free_stopwords();
