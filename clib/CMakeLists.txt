@@ -48,7 +48,7 @@ target_link_libraries(llamapun_senna_pos
                                         llamapun_utils ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 target_link_libraries(llamapun_ngrams stopwords stemmer
                                         llamapun_utils ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
-target_link_libraries(llamapun llamapun_ngrams stopwords stemmer llamapun_utils
+target_link_libraries(llamapun llamapun_ngrams stopwords stemmer llamapun_utils SENNA_POS
                                         ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 add_executable(TestSENNA tests/senna_post_test.c)
 target_link_libraries(TestSENNA llamapun_senna_pos ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
@@ -69,4 +69,4 @@ add_test(NGRAMS_Test TestNGRAMS WORKING_DIRECTORY "tests")
 add_test(UNICODE_NORMALIZER_Test TestUnicodeNormalizer WORKING_DIRECTORY "tests")
 
 install(TARGETS llamapun DESTINATION lib)
-install(FILES llamapun_cortex_interface.h llamapun_utils.h stopwords.h unicode_normalizer.h llamapun_ngrams.h stemmer.h DESTINATION include/llamapun)
+install(FILES llamapun_cortex_interface.h llamapun_utils.h stopwords.h unicode_normalizer.h llamapun_ngrams.h stemmer.h llamapun_senna_pos.h DESTINATION include/llamapun)
