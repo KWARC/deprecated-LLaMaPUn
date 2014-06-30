@@ -49,7 +49,7 @@ void normalize_unicode(char *input, char **output) {
 		**output = '\0';
 	}
 	iconv_t conv = iconv_open("ASCII//TRANSLIT//IGNORE", "UTF-8");
-    if((int) conv == -1) {
+    if((long long) conv == -1) {
         if (errno == EINVAL) {
             fprintf(stderr, "unicode_normalizer: Error: Conversion is not supported\n");
         } else {

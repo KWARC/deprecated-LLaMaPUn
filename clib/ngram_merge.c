@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <json.h>
+//#include <json-c/json.h>
+#include "jsoninclude.h"
 #include <uthash.h>
 #include "ngram_merge.h"
 

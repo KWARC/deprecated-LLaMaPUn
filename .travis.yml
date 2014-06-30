@@ -30,6 +30,7 @@ compiler:
  - clang
 script:
  - cd clib
+ - sh jsonincludecheck.sh > /dev/null
  - mkdir -p build
  - cd build && cmake ..
  - make

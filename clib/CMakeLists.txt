@@ -29,8 +29,6 @@ add_library(stopwords stopwords.c)
 add_library(stemmer stemmer.c)
 add_library(llamapun_ngrams llamapun_ngrams.c)
 add_library(unicode_normalizer unicode_normalizer.c)
-add_library(llamapun_cortex_interface llamapun_cortex_interface.c)
-add_library(llamapun SHARED llamapun_cortex_interface.c)
 #add_library(ngram_merge ngram_merge.c)
 
 #morpha yields many warnings
@@ -48,8 +46,6 @@ target_link_libraries(llamapun_senna_pos
                                         llamapun_utils ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 target_link_libraries(llamapun_ngrams stopwords stemmer
                                         llamapun_utils ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
-target_link_libraries(llamapun llamapun_ngrams stopwords stemmer llamapun_utils SENNA_POS
-                                        ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 add_executable(TestSENNA tests/senna_post_test.c)
 target_link_libraries(TestSENNA llamapun_senna_pos ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 add_executable(TestSTOPWORDS tests/stopwords_test.c)
@@ -68,5 +64,13 @@ add_test(STEMMER_Test TestSTEMMER WORKING_DIRECTORY "tests")
 add_test(NGRAMS_Test TestNGRAMS WORKING_DIRECTORY "tests")
 add_test(UNICODE_NORMALIZER_Test TestUnicodeNormalizer WORKING_DIRECTORY "tests")
 
+
+#install
+
+file(GLOB llamapun_SOURCES *.c)
+file(GLOB llamapun_HEADERS *.h)
+add_library(llamapun SHARED ${llamapun_SOURCES} ${llamapun_HEADERS})
+
+target_link_libraries(llamapun ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 install(TARGETS llamapun DESTINATION lib)
-install(FILES llamapun_cortex_interface.h llamapun_utils.h stopwords.h unicode_normalizer.h llamapun_ngrams.h stemmer.h llamapun_senna_pos.h DESTINATION include/llamapun)
+install(FILES ${llamapun_HEADERS} DESTINATION include/llamapun)

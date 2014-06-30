@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
-#include <json.h>
+//#include <json-c/json.h>
+#include "../jsoninclude.h"
 // XML DOM and XPath
 #include <libxml/tree.h>
 #include <libxml/parser.h>
@@ -17,7 +18,7 @@ int main() {
   if (doc == NULL) {
     fprintf(stderr,"Test XHTML document could not be parsed, failing");
     return 1; }
-  json_object* response = get_ngrams(doc);
+  json_object* response = llamapun_get_ngrams(doc);
 
   FILE *f = fopen("ngrams.txt", "w");
   fprintf(f, "%s", json_object_to_json_string(response));

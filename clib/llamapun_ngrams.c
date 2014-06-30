@@ -7,7 +7,8 @@
 // Hashes
 #include <uthash.h>
 // JSON
-#include <json.h>
+//#include <json-c/json.h>
+#include "jsoninclude.h"
 // XML DOM and XPath
 #include <libxml/tree.h>
 #include <libxml/parser.h>
@@ -41,7 +42,7 @@ struct stringcount {
   }
 }*/
 
-json_object* get_ngrams (xmlDocPtr doc) {
+json_object* llamapun_get_ngrams (xmlDocPtr doc) {
   char* log_message;
   if (doc == NULL) {
     fprintf(stderr, "Failed to parse workload!\n");
