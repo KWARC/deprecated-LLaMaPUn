@@ -15,7 +15,8 @@ void preprocess(char *string) {
 	while (*readindex) {
 		if (*readindex == '\xc3') {
 			readindex++;
-			if in_range(*readindex, '\x80', '\x85') *writeindex = 'A';
+			//I don't know why, but casting to unsigned char once prevents annoying compiler warning
+			if in_range((unsigned char)*readindex, (unsigned char)'\x80', (unsigned char)'\x85') *writeindex = 'A';
 			else if in_range(*readindex, '\x88', '\x8b') *writeindex = 'E';
 			else if in_range(*readindex, '\x8c', '\x8f') *writeindex = 'I';
 			else if (*readindex == '\x91') *writeindex = 'N';
