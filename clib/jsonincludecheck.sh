@@ -1,3 +1,8 @@
+#/usr/bin/bash
+
+#On some platforms, json-c is installed to <json-c/json.h>,
+#but on other platforms to <json/json.h>.
+
 cat > .testjsoninclude.h <<'EOM'
 #include <json-c/json.h>
 EOM
