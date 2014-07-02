@@ -13,3 +13,14 @@ if gcc -E .testjsoninclude.h
   echo '#include <json/json.h>' > jsoninclude.h
  fi
 rm .testjsoninclude.h
+
+echo '#ifdef _json_c_version_h_' >> jsoninclude.h
+#echo '    #define JSON_OBJECT_OBJECT_GET_EX_DEFINED 1' >> jsoninclude.h
+echo '  #if JSON_C_MAJOR_VERSION > 0' >> jsoninclude.h
+echo '    #define JSON_OBJECT_OBJECT_GET_EX_DEFINED 1' >> jsoninclude.h
+echo '  #endif' >> jsoninclude.h
+echo '  #if JSON_C_MINOR_VERSION > 9' >> jsoninclude.h
+echo '    #define JSON_OBJECT_OBJECT_GET_EX_DEFINED 1' >> jsoninclude.h
+echo '  #endif' >> jsoninclude.h
+echo '#endif' >> jsoninclude.h
+
