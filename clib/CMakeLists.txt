@@ -29,12 +29,12 @@ add_library(stopwords stopwords.c)
 add_library(stemmer stemmer.c)
 add_library(llamapun_ngrams llamapun_ngrams.c)
 add_library(unicode_normalizer unicode_normalizer.c)
-#add_library(ngram_merge ngram_merge.c)
+add_library(llamapun_gt_estimate llamapun_gt_estimate.c)
 
 #morpha yields many warnings
 set_source_files_properties(stemmer.c PROPERTIES COMPILE_FLAGS " -w ")
 #required for parsing json
-set_source_files_properties(ngram_merge.c PROPERTIES COMPILE_FLAGS " -std=c99 ")
+set_source_files_properties(llamapun_gt_estimate.c PROPERTIES COMPILE_FLAGS " -std=c99 ")
 
 target_link_libraries(SENNA_Hash SENNA_utils)
 target_link_libraries(SENNA_Tokenizer SENNA_Hash SENNA_utils)
@@ -56,6 +56,7 @@ add_executable(TestNGRAMS tests/ngrams_test.c)
 target_link_libraries(TestNGRAMS llamapun_ngrams unicode_normalizer ${ICONV_LIBRARIES} ${JSON_LIBRARIES} ${LIBXML2_LIBRARIES})
 add_executable(TestUnicodeNormalizer tests/unicode_normalizer_test.c)
 target_link_libraries(TestUnicodeNormalizer unicode_normalizer ${ICONV_LIBRARIES})
+target_link_libraries(llamapun_gt_estimate ${JSON_LIBRARIES} ${uthash_LIBRARIES})
 
 enable_testing()
 add_test(SENNA_POS_Test TestSENNA WORKING_DIRECTORY "tests")
