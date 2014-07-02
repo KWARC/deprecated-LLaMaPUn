@@ -29,20 +29,25 @@ int main() {
   xmlCleanupParser();
 
   json_object* tmp;
+  json_object* tmp2;
 
   //check the number of occurences of the unigram "fraction"
-  tmp = json_object_object_get(response, "unigrams");
-  tmp = json_object_object_get(tmp, "fraction");
-  if (json_object_get_int(tmp) != 3) {
-    fprintf(stderr, "test ngrams -- wrong result for 'fraction': got %d\n", json_object_get_int(tmp));
+  //tmp = json_object_object_get(response, "unigrams");
+  json_object_object_get_ex(response, "unigrams", &tmp);
+  //tmp = json_object_object_get(tmp, "fraction");
+  json_object_object_get_ex(tmp, "fraction", &tmp2);
+  if (json_object_get_int(tmp2) != 3) {
+    fprintf(stderr, "test ngrams -- wrong result for 'fraction': got %d\n", json_object_get_int(tmp2));
     return 1;
   }
 
   //check the number of occurences of the bigram "arc length"
-  tmp = json_object_object_get(response, "bigrams");
-  tmp = json_object_object_get(tmp, "arc length");
-  if (json_object_get_int(tmp) != 2) {
-    fprintf(stderr, "test ngrams -- wrong result for 'arc length': got %d\n", json_object_get_int(tmp));
+  //tmp = json_object_object_get(response, "bigrams");
+  json_object_object_get_ex(response, "bigrams", &tmp);
+  //tmp = json_object_object_get(tmp, "arc length");
+  json_object_object_get_ex(tmp, "arc length", &tmp2);
+  if (json_object_get_int(tmp2) != 2) {
+    fprintf(stderr, "test ngrams -- wrong result for 'arc length': got %d\n", json_object_get_int(tmp2));
     return 1;
   }
 
