@@ -101,11 +101,12 @@ json_object* llamapun_get_ngrams (xmlDocPtr doc) {
   struct stringcount *unigram_hash = NULL;
   struct stringcount * bigram_hash = NULL;
   struct stringcount *trigram_hash = NULL;
-  if (access("../stopwords.json", R_OK)) {
-    fprintf(stderr, "Error: Cannot open \"../stopwords.json\"\n");
-    return NULL;
-  }
-  read_stopwords(json_object_from_file("../stopwords.json"));
+  //if (access("../stopwords.json", R_OK)) {
+  //  fprintf(stderr, "Error: Cannot open \"../stopwords.json\"\n");
+  //  return NULL;
+  //}
+  //read_stopwords_from_json(json_object_from_file("../stopwords.json"));
+  load_stopwords();
 
   //Evaluate XPath
   xmlXPathObjectPtr xpath_sentence_result = xmlXPathEvalExpression(sentence_xpath, xpath_context);
