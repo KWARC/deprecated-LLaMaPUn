@@ -50683,9 +50683,117 @@ char get_option(int argc, char *argv[], char *options, int *arg,
 int read_verbstem(char *fn)
 { char w[64];
   int n = 0, i, j, fs;
-  FILE *f = fopen(fn, "r");
-
-  if (f == NULL) fprintf(stderr, "File with consonant doubling verb stems not found (\"%s\").\n", fn);
+//  FILE *f = fopen(fn, "r");
+//
+//  if (f == NULL) fprintf(stderr, "File with consonant doubling verb stems not found (\"%s\").\n", fn);
+//edited for LLaMaPUn: use memstream to avoid external resources
+  const char * verbstemlist = "abat abet abhor abut accur acquit adlib admit aerobat aerosol\n\
+agendaset allot alot anagram annul appal apparel armbar aver babysit\n\
+airdrop appal blackleg bobsled bur chum confab counterplot curet dib\n\
+backdrop backfil backflip backlog backpedal backslap backstab bag\n\
+balfun ballot ban bar barbel bareleg barrel bat bayonet becom bed\n\
+bedevil bedwet beenhop befit befog beg beget begin bejewel bemedal\n\
+benefit benum beset besot bestir bet betassel bevel bewig bib bid\n\
+billet bin bip bit bitmap blab blag blam blan blat bles blim blip blob\n\
+bloodlet blot blub blur bob bodypop bog boobytrap booksel\n\
+bootleg bop bot bowel bracket brag brig brim bud buffet bug bullshit\n\
+bum bun bus but cab cabal cam can cancel cap caracol caravan carburet\n\
+carnap carol carpetbag castanet cat catcal catnap cavil chan chanel\n\
+channel chap char chargecap chat chin chip chir chirrup chisel chop\n\
+chug chur clam clap clearcut clip clodhop clog clop closet clot club\n\
+cob cobweb cod coif com\n\
+combat comit commit compel con concur confer confiscat control cop\n\
+coquet coral corbel corral cosset cotransmit councel council counsel\n\
+crab cram crap crib crop crossleg cub cudgel cum cun cup\n\
+cut dab dag dam dan dap daysit\n\
+deadpan debag debar debug decommit\n\
+decontrol defer defog deg degas deinstal demit demob demur den denet\n\
+depig depip depit der deskil deter devil diagram dial dig dim din dip\n\
+disbar disbud discomfit disembed disembowel dishevel disinter dispel\n\
+disprefer distil dog dognap don doorstep dot dowel drag drat driftnet\n\
+distil egotrip enrol enthral extol fulfil gaffe golliwog idyl inspan\n\
+drip drivel drop drub drug drum dub duel dun dybbuk earwig eavesdrop\n\
+ecolabel eitherspigot electroblot embed emit empanel enamel endlabel\n\
+endtrim enrol enthral entrammel entrap enwrap equal equip estop\n\
+exaggerat excel expel extol fag fan farewel fat featherbed feget fet\n\
+fib fig fin fingerspel fingertip fit flab flag flap flip flit flog\n\
+flop fob focus fog footbal footslog fop forbid forget format\n\
+fortunetel fot foxtrot frag freefal fret frig frip frog frug fuel\n\
+fufil fulfil fullyfit fun funnel fur furpul gab gad gag gam gambol gap\n\
+garot garrot gas gat gel gen general get giftwrap gig gimbal gin glam glenden\n\
+glendin globetrot glug glut gob goldpan goostep gossip grab gravel\n\
+grid grin grip grit groundhop grovel grub gum gun gunrun gut gyp hab haircut\n\
+ham han handbag handicap handknit handset hap hareleg hat headbut\n\
+hedgehop hem hen hiccup highwal hip hit hobnob hog hop horsewhip\n\
+hostel hot hotdog hovel hug hum humbug hup hushkit hut illfit imbed\n\
+immunblot immunoblot impannel impel imperil incur infer infil inflam\n\
+initial input inset instil inter interbed intercrop intercut interfer\n\
+instal instil intermit japan jug kris manumit mishit mousse mud\n\
+interwar jab jag jam jar jawdrop jet jetlag jewel jib jig jitterbug\n\
+job jog jot jut ken kennel kid kidnap kip kissogram kit knap\n\
+kneecap knit knob knot kor label lag lam lap lavel leafcut leapfrog\n\
+leg lem lep let level lib libel lid lig lip lob log lok lollop longleg lop\n\
+lowbal lug mackerel mahom man map mar marshal martial marvel mat matchwin\n\
+metal microplan microprogram milksop\n\
+miscal mishit mislabel mit mob mod model mohmam monogram mop\n\
+mothbal mug multilevel mum nab nag nan nap net nightclub nightsit nip\n\
+nod nonplus norkop nostril not nut nutmeg occur ocur offput offset\n\
+omit ommit onlap\n\
+outbid outcrop outfit outgas outgun outhit\n\
+outjab outpol output outrun outship outshop outsin outstrip outswel\n\
+outspan overcrop pettifog photostat pouf preset prim pug ret rosin\n\
+outwit\n\
+overbid overcal overcommit overcontrol overcrap overdub overfil\n\
+overhat overhit overlap overman overplot overrun overshop overstep\n\
+overtip overtop overwet overwil pad paintbal pan panel paperclip par\n\
+parallel parcel partiescal pat patrol pedal peewit peg pen pencil pep\n\
+permit pet petal photoset phototypeset phut picket pig pilot pin\n\
+pinbal pip pipefit pipet pit plan plit plod plop plot plug plumet\n\
+plummet pod policyset polyfil ponytrek pop pot pram prebag predistil\n\
+predril prefer prefil preinstal prep preplan preprogram prizewin prod\n\
+profer prog program prop propel pub pummel pun pup pushfit put quarel\n\
+quarrel quickskim quickstep quickwit quip quit quivertip quiz rabbit\n\
+rabit radiolabel rag ram ramrod rap rat ratecap ravel\n\
+readmit reallot rebel rebid\n\
+rebin rebut recap rechannel recommit recrop recur recut red redril\n\
+refer refit reformat refret refuel reget regret reinter rejig rekit\n\
+reknot relabel relet rem remap remetal remit remodel reoccur rep repel\n\
+repin replan replot repol repot reprogram rerun reset resignal resit\n\
+reskil resubmit retransfer retransmit retrofit rev revel\n\
+revet rewrap rib richochet ricochet rid rig rim ringlet rip rit rival\n\
+rivet roadrun rob rocket rod roset rot rowel rub run runnel rut sab\n\
+sad sag sandbag sap scab scalpel scam scan scar scat schlep scrag\n\
+scram shall sled smut stet sulfuret trepan unrip unstop whir whop wig\n\
+scrap scrat scrub scrum scud scum scur\n\
+semiskil sentinel set shag sham shed shim shin ship shir\n\
+shit shlap shop shopfit shortfal shot shovel shred shrinkwrap shrivel\n\
+shrug shun shut sideslip sidestep signal sin sinbin sip sit\n\
+skid skim skin skip skir skrag slab slag slam slap slim slip slit slob\n\
+slog slop slot slowclap slug slum slur smit snag snap snip snivel snog\n\
+snorkel snowcem snub snug sob sod softpedal son sop spam span spar\n\
+spat spiderweb spin spiral spit splat split spot sprag spraygun sprig\n\
+springtip spud spur squat squirrel stab stag star stem sten stencil\n\
+step stir stop storytel strap strim strip strop strug strum strut stub\n\
+stud stun sub subcrop sublet submit subset suedetrim sum summit sun\n\
+suntan sup superad swab swag swan swap swat swig swim\n\
+swivel swot tab tag tan tansfer tap tar tassel tat tefer teleshop\n\
+tendril terschel th'strip thermal thermostat thin throb thrum thud\n\
+thug tightlip tin tinsel tip tittup toecap tog tom tomorrow top tot\n\
+total towel traget trainspot tram trammel transfer tranship transit\n\
+transmit transship trap travel trek trendset trim trip tripod trod\n\
+trog trot trousseaushop trowel trup tub tug tunnel tup tut twat twig\n\
+twin twit typeset tyset unban unbar unbob uncap unclip uncompel\n\
+undam underbid\n\
+undercut underlet underman underpin unfit unfulfil unknot unlip\n\
+unlywil unman unpad unpeg unpin unplug unravel unrol unscrol unsnap\n\
+unstal unstep unstir untap unwrap unzip up upset upskil upwel ven\n\
+verbal vet victual vignet wad wag wainscot wan war waterfal\n\
+waterfil waterlog weasel web wed wet wham whet whip whir whiteskin\n\
+whiz whup wildcat win windmil wit woodchop woodcut wor worship wrap\n\
+will wiretap yen yak yap yarnspin yip yodel zag zap zig zigzag\n\
+zip ztrip\n";
+  FILE *f = fmemopen(verbstemlist, strlen(verbstemlist), "r");
+  if (f == NULL) fprintf(stderr, "Couldn't open memstream for verbstem.list\n");
   else
   { while (1)
     { fs = fscanf(f, " %n%63s%n", &i, w, &j);
