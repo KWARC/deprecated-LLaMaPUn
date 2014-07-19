@@ -108,9 +108,11 @@ json_object* llamapun_get_ngrams (xmlDocPtr doc) {
   //read_stopwords_from_json(json_object_from_file("../stopwords.json"));
   load_stopwords();
 
-  //Evaluate XPath
+  //Evaluate XPath - CAUSES OCCASIONALLY SEG FAULTS - bug in libxml?
   xmlXPathObjectPtr xpath_sentence_result = xmlXPathEvalExpression(sentence_xpath, xpath_context);
+
   if(xpath_sentence_result == NULL) {
+
     fprintf(stderr,"Error: unable to evaluate sentence xpath expression \"%s\"\n", sentence_xpath);
     xmlXPathFreeContext(xpath_context);
     xmlFreeDoc(doc);

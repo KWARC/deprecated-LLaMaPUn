@@ -7,33 +7,45 @@
 //Let's do it the "clean" way
 #define CHECK_ALLOC(ptr) {if (ptr==NULL) {fprintf(stderr, "Couldn't allocate memory, exiting\n"); exit(1);}}
 
+#define POSSIBLE_RESIZE(ptr, index, oldsizeptr, newsize, type) \
+		{if (index >= *oldsizeptr) {\
+			ptr = (type*)realloc(ptr, newsize); *oldsizeptr=newsize; CHECK_ALLOC(ptr); }}
 
 
 //for the creation of the DNM, we need to keep some things in mind:
 struct tmp_parsedata {
-	FILE *plaintext_stream;
+	size_t plaintext_allocated;
+	size_t plaintext_index;
 };
 
 
-void parse_dom_into_dnm(xmlNode *n, struct dnm * newdnm, struct tmp_parsedata *dcs, long parameters) {
+inline void copy_into_plaintext(const char *string, struct dnm *newdnm, struct tmp_parsedata *dcs) {
+	while (*string != '\0') {
+		POSSIBLE_RESIZE(newdnm->plaintext, dcs->plaintext_index, &dcs->plaintext_allocated,
+			dcs->plaintext_allocated*2, char);
+		newdnm->plaintext[dcs->plaintext_index++] = *string++;
+	}
+}
+
+void parse_dom_into_dnm(xmlNode *n, struct dnm * newdnm, struct tmp_parsedata *dcs, long parameters) {	
 	xmlNode *node;
 	xmlAttr *attr;
 	for (node = n; node!=NULL; node = node->next) {
 		//possibly normalize math tags
-		if ((parameters&DNF_NORMALIZE_MATH) && xmlStrEqual(node->name, BAD_CAST "math")) {
-			fprintf(dcs->plaintext_stream, "[MathFormula]");
+		if ((parameters&DNM_NORMALIZE_MATH) && xmlStrEqual(node->name, BAD_CAST "math")) {
+			copy_into_plaintext("[MathFormula]", newdnm, dcs);
 		}
 		//possibly ignore math tags
-		else if ((parameters&DNF_SKIP_MATH) && xmlStrEqual(node->name, BAD_CAST "math")) {
+		else if ((parameters&DNM_SKIP_MATH) && xmlStrEqual(node->name, BAD_CAST "math")) {
 
 		}
 		//possibly ignore cite tags
-		else if ((parameters&DNF_SKIP_CITE) && xmlStrEqual(node->name, BAD_CAST "cite")) {
+		else if ((parameters&DNM_SKIP_CITE) && xmlStrEqual(node->name, BAD_CAST "cite")) {
 
 		}
 		//copy text nodes
 		else if (xmlStrEqual(node->name, BAD_CAST "text")) {
-			fprintf(dcs->plaintext_stream, "%s", (char*)xmlNodeGetContent(node));
+			copy_into_plaintext((char*)xmlNodeGetContent(node), newdnm, dcs);
 		}
 		//otherwise parse children recursively
 		else {
@@ -49,11 +61,11 @@ struct dnm* createDNM(xmlDocPtr doc, long parameters) {
 		return NULL;
 	}
 
-	if ((parameters&DNF_NORMALIZE_MATH) && (parameters&DNF_SKIP_MATH)) {
+	if ((parameters&DNM_NORMALIZE_MATH) && (parameters&DNM_SKIP_MATH)) {
 		fprintf(stderr, "dnmlib - got conflicting parameters (skip and normalize math)\n");
 	}
 
-	//getting started
+	//----------------INITIALIZE----------------
 	struct dnm* newdnm = (struct dnm*)malloc(sizeof(struct dnm));
 	CHECK_ALLOC(newdnm);
 	struct tmp_parsedata *dcs = (struct tmp_parsedata*)malloc(sizeof(struct tmp_parsedata));
@@ -61,14 +73,25 @@ struct dnm* createDNM(xmlDocPtr doc, long parameters) {
 
 	//set initial values, and allocate initial memory
 	newdnm->document = doc;
+	newdnm->plaintext = (char*)malloc(sizeof(char)*4096);
+	CHECK_ALLOC(newdnm->plaintext);
 
-	dcs->plaintext_stream = open_memstream(&newdnm->plaintext, &newdnm->size_plaintext);
+	dcs->plaintext_allocated = 4096;
+	dcs->plaintext_index = 0;
+
 
 	//Call the actual parsing function
 	parse_dom_into_dnm(xmlDocGetRootElement(doc), newdnm, dcs, parameters);
 
-	//clean up
-	fclose(dcs->plaintext_stream);
+
+	//----------------CLEAN UP----------------
+
+	//end plaintext with \0 and truncate array
+	POSSIBLE_RESIZE(newdnm->plaintext, dcs->plaintext_index, &dcs->plaintext_allocated,
+			dcs->plaintext_allocated+1, char);
+	newdnm->plaintext[dcs->plaintext_index++] = '\0';
+	newdnm->size_plaintext = dcs->plaintext_index;
+	newdnm->plaintext = realloc(newdnm->plaintext, dcs->plaintext_index);
 	CHECK_ALLOC(newdnm->plaintext);
 
 	free(dcs);
