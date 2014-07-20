@@ -1,4 +1,6 @@
 #include <libxml/tree.h>
+#include <uthash.h>
+
 #include <string.h>
 
 #define DNM_NORMALIZE_MATH (1 << 0)
@@ -9,19 +11,26 @@
 enum dnm_level {DNM_LEVEL_PARA, DNM_LEVEL_SENTENCE, DNM_LEVEL_WORD};
 
 
-struct dnm {
+struct hash_element_string {
+	char *string;
+	UT_hash_handle hh;
+};
+
+
+struct dnm_struct {
 	xmlDocPtr document;
 
 	char *plaintext;
 
+	struct hash_element_string *annotation_handle;
 
 	size_t size_plaintext;
 };
 
+typedef struct dnm_struct * dnmPtr;
+
 struct dnm_chunk {
 	const char *id;
-	//char **annotations;
-	//unsigned number_of_annotations;
 	xmlNodePtr *dom_node;
 
 	enum dnm_level level;
@@ -33,6 +42,5 @@ struct dnm_chunk {
 	unsigned long offset_end;
 };
 
-struct dnm* createDNM(xmlDocPtr doc, long parameters);
-void freeDNM(struct dnm*);
-
+dnmPtr createDNM(xmlDocPtr doc, long parameters);
+void freeDNM(dnmPtr);
