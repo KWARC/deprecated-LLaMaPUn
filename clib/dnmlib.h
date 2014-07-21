@@ -8,7 +8,7 @@
 #define DNM_SKIP_CITE      (1 << 2)
 
 
-enum dnm_level {DNM_LEVEL_PARA, DNM_LEVEL_SENTENCE, DNM_LEVEL_WORD};
+enum dnm_level {DNM_LEVEL_PARA, DNM_LEVEL_SENTENCE, DNM_LEVEL_WORD, DNM_LEVEL_NONE};
 
 
 struct hash_element_string {
@@ -24,22 +24,30 @@ struct dnm_struct {
 
 	struct hash_element_string *annotation_handle;
 
+	struct dnm_chunk * para_level;
+	struct dnm_chunk * sent_level;
+	struct dnm_chunk * word_level;
+
+	size_t size_para_level;
+	size_t size_sent_level;
+	size_t size_word_level;
+
 	size_t size_plaintext;
 };
 
 typedef struct dnm_struct * dnmPtr;
 
 struct dnm_chunk {
-	const char *id;
-	xmlNodePtr *dom_node;
+	char *id;
+	xmlNode *dom_node;
 
 	enum dnm_level level;
 	long offset_parent;
 	long offset_children_start;
 	long offset_children_end;
 
-	unsigned long offset_start;
-	unsigned long offset_end;
+	size_t offset_start;
+	size_t offset_end;
 };
 
 dnmPtr createDNM(xmlDocPtr doc, long parameters);

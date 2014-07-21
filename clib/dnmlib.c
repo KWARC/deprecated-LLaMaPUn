@@ -6,17 +6,25 @@
 
 
 //Let's do it the "clean" way
-#define CHECK_ALLOC(ptr) {if (ptr==NULL) {fprintf(stderr, "Couldn't allocate memory, exiting\n"); exit(1);}}
+#define CHECK_ALLOC(ptr) {if (ptr==NULL) {fprintf(stderr, "Couldn't allocate memory, exiting\n"); fflush(stderr); exit(1);}}
 
 #define POSSIBLE_RESIZE(ptr, index, oldsizeptr, newsize, type) \
 		{if (index >= *oldsizeptr) {\
-			ptr = (type*)realloc(ptr, newsize); *oldsizeptr=newsize; CHECK_ALLOC(ptr); }}
+			ptr = (type*)realloc(ptr, newsize*sizeof(type)); *oldsizeptr=newsize; CHECK_ALLOC(ptr); }}
 
 
 //for the creation of the DNM, we need to keep some things in mind:
 struct tmp_parsedata {
 	size_t plaintext_allocated;
 	size_t plaintext_index;
+
+	size_t para_level_allocated;
+	size_t sent_level_allocated;
+	size_t word_level_allocated;
+
+	size_t para_level_index;
+	size_t sent_level_index;
+	size_t word_level_index;
 
 	char * para_annotation;
 	char * sent_annotation;
@@ -41,12 +49,13 @@ inline char * getAnnotationPtr(dnmPtr dnm, const char *annotation, int create) {
 	}
 }
 
-char ** getAnnotationList(dnmPtr dnm, char *string) {
+char ** getAnnotationList(dnmPtr dnm, char *string, size_t * final_length) {
 	char *i1 = string;
 	char *i2 = string;
 	int endofannotation = 0;
 
 	char **annotationlist = (char **) malloc(16*sizeof(char *));
+	CHECK_ALLOC(annotationlist);
 	size_t list_length = 16;
 	size_t list_index = 0;
 
@@ -61,7 +70,8 @@ char ** getAnnotationList(dnmPtr dnm, char *string) {
 		i1 = ++i2;
 	}
 	//truncate
-	return realloc(annotationlist, list_index);
+	*final_length = list_index;
+	return realloc(annotationlist, list_index * sizeof(char));
 }
 
 inline void copy_into_plaintext(const char *string, dnmPtr dnm, struct tmp_parsedata *dcs) {
@@ -72,12 +82,28 @@ inline void copy_into_plaintext(const char *string, dnmPtr dnm, struct tmp_parse
 	}
 }
 
+enum dnm_level getLevelFromAnnotations(struct tmp_parsedata *dcs, char **annotationlist,
+                                       size_t annotationlist_length) {
+	char *tmp;
+	while (annotationlist_length) {
+		tmp = annotationlist[--annotationlist_length];
+		if (tmp == dcs->para_annotation) return DNM_LEVEL_PARA;
+		if (tmp == dcs->sent_annotation) return DNM_LEVEL_SENTENCE;
+		if (tmp == dcs->word_annotation) return DNM_LEVEL_WORD;
+	}
+	return DNM_LEVEL_NONE;
+}
+
 void parse_dom_into_dnm(xmlNode *n, dnmPtr dnm, struct tmp_parsedata *dcs, long parameters) {	
 	xmlNode *node;
 	xmlAttr *attr;
 	xmlChar *tmpxmlstr;
 	xmlChar *id;
 	char **annotationlist;
+	size_t annotationlist_length;
+	enum dnm_level level;
+	struct dnm_chunk * current_chunk;
+	size_t level_offset;
 	for (node = n; node!=NULL; node = node->next) {
 		//possibly normalize math tags
 		if ((parameters&DNM_NORMALIZE_MATH) && xmlStrEqual(node->name, BAD_CAST "math")) {
@@ -93,16 +119,20 @@ void parse_dom_into_dnm(xmlNode *n, dnmPtr dnm, struct tmp_parsedata *dcs, long 
 		}
 		//copy text nodes
 		else if (xmlStrEqual(node->name, BAD_CAST "text")) {
+
 			tmpxmlstr = xmlNodeGetContent(node);
 			CHECK_ALLOC(tmpxmlstr);
-			copy_into_plaintext((char*)tmpxmlstr, dnm, dcs);
 			xmlFree(tmpxmlstr);
 		}
 		//otherwise parse children recursively
 		else {
 			id = NULL;
 			annotationlist = NULL;
+			
+
+
 			for (attr = node->properties; attr != NULL; attr = attr->next) {
+
 				if (xmlStrEqual(attr->name, BAD_CAST "id")) {
 					if (id) fprintf(stderr, "Error: Multiple id attributes in one tag\n");
 					id = xmlNodeGetContent(attr->children);
@@ -111,13 +141,70 @@ void parse_dom_into_dnm(xmlNode *n, dnmPtr dnm, struct tmp_parsedata *dcs, long 
 					if (annotationlist) fprintf(stderr, "Error: Multiple class attributes in one tag\n");
 					tmpxmlstr = xmlNodeGetContent(attr->children);
 					CHECK_ALLOC(tmpxmlstr);
-					annotationlist = getAnnotationList(dnm, (char *)tmpxmlstr);
+					annotationlist = getAnnotationList(dnm, (char *)tmpxmlstr, &annotationlist_length);
+					CHECK_ALLOC(annotationlist);
 					xmlFree(tmpxmlstr);
 				}
 			}
+			if (annotationlist == NULL) {
+				parse_dom_into_dnm(node->children, dnm, dcs, parameters);
+			} else {
+				level = getLevelFromAnnotations(dcs, annotationlist, annotationlist_length);
+				current_chunk = NULL;
+				switch (level) {
+					case DNM_LEVEL_PARA:
+						POSSIBLE_RESIZE(dnm->para_level, dcs->para_level_index, &dcs->para_level_allocated,
+						                dcs->para_level_allocated*2, struct dnm_chunk);
+						level_offset = dcs->para_level_index++;
+						current_chunk = (dnm->para_level) + level_offset;
+						break;
+					case DNM_LEVEL_SENTENCE:
+						POSSIBLE_RESIZE(dnm->sent_level, dcs->sent_level_index, &dcs->sent_level_allocated,
+						                dcs->sent_level_allocated*2, struct dnm_chunk);
+						level_offset = dcs->sent_level_index++;
+						current_chunk = (dnm->sent_level) + level_offset;
+						break;
+					case DNM_LEVEL_WORD:
+						POSSIBLE_RESIZE(dnm->word_level, dcs->word_level_index, &dcs->word_level_allocated,
+						                dcs->word_level_allocated*2, struct dnm_chunk);
+						level_offset = dcs->word_level_index++;
+						current_chunk = (dnm->word_level) + level_offset;
+						break;
+					case DNM_LEVEL_NONE:
+						current_chunk = NULL;
+						break;
+				}
+
+				if (current_chunk != NULL) {
+					current_chunk->id = (id == NULL ? NULL : strdup((char*)id));
+					current_chunk->dom_node = node;
+					current_chunk->offset_start = dcs->plaintext_index;
+
+					parse_dom_into_dnm(node->children, dnm, dcs, parameters);
+
+					//due to realloc, location of current_chunk might change :D
+					switch (level) {
+						case DNM_LEVEL_PARA:
+							current_chunk = (dnm->para_level) + level_offset;
+							break;
+						case DNM_LEVEL_SENTENCE:
+							current_chunk = (dnm->sent_level) + level_offset;
+							break;
+						case DNM_LEVEL_WORD:
+							current_chunk = (dnm->word_level) + level_offset;
+							break;
+						default: break;		//should never occur, but I don't like compiler warnings
+					}
+					current_chunk->offset_end = dcs->plaintext_index;
+				} else {
+					parse_dom_into_dnm(node->children, dnm, dcs, parameters);
+				}
+			}
+
+
 			free(annotationlist);
+
 			xmlFree(id);
-			parse_dom_into_dnm(node->children, dnm, dcs, parameters);
 		}
 	}
 }
@@ -158,6 +245,19 @@ dnmPtr createDNM(xmlDocPtr doc, long parameters) {
 	dcs->sent_annotation = getAnnotationPtr(dnm, "ltx_sentence", 1);
 	dcs->word_annotation = getAnnotationPtr(dnm, "ltx_word", 1);
 
+	//levels
+	dnm->para_level = (struct dnm_chunk *) malloc(sizeof(struct dnm_chunk)*32);
+	dcs->para_level_allocated = 32;
+	dcs->para_level_index = 0;
+
+	dnm->sent_level = (struct dnm_chunk *) malloc(sizeof(struct dnm_chunk)*128);
+	dcs->sent_level_allocated = 128;
+	dcs->sent_level_index = 0;
+
+	dnm->word_level = (struct dnm_chunk *) malloc(sizeof(struct dnm_chunk)*1024);
+	dcs->word_level_allocated = 1024;
+	dcs->word_level_index = 0;
+
 
 	//Call the actual parsing function
 	parse_dom_into_dnm(xmlDocGetRootElement(doc), dnm, dcs, parameters);
@@ -170,22 +270,47 @@ dnmPtr createDNM(xmlDocPtr doc, long parameters) {
 			dcs->plaintext_allocated+1, char);
 	dnm->plaintext[dcs->plaintext_index++] = '\0';
 	dnm->size_plaintext = dcs->plaintext_index;
-	dnm->plaintext = realloc(dnm->plaintext, dcs->plaintext_index);
-	CHECK_ALLOC(dnm->plaintext);
+	dnm->plaintext = realloc(dnm->plaintext, dcs->plaintext_index * sizeof(char));
+	if (dnm->size_plaintext) CHECK_ALLOC(dnm->plaintext);
+
+	//truncate level lists
+	dnm->size_para_level = dcs->para_level_index;
+	dnm->para_level = realloc(dnm->para_level, dnm->size_para_level * sizeof(struct dnm_chunk));
+	if (dnm->size_para_level) CHECK_ALLOC(dnm->para_level);    //only check if memory has actually been allocated
+	dnm->size_sent_level = dcs->sent_level_index;
+	dnm->sent_level = realloc(dnm->sent_level, dnm->size_sent_level * sizeof(struct dnm_chunk));
+	if (dnm->size_sent_level) CHECK_ALLOC(dnm->sent_level);
+	dnm->size_word_level = dcs->word_level_index;
+	dnm->word_level = realloc(dnm->word_level, dnm->size_word_level * sizeof(struct dnm_chunk));
+	if (dnm->size_word_level) CHECK_ALLOC(dnm->word_level);
 
 	free(dcs);
 
 	return dnm;
 }
 
+void freeLevelList(struct dnm_chunk * array, size_t size) {
+	while (size--) {
+		free(array[size].id);
+		//to be done: free annotations (once they're actually stored)
+	}
+	free(array);
+}
+
 void freeDNM(dnmPtr dnm) {
+	//free annotations
 	struct hash_element_string *current, *tmp;
 	HASH_ITER(hh, dnm->annotation_handle, current, tmp) {
 		HASH_DEL(dnm->annotation_handle, current);
 		free(current->string);
 		free(current);
 	}
-
+	//free plaintext
 	free(dnm->plaintext);
+	//free level lists
+	freeLevelList(dnm->para_level, dnm->size_para_level);
+	freeLevelList(dnm->sent_level, dnm->size_sent_level);
+	freeLevelList(dnm->word_level, dnm->size_word_level);
+
 	free(dnm);
 }
