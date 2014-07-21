@@ -10,12 +10,11 @@
 
 enum dnm_level {DNM_LEVEL_PARA, DNM_LEVEL_SENTENCE, DNM_LEVEL_WORD, DNM_LEVEL_NONE};
 
-
+//struct for string items in uthash
 struct hash_element_string {
 	char *string;
 	UT_hash_handle hh;
 };
-
 
 struct dnm_struct {
 	xmlDocPtr document;
@@ -37,6 +36,7 @@ struct dnm_struct {
 
 typedef struct dnm_struct * dnmPtr;
 
+//one chunk corresponds to one paragraph, sentence, or word
 struct dnm_chunk {
 	char *id;
 	xmlNode *dom_node;
@@ -50,5 +50,17 @@ struct dnm_chunk {
 	size_t offset_end;
 };
 
+struct dnm_iterator {
+	dnmPtr dnm;
+	enum dnm_level level;
+	size_t pos;
+};
+
+typedef struct dnm_iterator * dnmIteratorPtr;
+
 dnmPtr createDNM(xmlDocPtr doc, long parameters);
 void freeDNM(dnmPtr);
+dnmIteratorPtr getDnmIterator(dnmPtr dnm, enum dnm_level level);  //allocates memory using malloc => has to be free'd manually
+int dnmIteratorNext(dnmIteratorPtr it);
+int dnmIteratorPrevious(dnmIteratorPtr it);
+char *getDnmIteratorContent(dnmIteratorPtr it);    //returned array (\0-terminated) has to be free'd manually

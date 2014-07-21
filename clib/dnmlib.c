@@ -13,6 +13,85 @@
 			ptr = (type*)realloc(ptr, newsize*sizeof(type)); *oldsizeptr=newsize; CHECK_ALLOC(ptr); }}
 
 
+
+//=======================================================
+//Section: Iterators
+//=======================================================
+
+dnmIteratorPtr getDnmIterator(dnmPtr dnm, enum dnm_level level) {
+	struct dnm_iterator * it = (struct dnm_iterator *)malloc(sizeof(struct dnm_iterator));
+	CHECK_ALLOC(it);
+	it->dnm = dnm;
+	it->level = level;
+	it->pos = 0;
+	return it;
+}
+
+int dnmIteratorNext(dnmIteratorPtr it) {
+	size_t tmp_val;
+	switch (it->level) {
+		case DNM_LEVEL_PARA:
+			tmp_val = it->dnm->size_para_level;
+			break;
+		case DNM_LEVEL_SENTENCE:
+			tmp_val = it->dnm->size_sent_level;
+			break;
+		case DNM_LEVEL_WORD:
+			tmp_val = it->dnm->size_word_level;
+			break;
+		case DNM_LEVEL_NONE:     //avoids compiler warnings
+			tmp_val = 0;
+			break;
+	}
+	if (++(it->pos) < tmp_val) {
+		return 1;
+	} else {        //iterator points to last element already
+		(it->pos)--;
+		return 0;
+	}
+}
+
+int dnmIteratorPrevious(dnmIteratorPtr it) {
+	if (it->pos) {
+		(it->pos)--;
+		return 1;
+	} else {       //is at first element already
+		return 0;
+	}
+}
+
+char *getDnmIteratorContent(dnmIteratorPtr it) {
+	struct dnm_chunk *chunk;
+	switch (it->level) {
+		case DNM_LEVEL_PARA:
+			chunk = (it->dnm->para_level)+(it->pos);
+			break;
+		case DNM_LEVEL_SENTENCE:
+			chunk = (it->dnm->sent_level)+(it->pos);
+			break;
+		case DNM_LEVEL_WORD:
+			chunk = (it->dnm->word_level)+(it->pos);
+			break;
+		case DNM_LEVEL_NONE:      //avoid compiler warnings
+			chunk = NULL;
+			break;
+	}
+	if (chunk) {
+		char *cpy = (char *)malloc(sizeof(char)*(chunk->offset_end - chunk->offset_start + 1));   //+1 for \0
+		CHECK_ALLOC(cpy);
+		strncpy(cpy, (it->dnm->plaintext)+(chunk->offset_start), (chunk->offset_end - chunk->offset_start));
+		cpy[chunk->offset_end - chunk->offset_start] = '\0';
+		return cpy;
+	} else return NULL;
+}
+
+
+
+//=======================================================
+//Section: Creating DNM
+//=======================================================
+
+
 //for the creation of the DNM, we need to keep some things in mind:
 struct tmp_parsedata {
 	size_t plaintext_allocated;
@@ -30,7 +109,6 @@ struct tmp_parsedata {
 	char * sent_annotation;
 	char * word_annotation;
 };
-
 
 inline char * getAnnotationPtr(dnmPtr dnm, const char *annotation, int create) {
 	struct hash_element_string *tmp;
@@ -122,6 +200,7 @@ void parse_dom_into_dnm(xmlNode *n, dnmPtr dnm, struct tmp_parsedata *dcs, long 
 
 			tmpxmlstr = xmlNodeGetContent(node);
 			CHECK_ALLOC(tmpxmlstr);
+			copy_into_plaintext((char*)tmpxmlstr, dnm, dcs);
 			xmlFree(tmpxmlstr);
 		}
 		//otherwise parse children recursively
@@ -288,6 +367,12 @@ dnmPtr createDNM(xmlDocPtr doc, long parameters) {
 
 	return dnm;
 }
+
+
+
+//=======================================================
+//Section: Freeing DNM
+//=======================================================
 
 void freeLevelList(struct dnm_chunk * array, size_t size) {
 	while (size--) {
