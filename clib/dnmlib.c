@@ -79,7 +79,7 @@ char *getDnmIteratorContent(dnmIteratorPtr it) {
 	if (chunk) {
 		char *cpy = (char *)malloc(sizeof(char)*(chunk->offset_end - chunk->offset_start + 1));   //+1 for \0
 		CHECK_ALLOC(cpy);
-		strncpy(cpy, (it->dnm->plaintext)+(chunk->offset_start), (chunk->offset_end - chunk->offset_start));
+		memcpy(cpy, (it->dnm->plaintext)+(chunk->offset_start), (chunk->offset_end - chunk->offset_start));
 		cpy[chunk->offset_end - chunk->offset_start] = '\0';
 		return cpy;
 	} else return NULL;
@@ -138,18 +138,21 @@ char ** getAnnotationList(dnmPtr dnm, char *string, size_t * final_length) {
 	size_t list_index = 0;
 
 	while (!endofannotation) {
-		//go ahead to end of word
+		//go ahead to end of annotation
 		while (*i2 != ' ' && *i2 != '\0') {
 			i2++;
 		}
 		if (*i2 == '\0') endofannotation = 1;
+		*i2 = '\0';
 		POSSIBLE_RESIZE(annotationlist, list_index, &list_length, list_length*2, char *);
 		annotationlist[list_index++] = getAnnotationPtr(dnm, i1, 1);
-		i1 = ++i2;
+		i1 = ++i2;     //beginning of next annotation
 	}
 	//truncate
 	*final_length = list_index;
-	return realloc(annotationlist, list_index * sizeof(char));
+	annotationlist = realloc(annotationlist, list_index * sizeof(char *));
+	if (list_index) CHECK_ALLOC(annotationlist);
+	return annotationlist;
 }
 
 inline void copy_into_plaintext(const char *string, dnmPtr dnm, struct tmp_parsedata *dcs) {
