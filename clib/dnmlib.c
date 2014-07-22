@@ -21,29 +21,47 @@
 dnmIteratorPtr getDnmIterator(dnmPtr dnm, enum dnm_level level) {
 	struct dnm_iterator * it = (struct dnm_iterator *)malloc(sizeof(struct dnm_iterator));
 	CHECK_ALLOC(it);
+	//set properties
 	it->dnm = dnm;
 	it->level = level;
 	it->pos = 0;
+	it->start = 0;
+	//level dependent properties
+	switch (it->level) {
+		case DNM_LEVEL_PARA:
+			it->end = it->dnm->size_para_level;
+			break;
+		case DNM_LEVEL_SENTENCE:
+			it->end = it->dnm->size_sent_level;
+			break;
+		case DNM_LEVEL_WORD:
+			it->end = it->dnm->size_word_level;
+			break;
+		case DNM_LEVEL_NONE:     //avoids compiler warnings
+			it->end = 0;
+			break;
+	}
 	return it;
 }
 
 int dnmIteratorNext(dnmIteratorPtr it) {
-	size_t tmp_val;
+	size_t level_size;
 	switch (it->level) {
 		case DNM_LEVEL_PARA:
-			tmp_val = it->dnm->size_para_level;
+			level_size = it->dnm->size_para_level;
 			break;
 		case DNM_LEVEL_SENTENCE:
-			tmp_val = it->dnm->size_sent_level;
+			level_size = it->dnm->size_sent_level;
 			break;
 		case DNM_LEVEL_WORD:
-			tmp_val = it->dnm->size_word_level;
+			level_size = it->dnm->size_word_level;
 			break;
 		case DNM_LEVEL_NONE:     //avoids compiler warnings
-			tmp_val = 0;
+			level_size = 0;
 			break;
 	}
-	if (++(it->pos) < tmp_val) {
+	(it->pos)++;
+	if ((it->pos < level_size) && (++(it->pos) < it->end)) {   //next pos in bounds
 		return 1;
 	} else {        //iterator points to last element already
 		(it->pos)--;
@@ -52,7 +70,7 @@ int dnmIteratorNext(dnmIteratorPtr it) {
 }
 
 int dnmIteratorPrevious(dnmIteratorPtr it) {
-	if (it->pos) {
+	if (it->pos > it->start) {
 		(it->pos)--;
 		return 1;
 	} else {       //is at first element already
@@ -208,10 +226,11 @@ void parse_dom_into_dnm(xmlNode *n, dnmPtr dnm, struct tmp_parsedata *dcs, long 
 		}
 		//otherwise parse children recursively
 		else {
+
+//GET ANNOTATIONS AND OTHER ATTRIBUTES (IF AVAILABLE)
+
 			id = NULL;
 			annotationlist = NULL;
-			
-
 
 			for (attr = node->properties; attr != NULL; attr = attr->next) {
 
@@ -228,12 +247,15 @@ void parse_dom_into_dnm(xmlNode *n, dnmPtr dnm, struct tmp_parsedata *dcs, long 
 					xmlFree(tmpxmlstr);
 				}
 			}
-			if (annotationlist == NULL) {
+			if (annotationlist == NULL) {  //no annotations => node is of no particular interest; handle it recursively
 				parse_dom_into_dnm(node->children, dnm, dcs, parameters);
 			} else {
+
+//USING ANNOTATIONS, MAKE A dnm_chunk
+
 				level = getLevelFromAnnotations(dcs, annotationlist, annotationlist_length);
 				current_chunk = NULL;
-				switch (level) {
+				switch (level) {                    //take chunk from corresponding array
 					case DNM_LEVEL_PARA:
 						POSSIBLE_RESIZE(dnm->para_level, dcs->para_level_index, &dcs->para_level_allocated,
 						                dcs->para_level_allocated*2, struct dnm_chunk);
@@ -258,9 +280,27 @@ void parse_dom_into_dnm(xmlNode *n, dnmPtr dnm, struct tmp_parsedata *dcs, long 
 				}
 
 				if (current_chunk != NULL) {
+
+//WRITE VALUES INTO CHUNK
+
 					current_chunk->id = (id == NULL ? NULL : strdup((char*)id));
 					current_chunk->dom_node = node;
 					current_chunk->offset_start = dcs->plaintext_index;
+
+					//level dependent stuff:
+
+					switch (level) {
+						case DNM_LEVEL_PARA:
+							current_chunk->offset_children_start = dcs->sent_level_index;
+							break;
+						case DNM_LEVEL_SENTENCE:
+							current_chunk->offset_children_start = dcs->word_level_index;
+							break;
+						case DNM_LEVEL_WORD:   //no children
+						case DNM_LEVEL_NONE:   //no children
+							current_chunk->offset_children_start = 0;
+							break;
+					}
 
 					parse_dom_into_dnm(node->children, dnm, dcs, parameters);
 
@@ -277,8 +317,24 @@ void parse_dom_into_dnm(xmlNode *n, dnmPtr dnm, struct tmp_parsedata *dcs, long 
 							break;
 						default: break;		//should never occur, but I don't like compiler warnings
 					}
+
+					//fill in remaining values
 					current_chunk->offset_end = dcs->plaintext_index;
-				} else {
+
+					switch (level) {
+						case DNM_LEVEL_PARA:
+							current_chunk->offset_children_end = dcs->sent_level_index;
+							break;
+						case DNM_LEVEL_SENTENCE:
+							current_chunk->offset_children_end = dcs->word_level_index;
+							break;
+						case DNM_LEVEL_WORD:   //no child
+						case DNM_LEVEL_NONE:   //no child
+							current_chunk->offset_children_end = 0;
+							break;
+					}
+
+				} else {   //tag isn't paragraph, sentence, or word
 					parse_dom_into_dnm(node->children, dnm, dcs, parameters);
 				}
 			}

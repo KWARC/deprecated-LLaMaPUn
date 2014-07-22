@@ -54,6 +54,8 @@ struct dnm_iterator {
 	dnmPtr dnm;
 	enum dnm_level level;
 	size_t pos;
+	size_t start;
+	size_t end;
 };
 
 typedef struct dnm_iterator * dnmIteratorPtr;
