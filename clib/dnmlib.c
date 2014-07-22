@@ -123,6 +123,7 @@ char *getDnmIteratorContent(dnmIteratorPtr it) {
 			chunk = NULL;
 			break;
 	}
+
 	if (chunk) {
 		char *cpy = (char *)malloc(sizeof(char)*(chunk->offset_end - chunk->offset_start + 1));   //+1 for \0
 		CHECK_ALLOC(cpy);
@@ -151,6 +152,10 @@ struct tmp_parsedata {
 	size_t para_level_index;
 	size_t sent_level_index;
 	size_t word_level_index;
+
+	char **inherited_annotations;
+	size_t inherited_annotations_allocated;
+	size_t inherited_annotations_index;
 
 	char * para_annotation;
 	char * sent_annotation;
@@ -222,6 +227,15 @@ enum dnm_level getLevelFromAnnotations(struct tmp_parsedata *dcs, char **annotat
 	return DNM_LEVEL_NONE;
 }
 
+inline void appendAnnotationsForInheritance(char **annotationlist, size_t annotationlist_length, struct tmp_parsedata *dcs) {
+	POSSIBLE_RESIZE(dcs->inherited_annotations, dcs->inherited_annotations_index + annotationlist_length,
+	                &(dcs->inherited_annotations_allocated), dcs->inherited_annotations_allocated*2 + annotationlist_length, char *);
+	size_t i = 0;
+	while (i < annotationlist_length) {
+		dcs->inherited_annotations[dcs->inherited_annotations_index++] = annotationlist[i++];
+	}
+}
+
 void parse_dom_into_dnm(xmlNode *n, dnmPtr dnm, struct tmp_parsedata *dcs, long parameters) {	
 	xmlNode *node;
 	xmlAttr *attr;
@@ -232,6 +246,7 @@ void parse_dom_into_dnm(xmlNode *n, dnmPtr dnm, struct tmp_parsedata *dcs, long 
 	enum dnm_level level;
 	struct dnm_chunk * current_chunk;
 	size_t level_offset;
+	size_t old_number_inherited_annotations;
 	for (node = n; node!=NULL; node = node->next) {
 		//possibly normalize math tags
 		if ((parameters&DNM_NORMALIZE_MATH) && xmlStrEqual(node->name, BAD_CAST "math")) {
@@ -315,6 +330,14 @@ void parse_dom_into_dnm(xmlNode *n, dnmPtr dnm, struct tmp_parsedata *dcs, long 
 					current_chunk->id = (id == NULL ? NULL : strdup((char*)id));
 					current_chunk->dom_node = node;
 					current_chunk->offset_start = dcs->plaintext_index;
+					current_chunk->annotations = annotationlist;
+					current_chunk->number_of_annotations = annotationlist_length;
+
+					//copy inherited annotations
+					current_chunk->number_of_inherited_annotations = dcs->inherited_annotations_index;
+					current_chunk->inherited_annotations = (char **) malloc(sizeof(char *) * dcs->inherited_annotations_index);
+					CHECK_ALLOC(current_chunk->inherited_annotations);
+					memcpy(current_chunk->inherited_annotations, dcs->inherited_annotations, sizeof(char *) * dcs->inherited_annotations_index);
 
 					//level dependent stuff:
 
@@ -331,7 +354,12 @@ void parse_dom_into_dnm(xmlNode *n, dnmPtr dnm, struct tmp_parsedata *dcs, long 
 							break;
 					}
 
+
+					old_number_inherited_annotations = dcs->inherited_annotations_index;
+					appendAnnotationsForInheritance(annotationlist, annotationlist_length, dcs);
 					parse_dom_into_dnm(node->children, dnm, dcs, parameters);
+					dcs->inherited_annotations_index = old_number_inherited_annotations;
+
 
 					//due to realloc, location of current_chunk might change :D
 					switch (level) {
@@ -364,12 +392,15 @@ void parse_dom_into_dnm(xmlNode *n, dnmPtr dnm, struct tmp_parsedata *dcs, long 
 					}
 
 				} else {   //tag isn't paragraph, sentence, or word
+					old_number_inherited_annotations = dcs->inherited_annotations_index;
+					appendAnnotationsForInheritance(annotationlist, annotationlist_length, dcs);
+					free(annotationlist);
 					parse_dom_into_dnm(node->children, dnm, dcs, parameters);
+					dcs->inherited_annotations_index = old_number_inherited_annotations;
 				}
 			}
 
 
-			free(annotationlist);
 
 			xmlFree(id);
 		}
@@ -412,6 +443,10 @@ dnmPtr createDNM(xmlDocPtr doc, long parameters) {
 	dcs->sent_annotation = getAnnotationPtr(dnm, "ltx_sentence", 1);
 	dcs->word_annotation = getAnnotationPtr(dnm, "ltx_word", 1);
 
+	dcs->inherited_annotations = (char **) malloc(sizeof(char *)*64);
+	dcs->inherited_annotations_allocated = 64;
+	dcs->inherited_annotations_index = 0;
+
 	//levels
 	dnm->para_level = (struct dnm_chunk *) malloc(sizeof(struct dnm_chunk)*32);
 	dcs->para_level_allocated = 32;
@@ -424,6 +459,7 @@ dnmPtr createDNM(xmlDocPtr doc, long parameters) {
 	dnm->word_level = (struct dnm_chunk *) malloc(sizeof(struct dnm_chunk)*1024);
 	dcs->word_level_allocated = 1024;
 	dcs->word_level_index = 0;
+
 
 
 	//Call the actual parsing function
@@ -451,6 +487,7 @@ dnmPtr createDNM(xmlDocPtr doc, long parameters) {
 	dnm->word_level = realloc(dnm->word_level, dnm->size_word_level * sizeof(struct dnm_chunk));
 	if (dnm->size_word_level) CHECK_ALLOC(dnm->word_level);
 
+	free(dcs->inherited_annotations);
 	free(dcs);
 
 	return dnm;
@@ -465,7 +502,8 @@ dnmPtr createDNM(xmlDocPtr doc, long parameters) {
 void freeLevelList(struct dnm_chunk * array, size_t size) {
 	while (size--) {
 		free(array[size].id);
-		//to be done: free annotations (once they're actually stored)
+		free(array[size].annotations);
+		free(array[size].inherited_annotations);
 	}
 	free(array);
 }

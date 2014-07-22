@@ -46,6 +46,12 @@ struct dnm_chunk {
 	long offset_children_start;
 	long offset_children_end;
 
+	char **annotations;
+	size_t number_of_annotations;  //corresponds to allocated memory
+
+	char **inherited_annotations;
+	size_t number_of_inherited_annotations;
+
 	size_t offset_start;
 	size_t offset_end;
 };
