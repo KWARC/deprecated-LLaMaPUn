@@ -62,7 +62,10 @@ typedef struct dnm_iterator * dnmIteratorPtr;
 
 dnmPtr createDNM(xmlDocPtr doc, long parameters);
 void freeDNM(dnmPtr);
+
 dnmIteratorPtr getDnmIterator(dnmPtr dnm, enum dnm_level level);  //allocates memory using malloc => has to be free'd manually
+dnmIteratorPtr getDnmChildrenIterator(dnmIteratorPtr it);  //returns iterator over children, has to be freed (NULL level has no children)
 int dnmIteratorNext(dnmIteratorPtr it);
 int dnmIteratorPrevious(dnmIteratorPtr it);
 char *getDnmIteratorContent(dnmIteratorPtr it);    //returned array (\0-terminated) has to be free'd manually
+

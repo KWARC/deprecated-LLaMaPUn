@@ -44,6 +44,35 @@ dnmIteratorPtr getDnmIterator(dnmPtr dnm, enum dnm_level level) {
 	return it;
 }
 
+dnmIteratorPtr getDnmChildrenIterator(dnmIteratorPtr it) {
+	struct dnm_iterator * new_it = (struct dnm_iterator *)malloc(sizeof(struct dnm_iterator));
+	CHECK_ALLOC(new_it);
+
+	struct dnm_chunk *chunk;
+	switch (it->level) {
+		case DNM_LEVEL_PARA:
+			chunk = (it->dnm->para_level)+(it->pos);
+			new_it->level = DNM_LEVEL_SENTENCE;
+			break;
+		case DNM_LEVEL_SENTENCE:
+			chunk = (it->dnm->sent_level)+(it->pos);
+			new_it->level = DNM_LEVEL_WORD;
+			break;
+		case DNM_LEVEL_WORD:   //level has no children
+		case DNM_LEVEL_NONE:   //level has no children
+			free(new_it);
+			fprintf(stderr, "Tried to get children iterator of level without children\n");
+			return NULL;
+	}
+
+	new_it->dnm = it->dnm;
+	new_it->pos = chunk->offset_children_start;
+	new_it->start = chunk->offset_children_start;
+	new_it->end = chunk->offset_children_end;
+
+	return new_it;
+}
+
 int dnmIteratorNext(dnmIteratorPtr it) {
 	size_t level_size;
 	switch (it->level) {
@@ -61,7 +90,7 @@ int dnmIteratorNext(dnmIteratorPtr it) {
 			break;
 	}
 	(it->pos)++;
-	if ((it->pos < level_size) && (++(it->pos) < it->end)) {   //next pos in bounds
+	if ((it->pos < level_size) && (it->pos < it->end)) {   //next pos in bounds
 		return 1;
 	} else {        //iterator points to last element already
 		(it->pos)--;
