@@ -47,10 +47,12 @@ struct dnm_chunk {
 	long offset_children_end;
 
 	char **annotations;
-	size_t number_of_annotations;  //corresponds to allocated memory
+	size_t number_of_annotations;
+	size_t annotations_allocated;
 
 	char **inherited_annotations;
 	size_t number_of_inherited_annotations;
+	size_t inherited_annotations_allocated;
 
 	size_t offset_start;
 	size_t offset_end;
@@ -77,3 +79,5 @@ int dnmIteratorPrevious(dnmIteratorPtr it);
 char *getDnmIteratorContent(dnmIteratorPtr it);    //returned array (\0-terminated) has to be free'd manually
 int dnmIteratorHasAnnotation(dnmIteratorPtr it, const char *annotation);   //1 if it has the annotation, 0 otherwise
 int dnmIteratorHasAnnotationInherited(dnmIteratorPtr it, const char *annotation);
+
+void dnmIteratorAddAnnotation(dnmIteratorPtr it, const char *annotation, int writeIntoDOM, int inheritToChildren);
