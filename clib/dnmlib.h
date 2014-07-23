@@ -73,5 +73,7 @@ dnmIteratorPtr getDnmIterator(dnmPtr dnm, enum dnm_level level);  //allocates me
 dnmIteratorPtr getDnmChildrenIterator(dnmIteratorPtr it);  //returns iterator over children, has to be freed (NULL level has no children)
 int dnmIteratorNext(dnmIteratorPtr it);
 int dnmIteratorPrevious(dnmIteratorPtr it);
-char *getDnmIteratorContent(dnmIteratorPtr it);    //returned array (\0-terminated) has to be free'd manually
 
+char *getDnmIteratorContent(dnmIteratorPtr it);    //returned array (\0-terminated) has to be free'd manually
+int dnmIteratorHasAnnotation(dnmIteratorPtr it, const char *annotation);   //1 if it has the annotation, 0 otherwise
+int dnmIteratorHasAnnotationInherited(dnmIteratorPtr it, const char *annotation);

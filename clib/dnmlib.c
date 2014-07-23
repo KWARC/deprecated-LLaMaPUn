@@ -10,9 +10,9 @@
 
 #define POSSIBLE_RESIZE(ptr, index, oldsizeptr, newsize, type) \
 		{if (index >= *oldsizeptr) {\
-			ptr = (type*)realloc(ptr, newsize*sizeof(type)); *oldsizeptr=newsize; CHECK_ALLOC(ptr); }}
+			ptr = (type*)realloc(ptr, (newsize)*sizeof(type)); *oldsizeptr=newsize; CHECK_ALLOC(ptr); }}
 
-
+char * getAnnotationPtr(dnmPtr dnm, const char *annotation, int create);
 
 //=======================================================
 //Section: Iterators
@@ -107,22 +107,23 @@ int dnmIteratorPrevious(dnmIteratorPtr it) {
 	}
 }
 
-char *getDnmIteratorContent(dnmIteratorPtr it) {
-	struct dnm_chunk *chunk;
+inline struct dnm_chunk *getDnmChunkFromIterator(dnmIteratorPtr it) {
 	switch (it->level) {
 		case DNM_LEVEL_PARA:
-			chunk = (it->dnm->para_level)+(it->pos);
-			break;
+			return (it->dnm->para_level)+(it->pos);
 		case DNM_LEVEL_SENTENCE:
-			chunk = (it->dnm->sent_level)+(it->pos);
-			break;
+			return (it->dnm->sent_level)+(it->pos);
 		case DNM_LEVEL_WORD:
-			chunk = (it->dnm->word_level)+(it->pos);
-			break;
-		case DNM_LEVEL_NONE:      //avoid compiler warnings
-			chunk = NULL;
-			break;
+			return (it->dnm->word_level)+(it->pos);
+		case DNM_LEVEL_NONE:
+			return NULL;
 	}
+	return NULL;  //just in case
+}
+
+
+char *getDnmIteratorContent(dnmIteratorPtr it) {
+	struct dnm_chunk *chunk = getDnmChunkFromIterator(it);
 
 	if (chunk) {
 		char *cpy = (char *)malloc(sizeof(char)*(chunk->offset_end - chunk->offset_start + 1));   //+1 for \0
@@ -133,6 +134,33 @@ char *getDnmIteratorContent(dnmIteratorPtr it) {
 	} else return NULL;
 }
 
+int dnmIteratorHasAnnotation(dnmIteratorPtr it, const char *annotation) {
+	char * aPtr = getAnnotationPtr(it->dnm, annotation, 0);
+	if (aPtr == NULL) return 0;
+	else {
+		//search annotation list for aPtr
+		struct dnm_chunk *chunk = getDnmChunkFromIterator(it);
+		size_t i = 0;
+		while (i < chunk->number_of_annotations) {
+			if (chunk->annotations[i++] == aPtr) return 1;
+		}
+		return 0;    //annotation not in list
+	}
+}
+
+int dnmIteratorHasAnnotationInherited(dnmIteratorPtr it, const char *annotation) {
+	char * aPtr = getAnnotationPtr(it->dnm, annotation, 0);
+	if (aPtr == NULL) return 0;
+	else {
+		//search inherited_annotations list for aPtr
+		struct dnm_chunk *chunk = getDnmChunkFromIterator(it);
+		size_t i = 0;
+		while (i < chunk->number_of_inherited_annotations) {
+			if (chunk->inherited_annotations[i++] == aPtr) return 1;
+		}
+		return 0;    //annotation not in list
+	}
+}
 
 
 //=======================================================
