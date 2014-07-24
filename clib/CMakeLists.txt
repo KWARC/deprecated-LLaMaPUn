@@ -55,7 +55,9 @@ target_link_libraries(TestSTOPWORDS stopwords ${JSON_LIBRARIES} ${uthash_LIBRARI
 add_executable(TestSTEMMER tests/stemmer_test.c)
 target_link_libraries(TestSTEMMER stemmer)
 add_executable(TestNGRAMS tests/ngrams_test.c)
+add_executable(TestDNMLIB tests/dnmlib_test.c)
 target_link_libraries(TestNGRAMS llamapun_ngrams unicode_normalizer ${ICONV_LIBRARIES} ${JSON_LIBRARIES} ${LIBXML2_LIBRARIES})
+target_link_libraries(TestDNMLIB dnmlib ${LIBXML2_LIBRARIES})
 add_executable(TestUnicodeNormalizer tests/unicode_normalizer_test.c)
 target_link_libraries(TestUnicodeNormalizer unicode_normalizer ${ICONV_LIBRARIES})
 target_link_libraries(llamapun_gt_estimate ${JSON_LIBRARIES} ${uthash_LIBRARIES})
@@ -65,6 +67,7 @@ add_test(SENNA_POS_Test TestSENNA WORKING_DIRECTORY "tests")
 add_test(STOPWORDS_Test TestSTOPWORDS WORKING_DIRECTORY "tests")
 add_test(STEMMER_Test TestSTEMMER WORKING_DIRECTORY "tests")
 add_test(NGRAMS_Test TestNGRAMS WORKING_DIRECTORY "tests")
+add_test(DNMLIB_Test TestDNMLIB WORKING_DIRECTORY "tests")
 add_test(UNICODE_NORMALIZER_Test TestUnicodeNormalizer WORKING_DIRECTORY "tests")
 
 
