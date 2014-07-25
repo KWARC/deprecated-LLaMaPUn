@@ -111,7 +111,7 @@ int dnmIteratorPrevious(dnmIteratorPtr it) {
 	}
 }
 
-inline struct dnm_chunk *getDnmChunkFromIterator(dnmIteratorPtr it) {
+struct dnm_chunk *getDnmChunkFromIterator(dnmIteratorPtr it) {
 	if (it->pos < it->start || it->pos >= it->end) return NULL;  //out of bounds
 
 	switch (it->level) {
@@ -267,7 +267,7 @@ struct tmp_parsedata {
 	char * word_annotation;
 };
 
-inline char * getAnnotationPtr(dnmPtr dnm, const char *annotation, int create) {
+char * getAnnotationPtr(dnmPtr dnm, const char *annotation, int create) {
 	struct hash_element_string *tmp;
 	HASH_FIND_STR(dnm->annotation_handle, annotation, tmp);
 	if (tmp == NULL) {		//Couldn't find annotation
@@ -312,7 +312,7 @@ char ** getAnnotationList(dnmPtr dnm, char *string, size_t * final_length, size_
 	return annotationlist;
 }
 
-inline void copy_into_plaintext(const char *string, dnmPtr dnm, struct tmp_parsedata *dcs) {
+void copy_into_plaintext(const char *string, dnmPtr dnm, struct tmp_parsedata *dcs) {
 	while (*string != '\0') {
 		POSSIBLE_RESIZE(dnm->plaintext, dcs->plaintext_index, &dcs->plaintext_allocated,
 			dcs->plaintext_allocated*2, char);
@@ -332,7 +332,7 @@ enum dnm_level getLevelFromAnnotations(struct tmp_parsedata *dcs, char **annotat
 	return DNM_LEVEL_NONE;
 }
 
-inline void appendAnnotationsForInheritance(char **annotationlist, size_t annotationlist_number, struct tmp_parsedata *dcs) {
+void appendAnnotationsForInheritance(char **annotationlist, size_t annotationlist_number, struct tmp_parsedata *dcs) {
 	POSSIBLE_RESIZE(dcs->inherited_annotations, dcs->inherited_annotations_index + annotationlist_number,
 	                &(dcs->inherited_annotations_allocated), dcs->inherited_annotations_allocated*2 + annotationlist_number, char *);
 	size_t i = 0;
