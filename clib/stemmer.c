@@ -109,6 +109,8 @@ void morpha_stem(const char *sentence, char **stemmed) {
 
 	fprintf(morpha_instream, "%s", sentence);
 
+	free(sentence);
+
 	int c;
 	while ((c = getc(morpha_instream)) != EOF) {
 		ungetc(c, morpha_instream);

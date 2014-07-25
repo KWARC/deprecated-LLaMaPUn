@@ -13,6 +13,7 @@ int main(void) {
 		free(result);
 		return 1;
 	}
+	free(input);
 	free(result);
 	return 0;
 }
