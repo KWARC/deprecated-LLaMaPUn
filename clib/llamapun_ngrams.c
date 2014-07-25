@@ -223,18 +223,21 @@ json_object* llamapun_get_ngrams (xmlDocPtr doc) {
     json_object_object_add(unigrams, current->string,
           json_object_new_int(current->counter));
     HASH_DEL(unigram_hash, current);
+    free(current->string);
     free(current);
   }
   HASH_ITER(hh, bigram_hash, current, tmp) {
     json_object_object_add(bigrams, current->string,
           json_object_new_int(current->counter));
     HASH_DEL(bigram_hash, current);
+    free(current->string);
     free(current);
   }
   HASH_ITER(hh, trigram_hash, current, tmp) {
     json_object_object_add(trigrams, current->string,
           json_object_new_int(current->counter));
     HASH_DEL(trigram_hash, current);
+    free(current->string);
     free(current);
   }
 

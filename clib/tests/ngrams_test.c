@@ -24,10 +24,6 @@ int main() {
   fprintf(f, "%s", json_object_to_json_string(response));
   fclose(f); 
 
-  /* Clean up libxml objects */
-  xmlFreeDoc(doc);
-  xmlCleanupParser();
-
   json_object* tmp;
   json_object* tmp2;
 
@@ -54,10 +50,17 @@ int main() {
   json_object_object_get_ex(tmp, "arc length", &tmp2);
   #endif
 
+
+
   if (json_object_get_int(tmp2) != 2) {
     fprintf(stderr, "test ngrams -- wrong result for 'arc length': got %d\n", json_object_get_int(tmp2));
     return 1;
   }
+
+  json_object_put(response);
+
+  if (doc) xmlFreeDoc(doc);
+  xmlCleanupParser();
 
   return 0;
 }
