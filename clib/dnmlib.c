@@ -5,23 +5,29 @@
 #include <assert.h>
 
 
-//Let's do it the "clean" way
+//macro, checking whether memory was allocated successfully
 #define CHECK_ALLOC(ptr) {if (ptr==NULL) {fprintf(stderr, "Couldn't allocate memory, exiting\n"); fflush(stderr); exit(1);}}
 
+//resize an array if the index exceeds the old size
 #define POSSIBLE_RESIZE(ptr, index, oldsizeptr, newsize, type) \
 		{if (index >= *oldsizeptr) {\
 			ptr = (type*)realloc(ptr, (newsize)*sizeof(type)); *oldsizeptr=newsize; CHECK_ALLOC(ptr); }}
 
-char * getAnnotationPtr(dnmPtr dnm, const char *annotation, int create);
+
 
 //=======================================================
 //Section: Iterators
 //=======================================================
 
+char * getAnnotationPtr(dnmPtr dnm, const char *annotation, int create);
+
 dnmIteratorPtr getDnmIterator(dnmPtr dnm, enum dnm_level level) {
+	/* returns an iterator over dnm on the specified level
+	   memory allocated for the iterator has to be free'd */
 	struct dnm_iterator * it = (struct dnm_iterator *)malloc(sizeof(struct dnm_iterator));
 	CHECK_ALLOC(it);
-	//set properties
+
+	//set iterator properties
 	it->dnm = dnm;
 	it->level = level;
 	it->pos = 0;
@@ -37,7 +43,7 @@ dnmIteratorPtr getDnmIterator(dnmPtr dnm, enum dnm_level level) {
 		case DNM_LEVEL_WORD:
 			it->end = it->dnm->size_word_level;
 			break;
-		case DNM_LEVEL_NONE:     //avoids compiler warnings
+		case DNM_LEVEL_NONE:
 			it->end = 0;
 			break;
 	}
@@ -45,9 +51,13 @@ dnmIteratorPtr getDnmIterator(dnmPtr dnm, enum dnm_level level) {
 }
 
 dnmIteratorPtr getDnmChildrenIterator(dnmIteratorPtr it) {
+	/* returns iterator for the children of the current position of it,
+	   i.e. over the sentences of a certain paragraph, or over the words of a sentence
+	   memory allocated for new iterator has to be free'd manually as well */
 	struct dnm_iterator * new_it = (struct dnm_iterator *)malloc(sizeof(struct dnm_iterator));
 	CHECK_ALLOC(new_it);
 
+	//find the dnm chunk corresponding to it
 	struct dnm_chunk *chunk;
 	switch (it->level) {
 		case DNM_LEVEL_PARA:
@@ -64,12 +74,14 @@ dnmIteratorPtr getDnmChildrenIterator(dnmIteratorPtr it) {
 			return NULL;
 	}
 
+	//set the properties of the children iterator
 	new_it->dnm = it->dnm;
 	new_it->pos = chunk->offset_children_start;
 	new_it->start = chunk->offset_children_start;
 	new_it->end = chunk->offset_children_end;
 
-	if (new_it->start >= new_it->end) {  //no children
+	//return NULL if there are no children
+	if (new_it->start >= new_it->end) {
 		free(new_it);
 		return NULL;
 	}
@@ -78,6 +90,10 @@ dnmIteratorPtr getDnmChildrenIterator(dnmIteratorPtr it) {
 }
 
 int dnmIteratorNext(dnmIteratorPtr it) {
+	/* makes the iterator point to the next element of the document
+	   returns 0, if there is no element left, otherwise 1 */
+
+	//determine number of elements, which obviously depends on the level
 	size_t level_size;
 	switch (it->level) {
 		case DNM_LEVEL_PARA:
@@ -89,12 +105,13 @@ int dnmIteratorNext(dnmIteratorPtr it) {
 		case DNM_LEVEL_WORD:
 			level_size = it->dnm->size_word_level;
 			break;
-		case DNM_LEVEL_NONE:     //avoids compiler warnings
+		case DNM_LEVEL_NONE:
 			level_size = 0;
 			break;
 	}
+	//check, whether the next position would be in the bounds
 	(it->pos)++;
-	if ((it->pos < level_size) && (it->pos < it->end)) {   //next pos in bounds
+	if ((it->pos < level_size) && (it->pos < it->end)) {
 		return 1;
 	} else {        //iterator points to last element already
 		(it->pos)--;
@@ -103,17 +120,24 @@ int dnmIteratorNext(dnmIteratorPtr it) {
 }
 
 int dnmIteratorPrevious(dnmIteratorPtr it) {
+	/* like dnmIteratorNext, just the other direction */
+
+	//decrease, iff new position would be in bounds
 	if (it->pos > it->start) {
 		(it->pos)--;
 		return 1;
-	} else {       //is at first element already
+	} else {
 		return 0;
 	}
 }
 
 struct dnm_chunk *getDnmChunkFromIterator(dnmIteratorPtr it) {
+	/*returns a pointer to the dnm chunk corresponding to the current iterator position
+	  not intended for external calls */
+
 	if (it->pos < it->start || it->pos >= it->end) return NULL;  //out of bounds
 
+	//of course, the chunk location is level dependent
 	switch (it->level) {
 		case DNM_LEVEL_PARA:
 			return (it->dnm->para_level)+(it->pos);
@@ -125,14 +149,18 @@ struct dnm_chunk *getDnmChunkFromIterator(dnmIteratorPtr it) {
 			return NULL;
 	}
 
-	return NULL;  //just in case
+	return NULL;  //just in case, some levels get added
 }
 
 
 char *getDnmIteratorContent(dnmIteratorPtr it) {
+	/* returns the plaintext corresponding to the current iterator position.
+	   The string, which is ended by \0, has to be freed manually. */
+
 	struct dnm_chunk *chunk = getDnmChunkFromIterator(it);
 
 	if (chunk) {
+		//create and return a copy of the plaintext fragment
 		char *cpy = (char *)malloc(sizeof(char)*(chunk->offset_end - chunk->offset_start + 1));   //+1 for \0
 		CHECK_ALLOC(cpy);
 		memcpy(cpy, (it->dnm->plaintext)+(chunk->offset_start), (chunk->offset_end - chunk->offset_start));
@@ -142,8 +170,13 @@ char *getDnmIteratorContent(dnmIteratorPtr it) {
 }
 
 int dnmIteratorHasAnnotation(dnmIteratorPtr it, const char *annotation) {
+	/* Checks, whether the element, pointed to by the iterator, has the annotation.
+	   Returns 1, if it has the annotation, otherwise 0.
+	   Note that there is a faster way, if you want to repeatedly check for one specific annotation.
+	   (by determining aPtr just once, feature isn't implemented yet) */
+
 	char * aPtr = getAnnotationPtr(it->dnm, annotation, 0);
-	if (aPtr == NULL) return 0;
+	if (aPtr == NULL) return 0;    //annotation doesn't exist at all
 	else {
 		//search annotation list for aPtr
 		struct dnm_chunk *chunk = getDnmChunkFromIterator(it);
@@ -156,6 +189,8 @@ int dnmIteratorHasAnnotation(dnmIteratorPtr it, const char *annotation) {
 }
 
 int dnmIteratorHasAnnotationInherited(dnmIteratorPtr it, const char *annotation) {
+	/* like dnmIteratorHasAnnotation, just for inherited annotations.
+	   Inherited annotations are annotations of the parent nodes */
 	char * aPtr = getAnnotationPtr(it->dnm, annotation, 0);
 	if (aPtr == NULL) return 0;
 	else {
@@ -170,18 +205,24 @@ int dnmIteratorHasAnnotationInherited(dnmIteratorPtr it, const char *annotation)
 }
 
 void dnmIteratorAddAnnotation(dnmIteratorPtr it, const char *annotation, int writeIntoDOM, int inheritToChildren) {
+	/* writes adds an annotation to the dnm chunk the iterator refers to.
+	   The annotation can also be written into the DOM, and inherited to the child chunks.
+	   Again, note that there is a faster way for doing this repeatedly with an annotation,
+	   by determining aPtr just once. This feature isn't implemented yet */
+
 	char *aPtr = getAnnotationPtr(it->dnm, annotation, 1);
 	struct dnm_chunk *chunk = getDnmChunkFromIterator(it);
 
 	//writing into DOM
 	if (writeIntoDOM) {
+		//search for class attribute
 		xmlAttr *attr;
 		xmlChar *current_value = NULL;
 		for (attr = chunk->dom_node->properties; attr != NULL; attr = attr->next) {
 			if (xmlStrEqual(attr->name, BAD_CAST "class")) {  //annotations are stored in class attribute
 				current_value = xmlNodeGetContent(attr->children);
 				CHECK_ALLOC(current_value);
-				//remove attr (we'll create a new one later)
+				//remove attr (we'll create and add a new one later)
 				if (attr->prev != NULL)
 					attr->prev->next = attr->next;
 				else
@@ -190,9 +231,11 @@ void dnmIteratorAddAnnotation(dnmIteratorPtr it, const char *annotation, int wri
 					attr->next->prev = attr->prev;
 				xmlFreeProp(attr);
 
-				break;  //we're not interested in anything else
+				break;  //we're not interested in other attributes
 			}
 		}
+
+		//create new value string (by appending the new annotation to the old value)
 		size_t s = strlen((char*)current_value);
 		char *new_value = (char *)malloc(sizeof(char)*(s + strlen(annotation) + 2));  //+2 for ' ' and '\0'
 		CHECK_ALLOC(new_value);
@@ -204,7 +247,7 @@ void dnmIteratorAddAnnotation(dnmIteratorPtr it, const char *annotation, int wri
 		xmlFree(current_value);
 	}
 
-	//write into annotations
+	//write into annotations of chunk
 	POSSIBLE_RESIZE(chunk->annotations, chunk->number_of_annotations, &chunk->annotations_allocated, chunk->annotations_allocated*2, char *);
 	chunk->annotations[chunk->number_of_annotations++] = aPtr;
 
@@ -219,7 +262,7 @@ void dnmIteratorAddAnnotation(dnmIteratorPtr it, const char *annotation, int wri
 					POSSIBLE_RESIZE(chunk->inherited_annotations, chunk->number_of_inherited_annotations,
 					               &chunk->inherited_annotations_allocated, chunk->inherited_annotations_allocated*2, char *);
 					chunk->inherited_annotations[chunk->number_of_inherited_annotations++] = aPtr;
-					//we might have to inherit deeper
+					//we might have to inherit one level deeper
 					it3 = getDnmChildrenIterator(it2);
 					if (it3) {
 						do {
@@ -267,10 +310,18 @@ struct tmp_parsedata {
 	char * word_annotation;
 };
 
+
 char * getAnnotationPtr(dnmPtr dnm, const char *annotation, int create) {
+	/* returns the (unique) pointer to the annotation, if create is non-zero,
+	   it creates the annotation, if it doesn't exist yet.
+	   These pointers serve as ids */
+
+	//search for annotation in hash
 	struct hash_element_string *tmp;
 	HASH_FIND_STR(dnm->annotation_handle, annotation, tmp);
-	if (tmp == NULL) {		//Couldn't find annotation
+
+	//if it doesn't exist yet, create it (if the parameter is set)
+	if (tmp == NULL) {
 		if (create) {
 			tmp = (struct hash_element_string *)malloc(sizeof(struct hash_element_string));
 			CHECK_ALLOC(tmp);
@@ -285,26 +336,33 @@ char * getAnnotationPtr(dnmPtr dnm, const char *annotation, int create) {
 }
 
 char ** getAnnotationList(dnmPtr dnm, char *string, size_t * final_length, size_t * final_number) {
+	/* Returns an array of annotation pointers, extracted from string.
+	   (In XHTML, the class attribute has the annotations separated by whitespaces)
+	   The pointers final_length and final_number, represent the amount of memory
+	   allocated, and the number of annotations detected. */
+
 	char *i1 = string;
 	char *i2 = string;
-	int endofannotation = 0;
+	int reached_end = 0;
 
 	char **annotationlist = (char **) malloc(8*sizeof(char *));
 	CHECK_ALLOC(annotationlist);
 	size_t list_length = 8;
 	size_t list_index = 0;
 
-	while (!endofannotation) {
-		//go ahead to end of annotation
+	//loop over annotations
+	while (!reached_end) {
+		//go ahead to end of current annotation
 		while (*i2 != ' ' && *i2 != '\0') {
 			i2++;
 		}
-		if (*i2 == '\0') endofannotation = 1;
+		if (*i2 == '\0') reached_end = 1;
 		*i2 = '\0';
 		POSSIBLE_RESIZE(annotationlist, list_index, &list_length, list_length*2, char *);
 		annotationlist[list_index++] = getAnnotationPtr(dnm, i1, 1);
 		i1 = ++i2;     //beginning of next annotation
 	}
+
 	*final_length = list_length;
 	*final_number = list_index;
 	//annotationlist = realloc(annotationlist, list_index * sizeof(char *));
@@ -313,6 +371,7 @@ char ** getAnnotationList(dnmPtr dnm, char *string, size_t * final_length, size_
 }
 
 void copy_into_plaintext(const char *string, dnmPtr dnm, struct tmp_parsedata *dcs) {
+	/* appends string to the plaintext, stored in dnm */
 	while (*string != '\0') {
 		POSSIBLE_RESIZE(dnm->plaintext, dcs->plaintext_index, &dcs->plaintext_allocated,
 			dcs->plaintext_allocated*2, char);
@@ -322,6 +381,8 @@ void copy_into_plaintext(const char *string, dnmPtr dnm, struct tmp_parsedata *d
 
 enum dnm_level getLevelFromAnnotations(struct tmp_parsedata *dcs, char **annotationlist,
                                        size_t annotationlist_length) {
+	/* returns the level, according to the list of annotation pointers. */
+
 	char *tmp;
 	while (annotationlist_length) {
 		tmp = annotationlist[--annotationlist_length];
@@ -329,19 +390,24 @@ enum dnm_level getLevelFromAnnotations(struct tmp_parsedata *dcs, char **annotat
 		if (tmp == dcs->sent_annotation) return DNM_LEVEL_SENTENCE;
 		if (tmp == dcs->word_annotation) return DNM_LEVEL_WORD;
 	}
+	//if no annotation declaring the level was found:
 	return DNM_LEVEL_NONE;
 }
 
 void appendAnnotationsForInheritance(char **annotationlist, size_t annotationlist_number, struct tmp_parsedata *dcs) {
+	/* appends annotations to the list in the dcs, which accumulates the annotations of the parent tags. */
 	POSSIBLE_RESIZE(dcs->inherited_annotations, dcs->inherited_annotations_index + annotationlist_number,
 	                &(dcs->inherited_annotations_allocated), dcs->inherited_annotations_allocated*2 + annotationlist_number, char *);
-	size_t i = 0;
-	while (i < annotationlist_number) {
-		dcs->inherited_annotations[dcs->inherited_annotations_index++] = annotationlist[i++];
+	size_t index = 0;
+	while (index < annotationlist_number) {
+		dcs->inherited_annotations[dcs->inherited_annotations_index++] = annotationlist[index++];
 	}
 }
 
 void parse_dom_into_dnm(xmlNode *n, dnmPtr dnm, struct tmp_parsedata *dcs, long parameters) {	
+	/* the core function which (recursively) parses the DOM into the DNM */
+
+	//declaring a lot of variables required later on...
 	xmlNode *node;
 	xmlAttr *attr;
 	xmlChar *tmpxmlstr;
@@ -353,6 +419,8 @@ void parse_dom_into_dnm(xmlNode *n, dnmPtr dnm, struct tmp_parsedata *dcs, long 
 	struct dnm_chunk * current_chunk;
 	size_t level_offset;
 	size_t old_number_inherited_annotations;
+
+	//iterate over nodes
 	for (node = n; node!=NULL; node = node->next) {
 		//possibly normalize math tags
 		if ((parameters&DNM_NORMALIZE_MATH) && xmlStrEqual(node->name, BAD_CAST "math")) {
@@ -366,7 +434,7 @@ void parse_dom_into_dnm(xmlNode *n, dnmPtr dnm, struct tmp_parsedata *dcs, long 
 		else if ((parameters&DNM_SKIP_CITE) && xmlStrEqual(node->name, BAD_CAST "cite")) {
 
 		}
-		//copy text nodes
+		//copy contents of text nodes into plaintext
 		else if (xmlStrEqual(node->name, BAD_CAST "text")) {
 
 			tmpxmlstr = xmlNodeGetContent(node);
@@ -374,7 +442,7 @@ void parse_dom_into_dnm(xmlNode *n, dnmPtr dnm, struct tmp_parsedata *dcs, long 
 			copy_into_plaintext((char*)tmpxmlstr, dnm, dcs);
 			xmlFree(tmpxmlstr);
 		}
-		//otherwise parse children recursively
+		//otherwise, parse children recursively
 		else {
 
 //GET ANNOTATIONS AND OTHER ATTRIBUTES (IF AVAILABLE)
@@ -382,6 +450,7 @@ void parse_dom_into_dnm(xmlNode *n, dnmPtr dnm, struct tmp_parsedata *dcs, long 
 			id = NULL;
 			annotationlist = NULL;
 
+			//iterate over attributes (we're looking for the id and the class values)
 			for (attr = node->properties; attr != NULL; attr = attr->next) {
 
 				if (xmlStrEqual(attr->name, BAD_CAST "id")) {
@@ -397,11 +466,12 @@ void parse_dom_into_dnm(xmlNode *n, dnmPtr dnm, struct tmp_parsedata *dcs, long 
 					xmlFree(tmpxmlstr);
 				}
 			}
+
 			if (annotationlist == NULL) {  //no annotations => node is of no particular interest; handle it recursively
 				parse_dom_into_dnm(node->children, dnm, dcs, parameters);
 			} else {
 
-//USING ANNOTATIONS, MAKE A dnm_chunk
+//USING THE ANNOTATIONS, MAKE A dnm_chunk
 
 				level = getLevelFromAnnotations(dcs, annotationlist, annotationlist_number);
 				current_chunk = NULL;
@@ -465,11 +535,15 @@ void parse_dom_into_dnm(xmlNode *n, dnmPtr dnm, struct tmp_parsedata *dcs, long 
 
 					old_number_inherited_annotations = dcs->inherited_annotations_index;
 					appendAnnotationsForInheritance(annotationlist, annotationlist_number, dcs);
+
+					//recursively parse children
 					parse_dom_into_dnm(node->children, dnm, dcs, parameters);
+
+					//"remove" annotations from this chunk in the inheritance list
 					dcs->inherited_annotations_index = old_number_inherited_annotations;
 
 
-					//due to realloc, location of current_chunk might change :D
+					//due to realloc, location of current_chunk might have changed :D
 					switch (level) {
 						case DNM_LEVEL_PARA:
 							current_chunk = (dnm->para_level) + level_offset;
@@ -499,16 +573,16 @@ void parse_dom_into_dnm(xmlNode *n, dnmPtr dnm, struct tmp_parsedata *dcs, long 
 							break;
 					}
 
-				} else {   //tag isn't paragraph, sentence, or word
+				} else {   //tag isn't paragraph, sentence, or word => we don't create a chunk
 					old_number_inherited_annotations = dcs->inherited_annotations_index;
 					appendAnnotationsForInheritance(annotationlist, annotationlist_number, dcs);
 					free(annotationlist);
+					//recursively parse children
 					parse_dom_into_dnm(node->children, dnm, dcs, parameters);
+					//"remove" annotations from this node again from the list
 					dcs->inherited_annotations_index = old_number_inherited_annotations;
 				}
 			}
-
-
 
 			xmlFree(id);
 		}
@@ -516,6 +590,9 @@ void parse_dom_into_dnm(xmlNode *n, dnmPtr dnm, struct tmp_parsedata *dcs, long 
 }
 
 dnmPtr createDNM(xmlDocPtr doc, long parameters) {
+	/* Creates a DNM and returns a pointer to it.
+	   The memory has to be free'd later by calling freeDNM */
+
 	//check arguments
 	if (doc==NULL) {
 		fprintf(stderr, "dnmlib - Didn't get an xmlDoc - parse error??\n");
@@ -594,7 +671,8 @@ dnmPtr createDNM(xmlDocPtr doc, long parameters) {
 	dnm->size_word_level = dcs->word_level_index;
 	dnm->word_level = realloc(dnm->word_level, dnm->size_word_level * sizeof(struct dnm_chunk));
 	if (dnm->size_word_level) CHECK_ALLOC(dnm->word_level);
-
+ 
+	//after the creation process, we don't need the dcs anymore
 	free(dcs->inherited_annotations);
 	free(dcs);
 
@@ -608,6 +686,7 @@ dnmPtr createDNM(xmlDocPtr doc, long parameters) {
 //=======================================================
 
 void freeLevelList(struct dnm_chunk * array, size_t size) {
+	/* frees the level list */
 	while (size--) {
 		free(array[size].id);
 		free(array[size].annotations);
@@ -617,6 +696,7 @@ void freeLevelList(struct dnm_chunk * array, size_t size) {
 }
 
 void freeDNM(dnmPtr dnm) {
+	/* frees the dnm */
 	//free annotations
 	struct hash_element_string *current, *tmp;
 	HASH_ITER(hh, dnm->annotation_handle, current, tmp) {
