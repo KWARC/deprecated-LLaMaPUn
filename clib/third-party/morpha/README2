@@ -1,1 +1,2 @@
-We changed morphy.yy.c slightly in order to get an interface that fits our purposes better. Basically, it just changes the input and output to use memstreams and not stdio and stdout.
+We changed morphy.yy.c slightly in order to get an interface that fits our purposes better. Basically, it just changes the input and output to use memstreams and not stdio and stdout,
+and we put the verbstem list into the morpha.yy.c source itself.

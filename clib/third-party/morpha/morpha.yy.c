@@ -50683,6 +50683,8 @@ char get_option(int argc, char *argv[], char *options, int *arg,
 int read_verbstem(char *fn)
 { char w[64];
   int n = 0, i, j, fs;
+  static int initialized = 0;   //make sure verbstemlist is loaded just once
+  if (initialized) return 0;
 //  FILE *f = fopen(fn, "r");
 //
 //  if (f == NULL) fprintf(stderr, "File with consonant doubling verb stems not found (\"%s\").\n", fn);
@@ -50806,6 +50808,7 @@ zip ztrip\n";
     fclose(f);
     qsort(verbstem_list, verbstem_n, sizeof(char*), &vcmp);
   }
+  initialized = 1;
 }
 
 BOOL read_verbstem_file(char *argv[], 
