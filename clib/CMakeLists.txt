@@ -31,6 +31,7 @@ add_library(llamapun_ngrams llamapun_ngrams.c)
 add_library(unicode_normalizer unicode_normalizer.c)
 add_library(llamapun_gt_estimate llamapun_gt_estimate.c)
 add_library(dnmlib dnmlib.c)
+add_library(preprocessor preprocessor.c)
 
 #morpha yields many warnings
 set_source_files_properties(stemmer.c PROPERTIES COMPILE_FLAGS " -w ")
@@ -48,6 +49,7 @@ target_link_libraries(llamapun_senna_pos
 target_link_libraries(llamapun_ngrams stopwords stemmer
                                         llamapun_utils ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 target_link_libraries(dnmlib ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
+target_link_libraries(preprocessor ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 add_executable(TestSENNA tests/senna_post_test.c)
 target_link_libraries(TestSENNA llamapun_senna_pos ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 add_executable(TestSTOPWORDS tests/stopwords_test.c)

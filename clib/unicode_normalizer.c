@@ -7,7 +7,7 @@
 
 #define in_range(x, a, b) (x >= a && x <= b)
 
-void preprocess(char *string) {
+void norm_preprocess(char *string) {
 	//removes accents from common diacritics
 	//REASON: iconv makes e.g. [o umlaut] to ["o]
 	char *readindex = string;
@@ -58,7 +58,7 @@ void normalize_unicode(char *input, char **output) {
         }   
     }
 
-    preprocess(input);
+    norm_preprocess(input);
 
     char *tmp = (char *) malloc(sizeof(char) * (strlen(input) * 10 + 10));   //some memory for the conversion
 
