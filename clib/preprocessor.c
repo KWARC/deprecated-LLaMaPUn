@@ -75,6 +75,7 @@ void append_to_plaintext(struct tmp_preprocessing_data *tpd, const char *string)
 void preprocessing_parse(xmlNode *n, struct tmp_preprocessing_data *tpd) {
 	xmlNode *node;
 	char *normalization;
+	char string[32];
 	xmlChar *content;
 	for (node = n; node!=NULL; node = node->next) {
 		if (xmlStrEqual(node->name, BAD_CAST "text")) {
@@ -86,11 +87,44 @@ void preprocessing_parse(xmlNode *n, struct tmp_preprocessing_data *tpd) {
 			if (normalization) {
 				append_to_plaintext(tpd, normalization);
 			} else {
+				//store offset
+				snprintf(string, sizeof(string), "%ld", tpd->pt_index);
+				xmlNewProp(node, BAD_CAST "llamapun_offset_start", BAD_CAST string);
+
 				preprocessing_parse(node->children, tpd);
+
+				snprintf(string, sizeof(string), "%ld", tpd->pt_index);
+				xmlNewProp(node, BAD_CAST "llamapun_offset_end", BAD_CAST string);
 			}
 			
 		}
 	}
+}
+
+
+void remove_offset_attributes_actual(xmlNode *n) {
+	xmlNode *node;
+	xmlAttr *attr;
+	for (node = n; node!=NULL; node = node->next) {
+		for (attr = node->properties; attr != NULL; attr = attr->next) {
+			if (xmlStrEqual(attr->name, BAD_CAST "llamapun_offset_start") || 
+				xmlStrEqual(attr->name, BAD_CAST "llamapun_offset_end")) {
+				if (attr->prev != NULL)
+					attr->prev->next = attr->next;
+				else
+					node->properties = attr->next;
+				if (attr->next)
+					attr->next->prev = attr->prev;
+				xmlFreeProp(attr);
+			}
+		}
+	}
+}
+
+
+void remove_offset_attributes(xmlDocPtr doc) {
+	xmlNode *node = xmlDocGetRootElement(doc);
+	remove_offset_attributes_actual(node);
 }
 
 
