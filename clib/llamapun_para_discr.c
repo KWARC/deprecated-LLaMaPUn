@@ -48,13 +48,16 @@ json_object* llamapun_para_discr_get_bags (xmlDocPtr doc) {
       continue;
 
     //determine paragraph type
-    if (dnmIteratorHasAnnotation(it_para, "ltx_theorem_thm")) 
+    if (dnmIteratorHasAnnotationInherited(it_para, "ltx_theorem_thm")) 
       para_type = 0;
     //else if ...
     else
       para_type = -1;    //no known paragraph type
 
-    if (para_type < 0) continue;
+    if (para_type < 0) {
+      free(it_sent);
+      continue;
+    }
 
     //loop over sentences
     do {
@@ -76,6 +79,7 @@ json_object* llamapun_para_discr_get_bags (xmlDocPtr doc) {
           for (i = 0; i < NUMBER_OF_THM_TYPES; i++) {
             tmp_word_count->counters[i] = 0;
           }
+          HASH_ADD_KEYPTR(hh,bag_hash, tmp_word_count->word, strlen(tmp_word_count->word), tmp_word_count);
         }
         //increment corresponding counter
         tmp_word_count->counters[para_type]++;
