@@ -10,6 +10,7 @@ SET(COMMON_FLAGS
 SET(CMAKE_C_FLAGS
     "${CMAKE_C_FLAGS} ${COMMON_FLAGS}")
 
+#find the required libraries
 find_library(uthash uthash)
 FIND_LIBRARY(ICONV_LIBRARIES NAMES iconv libiconv libiconv-2 c)
 find_package(Json REQUIRED)
@@ -18,6 +19,7 @@ include_directories(${LIBXML2_INCLUDE_DIR} ${JSON_INCLUDE_DIRS} ${ICONV_INCLUDE_
 
 include_directories("third-party")
 
+#add libraries
 add_library(SENNA_utils third-party/senna/SENNA_utils.c)
 add_library(SENNA_Hash third-party/senna/SENNA_Hash.c)
 add_library(SENNA_nn third-party/senna/SENNA_nn.c)
@@ -34,39 +36,50 @@ add_library(llamapun_gt_estimate llamapun_gt_estimate.c)
 add_library(dnmlib dnmlib.c)
 add_library(preprocessor preprocessor.c)
 
+#special compiler settings:
 #morpha yields many warnings
 set_source_files_properties(stemmer.c PROPERTIES COMPILE_FLAGS " -w ")
 #required for parsing json
 set_source_files_properties(llamapun_gt_estimate.c PROPERTIES COMPILE_FLAGS " -std=c99 ")
 
+#link libraries
 target_link_libraries(SENNA_Hash SENNA_utils)
 target_link_libraries(SENNA_Tokenizer SENNA_Hash SENNA_utils)
 target_link_libraries(SENNA_nn SENNA_utils)
 target_link_libraries(SENNA_POS SENNA_utils SENNA_Hash SENNA_nn)
+target_link_libraries(llamapun_senna_pos SENNA_utils SENNA_Hash SENNA_nn SENNA_Tokenizer SENNA_POS
+                                        llamapun_utils ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 target_link_libraries(llamapun_utils ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
-target_link_libraries(llamapun_senna_pos
-                                        SENNA_utils SENNA_Hash SENNA_nn SENNA_Tokenizer SENNA_POS
+target_link_libraries(llamapun_ngrams stopwords stemmer dnmlib unicode_normalizer
                                         llamapun_utils ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
-target_link_libraries(llamapun_ngrams stopwords stemmer
-                                        llamapun_utils ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
+target_link_libraries(llamapun_gt_estimate ${JSON_LIBRARIES} ${uthash_LIBRARIES})
 target_link_libraries(llamapun_para_discr dnmlib llamapun_utils ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 target_link_libraries(dnmlib ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 target_link_libraries(preprocessor ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
+target_link_libraries(unicode_normalizer ${ICONV_LIBRARIES})
+
+
+#tests
 add_executable(TestSENNA tests/senna_post_test.c)
 target_link_libraries(TestSENNA llamapun_senna_pos ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
+
 add_executable(TestSTOPWORDS tests/stopwords_test.c)
 target_link_libraries(TestSTOPWORDS stopwords ${JSON_LIBRARIES} ${uthash_LIBRARIES})
+
 add_executable(TestSTEMMER tests/stemmer_test.c)
 target_link_libraries(TestSTEMMER stemmer)
+
 add_executable(TestNGRAMS tests/ngrams_test.c)
+target_link_libraries(TestNGRAMS llamapun_ngrams ${JSON_LIBRARIES} ${LIBXML2_LIBRARIES})
+
 add_executable(TestPARA_DISCR tests/para_discr_test.c)
-add_executable(TestDNMLIB tests/dnmlib_test.c)
-target_link_libraries(TestNGRAMS llamapun_ngrams unicode_normalizer dnmlib ${ICONV_LIBRARIES} ${JSON_LIBRARIES} ${LIBXML2_LIBRARIES})
 target_link_libraries(TestPARA_DISCR llamapun_para_discr ${JSON_LIBRARIES} ${LIBXML2_LIBRARIES})
+
+add_executable(TestDNMLIB tests/dnmlib_test.c)
 target_link_libraries(TestDNMLIB dnmlib ${LIBXML2_LIBRARIES})
+
 add_executable(TestUnicodeNormalizer tests/unicode_normalizer_test.c)
-target_link_libraries(TestUnicodeNormalizer unicode_normalizer ${ICONV_LIBRARIES})
-target_link_libraries(llamapun_gt_estimate ${JSON_LIBRARIES} ${uthash_LIBRARIES})
+target_link_libraries(TestUnicodeNormalizer unicode_normalizer)
 
 enable_testing()
 add_test(SENNA_POS_Test TestSENNA WORKING_DIRECTORY "tests")
@@ -78,7 +91,7 @@ add_test(DNMLIB_Test TestDNMLIB WORKING_DIRECTORY "tests")
 add_test(UNICODE_NORMALIZER_Test TestUnicodeNormalizer WORKING_DIRECTORY "tests")
 
 
-#install
+#installation of all .c and .h files 
 
 file(GLOB llamapun_SOURCES *.c)
 file(GLOB llamapun_HEADERS *.h)
