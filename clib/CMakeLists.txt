@@ -99,5 +99,5 @@ add_library(llamapun SHARED ${llamapun_SOURCES} ${llamapun_HEADERS})
 
 target_link_libraries(llamapun SENNA_utils SENNA_Hash SENNA_nn SENNA_Tokenizer SENNA_POS
 	${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
-install(TARGETS llamapun DESTINATION lib)
-install(FILES ${llamapun_HEADERS} DESTINATION include/llamapun)
+install(TARGETS llamapun DESTINATION /usr/lib)
+install(FILES ${llamapun_HEADERS} DESTINATION /usr/include/llamapun)
