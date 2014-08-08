@@ -7,7 +7,7 @@
 
 \usepackage{listings}
 
-\lstset{backgroundcolor=\color{lightgray}}
+\lstset{backgroundcolor=\color{lightgray}, basicstyle=\ttfamily}
 
 \title{Documentation of the LLaMaPUn C library}
 \author{Jan Frederik Schaefer}
@@ -25,7 +25,7 @@ future developers of the library.
 
 \newpage
 
-\section{Installation (on linux)}
+\section{Installation (on Linux)}
 
 You can clone the source from github:
 \begin{lstlisting}[language=bash]
@@ -54,8 +54,72 @@ cmake ..
 make
 make test
 sudo make install
+sudo ldconfig
 \end{lstlisting}
 
+
+
+\section{Including and linking the LLaMaPUn C library}
+After installing the library, you can include e.g. the DNM library writing
+\begin{lstlisting}[language=C]
+#include <llamapun/dnmlib.h>
+\end{lstlisting}
+If you use \texttt{gcc} or \texttt{clang} you can link the LLaMaPUn library by setting the
+\texttt{-lllamapun} flag.
+
+
+\section{DNM library}
+For the natural language processing of the XHTML documents created with LaTeXML,
+we need to switch between two different views on the data back and forth:
+On one hand, most NLP tools only work with plain text,
+on the other hand, the XML structure contains useful information about the structure
+of the document etc.
+The DNM library is supposed to provide an easy interface
+for doing NLP on these documents.
+The central idea is creating a DNM (document narrative model) out of the DOM,
+which could be perceived as a layer between the DOM and the plain text.
+
+\subsection{The document narrative model (DNM)}
+The DNM contains the plaintext as a simple string.
+Additionally, it contains three lists - a list of the paragraphs of the document,
+a list of the sentences, and a list of the words.
+These levels are identified by the annotations \texttt{ltx\_para}, \texttt{ltx\_sentence},
+and \texttt{ltx\_word}.
+One paragraph, sentence, or word is represented as a \texttt{dnm\_chunk}.
+A \texttt{dnm\_chunk} contains
+\begin{itemize}
+\item The offsets to the corresponding part of the plain text
+\item If possible, he offsets to the corresponding part of the lower level list
+(i.e. for example to the words of a sentence)
+\item If possible, the offset to the parent chunk (for example to the paragraph that contains the sentence)
+\item The annotations of that chunk, given by the the \texttt{class} attribute of the
+corresponding XML tag
+\item The annotations of the parent tags, which will be called ``inherited annotations''
+\item The \texttt{id} of the corresponding XML tag
+\item A pointer to the corresponding node in the DOM
+\end{itemize}
+
+\subsection{Creating and freeing the DNM}
+\begin{itemize}
+\item \texttt{dnmPtr createDNM(xmlDocPtr doc, long parameters)}
+\item \texttt{freeDNM(dnmPtr dnm)}
+\end{itemize}
+\texttt{createDNM} creates the DNM of \texttt{doc} and returns a pointer to it.
+So far the only defined parameters are
+\begin{itemize}
+\item \texttt{DNM\_NORMALIZE\_MATH}
+\item \texttt{DNM\_SKIP\_MATH}
+\item \texttt{DNM\_SKIP\_CITE}
+\end{itemize}
+Some tags, e.g. \texttt{math} tags can be ignored, or normalized to a string, e.g. \texttt{[MathFormula]}.
+Note that the DNM has to be freed by calling \texttt{freeDNM}.
+
+\begin{lstlisting}[language=C]
+//Example:
+dnmPtr dnm = createDNM(myDoc,
+               DNM_NORMALIZE_MATH | DNM_SKIP_CITE);
+freeDNM(dnm);
+\end{lstlisting}
 
 
 
