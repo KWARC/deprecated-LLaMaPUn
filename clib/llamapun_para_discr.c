@@ -15,7 +15,7 @@
 #include "dnmlib.h"
 
 
-#define NUMBER_OF_THM_TYPES 5
+#define NUMBER_OF_THM_TYPES 6
 
 struct word_count {
   char *word;
@@ -48,9 +48,25 @@ json_object* llamapun_para_discr_get_bags (xmlDocPtr doc) {
       continue;
 
     //determine paragraph type
-    if (dnmIteratorHasAnnotationInherited(it_para, "ltx_theorem_thm")) 
+    if (dnmIteratorHasAnnotationInherited(it_para, "ltx_theorem_thm") || \
+		dnmIteratorHasAnnotationInherited(it_para, "ltx_theorem_theorem")) 
       para_type = 0;
-    //else if ...
+    else if (dnmIteratorHasAnnotationInherited(it_para, "ltx_theorem_lem") || \
+		     dnmIteratorHasAnnotationInherited(it_para, "ltx_theorem_lemma"))
+	  para_type = 1;
+	else if (dnmIteratorHasAnnotationInherited(it_para, "ltx_theorem_cor") || \
+		     dnmIteratorHasAnnotationInherited(it_para, "ltx_theorem_corrolary"))
+	  para_type = 2;
+	else if (dnmIteratorHasAnnotationInherited(it_para, "ltx_theorem_proof"))
+	  para_type = 3;
+	else if (dnmIteratorHasAnnotationInherited(it_para, "ltx_theorem_def") || \
+		     dnmIteratorHasAnnotationInherited(it_para, "ltx_theorem_definition"))
+	  para_type = 4;
+	else if (dnmIteratorHasAnnotationInherited(it_para, "ltx_theorem_note") || \
+		     dnmIteratorHasAnnotationInherited(it_para, "ltx_theorem_rmk") || \
+			 dnmIteratorHasAnnotationInherited(it_para, "ltx_theorem_remakr") || \
+			 dnmIteratorHasAnnotationInherited(it_para, "ltx_theorem_rem"))
+	  para_type = 5;
     else
       para_type = -1;    //no known paragraph type
 
