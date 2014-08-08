@@ -1,0 +1,62 @@
+\documentclass[12pt]{article}
+\usepackage{fullpage}
+\usepackage{hyperref}
+
+\usepackage{color}
+\definecolor{lightgray}{rgb}{0.7, 0.7, 0.7}
+
+\usepackage{listings}
+
+\lstset{backgroundcolor=\color{lightgray}}
+
+\title{Documentation of the LLaMaPUn C library}
+\author{Jan Frederik Schaefer}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+The LLaMaPUn C library contains some NLP tools for (mainly) mathematical documents.
+This document is supposed to give an overview about these tools - both for users and
+future developers of the library.
+\end{abstract}
+
+\tableofcontents
+
+\newpage
+
+\section{Installation (on linux)}
+
+You can clone the source from github:
+\begin{lstlisting}[language=bash]
+git clone https://github.com/KWARC/LLaMaPUn.git
+\end{lstlisting}
+We will need a couple of libraries:
+\begin{itemize}
+\item Libxml2
+\item LibJSON
+\item uthash
+\item libiconv
+\end{itemize}
+The \texttt{.travis.yml} file in the repository shows an example installation of the LLaMaPUn C library,
+including the installation of these libraries with \texttt{apt-get}.
+
+Since there are some issues with older versions of the JSON library,
+you might want to run a small script to fix the includes, if necessary:
+\begin{lstlisting}[language=bash]
+sh jsonincludecheck.sh > /dev/null
+\end{lstlisting}
+Now we can compile, test, and install the library, using \texttt{cmake}:
+\begin{lstlisting}[language=bash]
+mkdir -p build
+cd build
+cmake ..
+make
+make test
+sudo make install
+\end{lstlisting}
+
+
+
+
+\end{document}
