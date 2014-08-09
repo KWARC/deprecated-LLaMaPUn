@@ -1,17 +1,30 @@
+/*! \defgroup dnmlib DNMlib
+    Most NLP tools work on plain text.
+	However, the XML structure contains useful information about the
+	structure of a document etc.
+	So one tends to switch back and forth.
+	The purpose of this library is to simplify this switching
+	by providing a DNM (document narrative model) and some tools
+	to iterate over it etc.
+	@file
+*/
+
 #include <libxml/tree.h>
 #include <uthash.h>
 
 #include <string.h>
 
-//some bit stuff for parameters
+/*! normalize math tags in document */
 #define DNM_NORMALIZE_MATH (1 << 0)
+/*! skip, i.e. ignore, math tags in document */
 #define DNM_SKIP_MATH      (1 << 1)
+/*! skip, i.e. ignore, cite tags in document */
 #define DNM_SKIP_CITE      (1 << 2)
 
-//different levels for iterators
+/*! the different levels for iterators */
 enum dnm_level {DNM_LEVEL_PARA, DNM_LEVEL_SENTENCE, DNM_LEVEL_WORD, DNM_LEVEL_NONE};
 
-//struct for string items in uthash
+/*! string element for uthash */
 struct hash_element_string {
 	char *string;
 	UT_hash_handle hh;
@@ -80,29 +93,46 @@ typedef struct dnm_iterator * dnmIteratorPtr;
 //Section: Functions
 //=======================================================
 
+/*! creates a DNM
 
+    Example call: createDNM(mydoc, DNM_NORMALIZE_MATH | DNM_SKIP_CITE);
+	Memory has to be freed later using freeDNM
+	@see freeDNM
+    @param doc a pointer to the DOM
+	@param parameters the parameters
+	@retval a pointer to the new DNM
+*/
 dnmPtr createDNM(xmlDocPtr doc, long parameters);
-	/* Creates a DNM and returns a pointer to it.
-	   The memory has to be free'd later by calling freeDNM */
 
-void freeDNM(dnmPtr);
-	/* frees the DNM */
+/*! frees the DNM
+    @param dnm pointer to the DNM to be freed
+*/
+void freeDNM(dnmPtr dnm);
 
 
 //ITERATORS
 
+/*! creates an iterator over the document (uses malloc -> has to be free'd later)
+    @param dnm the document to be iterated over
+	@param level the chunks we want to iterate over (DNM_LEVEL_PARA, DNM_LEVEL_SENTENCE, DNM_LEVEL_WORD)
+	@retval a pointer to the iterator
+*/
 dnmIteratorPtr getDnmIterator(dnmPtr dnm, enum dnm_level level);
-	/* returns an iterator over dnm on the specified level
-	   memory allocated for the iterator has to be free'd */
 
+
+/*! creates an iterator for the children of the current position of an iterator,
+    i.e. over the sentences of a certain paragraph, or over the words of a sentence.
+    The new iterator has to be free'd manually as well
+    @param it the iterator to which tells us what to iterate over
+	@retval the iterator for the children
+*/
 dnmIteratorPtr getDnmChildrenIterator(dnmIteratorPtr it);
-	/* returns iterator for the children of the current position of it,
-	   i.e. over the sentences of a certain paragraph, or over the words of a sentence
-	   memory allocated for new iterator has to be free'd manually as well */
 
+/*! Make an iterator to point to the next chunk
+    @param it the iterator that shall be incremented
+	@retval 0 if the iterator points to the last element already, otherwise 1
+*/
 int dnmIteratorNext(dnmIteratorPtr it);
-	/* makes the iterator point to the next element of the document
-	   returns 0, if there is no element left, otherwise 1 */
 
 int dnmIteratorPrevious(dnmIteratorPtr it);
 	/* like dnmIteratorNext, just the other direction */
@@ -114,21 +144,27 @@ char *getDnmIteratorContent(dnmIteratorPtr it);
 
 //ANNOTATIONS
 
+/*! Checks whether a chunk has a certain annotation.
+    Note that a faster way should be implemented,
+	if you want to repeatedly check for one annotation.
+    @param it A pointer to an iterator
+	@param annotation The string representation of the annotation
+	@retval 1 if the chunk has the annotation, 0 otherwise
+*/
 int dnmIteratorHasAnnotation(dnmIteratorPtr it, const char *annotation);
-	/* Checks, whether the element, pointed to by the iterator, has the annotation.
-	   Returns 1, if it has the annotation, otherwise 0.
-	   Note that there is a faster way, if you want to repeatedly check for one specific annotation.
-	   (by determining aPtr just once, feature isn't implemented yet) */
 
+/*! like dnmIteratorHasAnnotation, just for annotations inherited
+    (i.e. annotations from the parent tags)
+	@see dnmIteratorHasAnnotation
+*/
 int dnmIteratorHasAnnotationInherited(dnmIteratorPtr it, const char *annotation);
-	/* like dnmIteratorHasAnnotation, just for inherited annotations.
-	   Inherited annotations are annotations of the parent nodes */
 
-
+/*! adds an annotation to a chunk.
+    Again: A faster way for repeatedly adding one annotation should be implemented.
+    @param it An iterator referring to the chunk
+	@param annotation The string representation of the annotation
+	@param writeIntoDOM If non-zero: The annotation is also written into the DOM
+	@param inheritToChildren If non-zero: The annotation is inherited to the child chunks
+*/
 void dnmIteratorAddAnnotation(dnmIteratorPtr it, const char *annotation, int writeIntoDOM, int inheritToChildren);
-	/* writes adds an annotation to the dnm chunk the iterator refers to.
-	   The annotation can also be written into the DOM, and inherited to the child chunks.
-	   Again, note that there is a faster way for doing this repeatedly with an annotation,
-	   by determining aPtr just once. This feature isn't implemented yet */
-
 

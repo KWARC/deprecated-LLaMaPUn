@@ -1,12 +1,29 @@
+/*! \defgroup stopwords Stopword Library
+   A small library which provides a function to check
+   whether a word is a regarded a stopword.
+   @file
+*/
+
 #ifndef STOPWORDS_H_INCLUDED
 #define STOPWORDS_H_INCLUDED
 
 //#include <json-c/json.h>
 #include "jsoninclude.h"
 
+/*! loads the stopwords from a JSON array */
 void read_stopwords_from_json(json_object *);
-void load_stopwords();   //loads a set of math stopwords
+
+/*! loads the stopwords from a predefined set of math specialized stopwords */
+void load_stopwords();
+
+/*! frees the currently loaded set of stopwords */
 void free_stopwords();
-int is_stopword(const char *);
+
+/*! Checks whether a word is regarded a stopword.
+    Note that this function is case sensitive.
+    @param word the word to be checked
+	@retval returns 1 if the word is a stopword, otherwise 0
+*/
+int is_stopword(const char * word);
 
 #endif
