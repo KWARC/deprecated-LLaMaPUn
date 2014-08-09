@@ -128,18 +128,22 @@ dnmIteratorPtr getDnmIterator(dnmPtr dnm, enum dnm_level level);
 */
 dnmIteratorPtr getDnmChildrenIterator(dnmIteratorPtr it);
 
-/*! Make an iterator to point to the next chunk
+/*! Make an iterator point to the next chunk
     @param it the iterator that shall be incremented
 	@retval 0 if the iterator points to the last element already, otherwise 1
 */
 int dnmIteratorNext(dnmIteratorPtr it);
 
+/*! Make an iterator point to the previous chunk
+    @see dnmIteratorNext
+*/
 int dnmIteratorPrevious(dnmIteratorPtr it);
-	/* like dnmIteratorNext, just the other direction */
 
+/*! Returns the plain text of the chunk an iterator points to
+    @param it The iterator
+	@retvalue The plain text, ended by \0, which has to be free'd manually
+*/
 char *getDnmIteratorContent(dnmIteratorPtr it);
-	/* returns the plaintext corresponding to the current iterator position.
-	   The string, which is ended by \0, has to be freed manually. */
 
 
 //ANNOTATIONS
