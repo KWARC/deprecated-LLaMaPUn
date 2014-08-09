@@ -20,6 +20,6 @@ pm_to_blib
 .\#*
 CMakeLists.txt.user
 clib/CMakeFiles/
-doc/clib_documentation/**
-!doc/clib_documentation/*.pdf
+doc/clib_documentation/latex
+!doc/clib_documentation/latex/*.pdf
 
