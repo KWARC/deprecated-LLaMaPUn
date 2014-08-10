@@ -75,6 +75,10 @@ json_object* llamapun_para_discr_get_bags (xmlDocPtr doc) {
       continue;
     }
 
+	//create hash to store words found already
+    struct hash_element_string * tmpbag = NULL;
+	struct hash_element_string * tmphashstr;
+
     //loop over sentences
     do {
       dnmIteratorPtr it_word = getDnmChildrenIterator(it_sent);
@@ -87,18 +91,27 @@ json_object* llamapun_para_discr_get_bags (xmlDocPtr doc) {
       do {
         word = getDnmIteratorContent(it_word);
 
-        HASH_FIND_STR(bag_hash, word, tmp_word_count);
-        if (tmp_word_count == NULL) {
-          tmp_word_count = (struct word_count *) malloc(sizeof(struct word_count));
-          tmp_word_count->word = strdup(word);
-          //set counts to 0
-          for (i = 0; i < NUMBER_OF_THM_TYPES; i++) {
-            tmp_word_count->counters[i] = 0;
+		HASH_FIND_STR(tmpbag, word, tmphashstr);
+		if (tmphashstr == NULL) {   //if word hasn't been added to bag yet
+          //add word to hash of words found in paragraph so far
+		  tmphashstr = (struct hash_element_string *) malloc(sizeof(struct hash_element_string));
+		  tmphashstr->string = strdup(word);
+		  HASH_ADD_KEYPTR(hh, tmpbag, tmphashstr->string, strlen(tmphashstr->string), tmphashstr);
+
+		  //add word to general statistic
+          HASH_FIND_STR(bag_hash, word, tmp_word_count);
+          if (tmp_word_count == NULL) {
+            tmp_word_count = (struct word_count *) malloc(sizeof(struct word_count));
+            tmp_word_count->word = strdup(word);
+            //set counts to 0
+            for (i = 0; i < NUMBER_OF_THM_TYPES; i++) {
+              tmp_word_count->counters[i] = 0;
+            }
+            HASH_ADD_KEYPTR(hh,bag_hash, tmp_word_count->word, strlen(tmp_word_count->word), tmp_word_count);
           }
-          HASH_ADD_KEYPTR(hh,bag_hash, tmp_word_count->word, strlen(tmp_word_count->word), tmp_word_count);
-        }
-        //increment corresponding counter
-        tmp_word_count->counters[para_type]++;
+          //increment corresponding counter
+          tmp_word_count->counters[para_type]++;
+		}
 
         free(word);
 
@@ -109,6 +122,14 @@ json_object* llamapun_para_discr_get_bags (xmlDocPtr doc) {
     } while (dnmIteratorNext(it_sent));
 
     free(it_sent);
+
+	//free the temporary hash of words of that paragraph
+	struct hash_element_string * currenthashstr;
+	HASH_ITER(hh, tmpbag, currenthashstr, tmphashstr) {
+	  HASH_DEL(tmpbag, currenthashstr);
+	  free(currenthashstr->string);
+	  free(currenthashstr);
+	}
 
   } while (dnmIteratorNext(it_para));
 
