@@ -13,6 +13,7 @@
 		{if (index >= *oldsizeptr) {\
 			ptr = (type*)realloc(ptr, (newsize)*sizeof(type)); *oldsizeptr=newsize; CHECK_ALLOC(ptr); }}
 
+#define NUMBER_OF_EXTENDED_PARA_ANNOTATIONS 5
 
 
 //=======================================================
@@ -305,9 +306,12 @@ struct tmp_parsedata {
 	size_t inherited_annotations_allocated;
 	size_t inherited_annotations_index;
 
+	enum dnm_level current_level;
+
 	char * para_annotation;
 	char * sent_annotation;
 	char * word_annotation;
+	char * extended_para_annotations[NUMBER_OF_EXTENDED_PARA_ANNOTATIONS];
 };
 
 
@@ -394,6 +398,25 @@ enum dnm_level getLevelFromAnnotations(struct tmp_parsedata *dcs, char **annotat
 	return DNM_LEVEL_NONE;
 }
 
+enum dnm_level getLevelFromAnnotations_extendedPara(struct tmp_parsedata *dcs, char **annotationlist,
+                                       size_t annotationlist_length) {
+	/* returns level para, if the annotation pointers fall into the extended range (toc, bibliography, titles, ...) */
+
+	char *tmp;
+	int i;
+	while (annotationlist_length) {
+		tmp = annotationlist[--annotationlist_length];
+		//iterate over annotations marking paragraphs in extended range
+		i = NUMBER_OF_EXTENDED_PARA_ANNOTATIONS;
+		while (i--) {
+			if (dcs->extended_para_annotations[i] == tmp) return DNM_LEVEL_PARA;
+		}
+	}
+
+	//if nothing was found:
+	return DNM_LEVEL_NONE;
+}
+
 void appendAnnotationsForInheritance(char **annotationlist, size_t annotationlist_number, struct tmp_parsedata *dcs) {
 	/* appends annotations to the list in the dcs, which accumulates the annotations of the parent tags. */
 	POSSIBLE_RESIZE(dcs->inherited_annotations, dcs->inherited_annotations_index + annotationlist_number,
@@ -416,6 +439,7 @@ void parse_dom_into_dnm(xmlNode *n, dnmPtr dnm, struct tmp_parsedata *dcs, long 
 	size_t annotationlist_length;
 	size_t annotationlist_number;
 	enum dnm_level level;
+	enum dnm_level tmplevel;
 	struct dnm_chunk * current_chunk;
 	size_t level_offset;
 	size_t old_number_inherited_annotations;
@@ -474,6 +498,20 @@ void parse_dom_into_dnm(xmlNode *n, dnmPtr dnm, struct tmp_parsedata *dcs, long 
 //USING THE ANNOTATIONS, MAKE A dnm_chunk
 
 				level = getLevelFromAnnotations(dcs, annotationlist, annotationlist_number);
+				if (level==DNM_LEVEL_NONE && (dcs->current_level == DNM_LEVEL_NONE) && (parameters & DNM_EXTEND_PARA_RANGE)) {
+					level = getLevelFromAnnotations_extendedPara(dcs, annotationlist, annotationlist_number);
+				}
+
+				// Check that level complies with strict hierarchy
+				if ( (dcs->current_level == DNM_LEVEL_PARA && level == DNM_LEVEL_PARA) ||
+					  (dcs->current_level == DNM_LEVEL_SENTENCE && (level!=DNM_LEVEL_WORD && level!=DNM_LEVEL_NONE)) ||
+					  (dcs->current_level == DNM_LEVEL_WORD && level != DNM_LEVEL_NONE)) {
+					fprintf(stderr, "There are violations in the document hierarchy!\n");
+				}
+
+				tmplevel = dcs->current_level;
+				if (level != DNM_LEVEL_NONE) dcs->current_level = level;
+
 				current_chunk = NULL;
 				switch (level) {                    //take chunk from corresponding array
 					case DNM_LEVEL_PARA:
@@ -536,12 +574,16 @@ void parse_dom_into_dnm(xmlNode *n, dnmPtr dnm, struct tmp_parsedata *dcs, long 
 					old_number_inherited_annotations = dcs->inherited_annotations_index;
 					appendAnnotationsForInheritance(annotationlist, annotationlist_number, dcs);
 
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 					//recursively parse children
 					parse_dom_into_dnm(node->children, dnm, dcs, parameters);
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 					//"remove" annotations from this chunk in the inheritance list
 					dcs->inherited_annotations_index = old_number_inherited_annotations;
 
+					//switch level back
+					dcs->current_level = tmplevel;
 
 					//due to realloc, location of current_chunk might have changed :D
 					switch (level) {
@@ -628,11 +670,23 @@ dnmPtr createDNM(xmlDocPtr doc, long parameters) {
 	dcs->sent_annotation = getAnnotationPtr(dnm, "ltx_sentence", 1);
 	dcs->word_annotation = getAnnotationPtr(dnm, "ltx_word", 1);
 
+	if (parameters & DNM_EXTEND_PARA_RANGE) {
+		dcs->extended_para_annotations[0] = getAnnotationPtr(dnm, "ltx_title", 1);
+		dcs->extended_para_annotations[1] = getAnnotationPtr(dnm, "ltx_authors", 1);
+		//there are ltx_p annotations inside tags annotated as ltx_para, but there is a mechanism to ignore those
+		dcs->extended_para_annotations[2] = getAnnotationPtr(dnm, "ltx_p", 1);
+		//again occurs inside paragraphs etc., but required e.g. for table of contents ("ltx_tocentry"s are nested)
+		dcs->extended_para_annotations[3] = getAnnotationPtr(dnm, "ltx_text", 1);
+		dcs->extended_para_annotations[4] = getAnnotationPtr(dnm, "ltx_bibitem", 1);
+	}
+
 	dcs->inherited_annotations = (char **) malloc(sizeof(char *)*64);
 	dcs->inherited_annotations_allocated = 64;
 	dcs->inherited_annotations_index = 0;
 
 	//levels
+	dcs->current_level = DNM_LEVEL_NONE;
+
 	dnm->para_level = (struct dnm_chunk *) malloc(sizeof(struct dnm_chunk)*32);
 	dcs->para_level_allocated = 32;
 	dcs->para_level_index = 0;

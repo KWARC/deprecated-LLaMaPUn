@@ -20,6 +20,8 @@
 #define DNM_SKIP_MATH      (1 << 1)
 /*! skip, i.e. ignore, cite tags in document */
 #define DNM_SKIP_CITE      (1 << 2)
+/*! include title, authors, toc, bibliography, ... in list of paragraphs */
+#define DNM_EXTEND_PARA_RANGE (1 << 3)
 
 /*! the different levels for iterators */
 enum dnm_level {DNM_LEVEL_PARA, DNM_LEVEL_SENTENCE, DNM_LEVEL_WORD, DNM_LEVEL_NONE};
