@@ -34,7 +34,7 @@ add_library(llamapun_para_discr llamapun_para_discr.c)
 add_library(unicode_normalizer unicode_normalizer.c)
 add_library(llamapun_gt_estimate llamapun_gt_estimate.c)
 add_library(dnmlib dnmlib.c)
-add_library(preprocessor preprocessor.c)
+#add_library(preprocessor preprocessor.c)
 
 #special compiler settings:
 #morpha yields many warnings
@@ -55,7 +55,7 @@ target_link_libraries(llamapun_ngrams stopwords stemmer dnmlib unicode_normalize
 target_link_libraries(llamapun_gt_estimate ${JSON_LIBRARIES} ${uthash_LIBRARIES})
 target_link_libraries(llamapun_para_discr dnmlib llamapun_utils ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 target_link_libraries(dnmlib ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
-target_link_libraries(preprocessor ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
+#target_link_libraries(preprocessor ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 target_link_libraries(unicode_normalizer ${ICONV_LIBRARIES})
 
 
