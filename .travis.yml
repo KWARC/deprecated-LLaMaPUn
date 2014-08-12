@@ -13,11 +13,12 @@ before_install:
 install:
  - sudo apt-get install cmake
  - sudo apt-get install make
+ - sudo apt-get install libtool
  - sudo apt-get install libxml2-dev
  - sudo apt-get install libjson0-dev
  - sudo apt-get install uthash-dev
- - sudo wget http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.14.tar.gz
- - sudo tar -xvzf libiconv-1.14.tar.gz
+ - wget http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.14.tar.gz
+ - tar -xvzf libiconv-1.14.tar.gz
  - cd libiconv-1.14
  - sudo ./configure --prefix=/usr/local/libiconv
  - sudo make
