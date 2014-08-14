@@ -58,7 +58,6 @@ target_link_libraries(dnmlib ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 #target_link_libraries(preprocessor ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 target_link_libraries(unicode_normalizer ${ICONV_LIBRARIES})
 
-
 #tests
 add_executable(TestSENNA tests/senna_post_test.c)
 target_link_libraries(TestSENNA llamapun_senna_pos ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
@@ -80,6 +79,7 @@ target_link_libraries(TestDNMLIB dnmlib ${LIBXML2_LIBRARIES})
 
 add_executable(TestUnicodeNormalizer tests/unicode_normalizer_test.c)
 target_link_libraries(TestUnicodeNormalizer unicode_normalizer)
+
 
 enable_testing()
 add_test(SENNA_POS_Test TestSENNA WORKING_DIRECTORY "tests")
