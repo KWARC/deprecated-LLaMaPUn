@@ -285,6 +285,45 @@ void dnmIteratorAddAnnotation(dnmIteratorPtr it, const char *annotation, int wri
 
 
 //=======================================================
+//Section: Tokenization
+//=======================================================
+
+void freeLevelList(struct dnm_chunk * array, size_t size);  //defined below
+
+void markSentences(dnmPtr dnm, size_t start_offsets[], size_t end_offsets[], size_t n) {
+	if (dnm->size_sent_level) {
+		fprintf(stderr, "There are already sentences marked up in the DNM - forgetting them\n");
+		freeLevelList(dnm->sent_level, dnm->size_sent_level);
+	}
+	dnm->size_sent_level = n;
+	dnm->sent_level = (struct dnm_chunk *) malloc(n*sizeof(struct dnm_chunk));
+
+	size_t index;
+	char tmp_idstring[512];
+	for (index = 0; index < n; index++) {
+		snprintf(tmp_idstring, sizeof(tmp_idstring), "sentence.%ld", index);
+		dnm->sent_level[index].id = strdup(tmp_idstring);
+		dnm->sent_level[index].dom_node = NULL;    //Need to fix this if we're creating tags in xhtml
+		dnm->sent_level[index].level = DNM_LEVEL_SENTENCE;
+		dnm->sent_level[index].offset_parent = -1;
+		dnm->sent_level[index].offset_children_start = -1;
+		dnm->sent_level[index].offset_children_end = -1;
+
+		dnm->sent_level[index].annotations = NULL;
+		dnm->sent_level[index].inherited_annotations = NULL;   //Should fix that later...
+		dnm->sent_level[index].number_of_annotations = 0;
+		dnm->sent_level[index].number_of_inherited_annotations = 0;
+		dnm->sent_level[index].annotations_allocated = 0;
+		dnm->sent_level[index].inherited_annotations_allocated = 0;
+
+		dnm->sent_level[index].offset_start = start_offsets[index];
+		dnm->sent_level[index].offset_end = end_offsets[index];
+	}
+}
+
+
+
+//=======================================================
 //Section: Creating DNM
 //=======================================================
 
@@ -653,6 +692,7 @@ dnmPtr createDNM(xmlDocPtr doc, long parameters) {
 	//dnm
 	dnmPtr dnm = (dnmPtr)malloc(sizeof(struct dnm_struct));
 	CHECK_ALLOC(dnm);
+	dnm->parameters = parameters;
 
 	dnm->document = doc;
 

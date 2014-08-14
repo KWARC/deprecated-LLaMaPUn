@@ -40,6 +40,7 @@ struct hash_element_string {
 
 struct dnm_struct {
 	xmlDocPtr document;
+	long parameters;
 
 	char *plaintext;
 
@@ -174,3 +175,6 @@ int dnmIteratorHasAnnotationInherited(dnmIteratorPtr it, const char *annotation)
 */
 void dnmIteratorAddAnnotation(dnmIteratorPtr it, const char *annotation, int writeIntoDOM, int inheritToChildren);
 
+
+//TOKENIZATION
+void markSentences(dnmPtr dnm, size_t *offset_starts, size_t *offset_ends, size_t n);
