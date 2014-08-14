@@ -4,7 +4,7 @@
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 
-#include "../dnmlib.h"
+#include "../old_dnmlib.h"
 
 
 const char TEST_XHTML_DOCUMENT[] = "../../t/documents/1311.6767.xhtml";

@@ -12,7 +12,7 @@
 // LLaMaPUn Utils
 #include "llamapun_utils.h"
 #include "llamapun_ngrams.h"
-#include "dnmlib.h"
+#include "old_dnmlib.h"
 
 
 #define NUMBER_OF_THM_TYPES 6

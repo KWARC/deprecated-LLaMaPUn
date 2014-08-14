@@ -15,7 +15,7 @@
 #include "stemmer.h"
 #include "llamapun_ngrams.h"
 #include "unicode_normalizer.h"
-#include "dnmlib.h"
+#include "old_dnmlib.h"
 
 
 struct stringcount {

@@ -33,7 +33,8 @@ add_library(llamapun_ngrams llamapun_ngrams.c)
 add_library(llamapun_para_discr llamapun_para_discr.c)
 add_library(unicode_normalizer unicode_normalizer.c)
 add_library(llamapun_gt_estimate llamapun_gt_estimate.c)
-add_library(dnmlib dnmlib.c)
+#add_library(dnmlib dnmlib.c)
+add_library(old_dnmlib old_dnmlib.c)
 #add_library(preprocessor preprocessor.c)
 
 #special compiler settings:
@@ -50,11 +51,12 @@ target_link_libraries(SENNA_POS SENNA_utils SENNA_Hash SENNA_nn)
 target_link_libraries(llamapun_senna_pos SENNA_utils SENNA_Hash SENNA_nn SENNA_Tokenizer SENNA_POS
                                         llamapun_utils ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 target_link_libraries(llamapun_utils ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
-target_link_libraries(llamapun_ngrams stopwords stemmer dnmlib unicode_normalizer
+target_link_libraries(llamapun_ngrams stopwords stemmer old_dnmlib unicode_normalizer
                                         llamapun_utils ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 target_link_libraries(llamapun_gt_estimate ${JSON_LIBRARIES} ${uthash_LIBRARIES})
-target_link_libraries(llamapun_para_discr dnmlib llamapun_utils ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
-target_link_libraries(dnmlib ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
+target_link_libraries(llamapun_para_discr old_dnmlib llamapun_utils ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
+#target_link_libraries(dnmlib ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
+target_link_libraries(old_dnmlib ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 #target_link_libraries(preprocessor ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 target_link_libraries(unicode_normalizer ${ICONV_LIBRARIES})
 
@@ -74,9 +76,6 @@ target_link_libraries(TestNGRAMS llamapun_ngrams ${JSON_LIBRARIES} ${LIBXML2_LIB
 add_executable(TestPARA_DISCR tests/para_discr_test.c)
 target_link_libraries(TestPARA_DISCR llamapun_para_discr ${JSON_LIBRARIES} ${LIBXML2_LIBRARIES})
 
-add_executable(TestDNMLIB tests/dnmlib_test.c)
-target_link_libraries(TestDNMLIB dnmlib ${LIBXML2_LIBRARIES})
-
 add_executable(TestUnicodeNormalizer tests/unicode_normalizer_test.c)
 target_link_libraries(TestUnicodeNormalizer unicode_normalizer)
 
@@ -87,7 +86,7 @@ add_test(STOPWORDS_Test TestSTOPWORDS WORKING_DIRECTORY "tests")
 add_test(STEMMER_Test TestSTEMMER WORKING_DIRECTORY "tests")
 add_test(NGRAMS_Test TestNGRAMS WORKING_DIRECTORY "tests")
 add_test(PARA_DISCR_Test TestPARA_DISCR WORKING_DIRECTORY "tests")
-add_test(DNMLIB_Test TestDNMLIB WORKING_DIRECTORY "tests")
+#add_test(DNMLIB_Test TestDNMLIB WORKING_DIRECTORY "tests")
 add_test(UNICODE_NORMALIZER_Test TestUnicodeNormalizer WORKING_DIRECTORY "tests")
 
 

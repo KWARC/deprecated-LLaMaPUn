@@ -6,7 +6,7 @@
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>
-#include "dnmlib.h"
+#include "old_dnmlib.h"
 
 int main(void) {
 	//load example document
