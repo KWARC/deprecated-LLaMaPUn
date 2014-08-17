@@ -38,7 +38,7 @@ json_object* llamapun_para_discr_get_bags (xmlDocPtr doc) {
   int para_type;
   int i;
 
-  dnmPtr dnm = createDNM(doc, DNM_NORMALIZE_MATH | DNM_SKIP_CITE);
+  old_dnmPtr dnm = old_createDNM(doc, DNM_NORMALIZE_MATH | DNM_SKIP_CITE);
   dnmIteratorPtr it_para = getDnmIterator(dnm, DNM_LEVEL_PARA);
 
   //loop over paragraphs
@@ -134,7 +134,7 @@ json_object* llamapun_para_discr_get_bags (xmlDocPtr doc) {
   } while (dnmIteratorNext(it_para));
 
   free(it_para);
-  freeDNM(dnm);
+  old_freeDNM(dnm);
 
     
   //now transfer data to json object

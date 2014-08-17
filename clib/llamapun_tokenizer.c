@@ -13,7 +13,7 @@ int main(void) {
 	xmlDocPtr mydoc = xmlReadFile("../t/documents/1311.0066.xhtml", NULL, 0);
 
 	//Create DNM, with normalized math tags, and ignoring cite tags
-	dnmPtr mydnm = createDNM(mydoc, DNM_NORMALIZE_MATH | DNM_SKIP_CITE | DNM_EXTEND_PARA_RANGE);
+	old_dnmPtr mydnm = old_createDNM(mydoc, DNM_NORMALIZE_MATH | DNM_SKIP_CITE | DNM_EXTEND_PARA_RANGE);
 
 	printf("Plaintext: %s", mydnm->plaintext);
 
@@ -23,10 +23,10 @@ int main(void) {
 	size_t *offset_starts_array;
 	size_t *offset_ends_array;
 	//last argument is number of sentences
-	markSentences(mydnm, offset_starts_array, offset_ends_array, 0);	
+	//markSentences(mydnm, offset_starts_array, offset_ends_array, 0);	
 
 	//clean up
-	freeDNM(mydnm);
+	old_freeDNM(mydnm);
 	xmlFreeDoc(mydoc);
 	xmlCleanupParser();
 	

@@ -41,7 +41,7 @@ json_object* llamapun_get_ngrams (xmlDocPtr doc) {
 
   load_stopwords();
 
-  dnmPtr dnm = createDNM(doc, DNM_NORMALIZE_MATH | DNM_SKIP_CITE);
+  old_dnmPtr dnm = old_createDNM(doc, DNM_NORMALIZE_MATH | DNM_SKIP_CITE);
   dnmIteratorPtr it_sent = getDnmIterator(dnm, DNM_LEVEL_SENTENCE);
 
   //loop over sentences
@@ -205,7 +205,7 @@ json_object* llamapun_get_ngrams (xmlDocPtr doc) {
   } while (dnmIteratorNext(it_sent));
 
   free(it_sent);
-  freeDNM(dnm);
+  old_freeDNM(dnm);
 
   close_stemmer();
   free_stopwords();
