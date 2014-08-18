@@ -30,13 +30,13 @@ void markSentences(dnmPtr dnm, size_t start_offsets[], size_t end_offsets[], siz
 
 
 //for the creation of the DNM, we need to keep some things in mind:
-struct tmp_parsedata {
+struct tmpParseData {
   size_t plaintext_allocated;
   size_t plaintext_index;
 };
 
 
-void copy_into_plaintext(const char *string, dnmPtr dnm, struct tmp_parsedata *dcs) {
+void copy_into_plaintext(const char *string, dnmPtr dnm, struct tmpParseData *dcs) {
   /* appends string to the plaintext, stored in dnm */
   while (*string != '\0') {
     POSSIBLE_RESIZE(dnm->plaintext, dcs->plaintext_index, &dcs->plaintext_allocated,
@@ -46,15 +46,22 @@ void copy_into_plaintext(const char *string, dnmPtr dnm, struct tmp_parsedata *d
 }
 
 
-void parse_dom_into_dnm(xmlNode *n, dnmPtr dnm, struct tmp_parsedata *dcs, long parameters) { 
+void parse_dom_into_dnm(xmlNode *n, dnmPtr dnm, struct tmpParseData *dcs, long parameters) { 
   /* the core function which (recursively) parses the DOM into the DNM */
 
   //declaring a lot of variables required later on...
   xmlNode *node;
   xmlChar *tmpxmlstr;
+  char offsetstring[32];
 
   //iterate over nodes
   for (node = n; node!=NULL; node = node->next) {
+
+//write start offset into DOM
+    snprintf(offsetstring, sizeof(offsetstring), "%ld", dcs->plaintext_index);
+    xmlNewProp(node, BAD_CAST "llamapun_offset_start", BAD_CAST offsetstring);
+
+//DEAL WITH TAG
     //possibly normalize math tags
     if ((parameters&DNM_NORMALIZE_TAGS) && xmlStrEqual(node->name, BAD_CAST "math")) {
       copy_into_plaintext("[MathFormula]", dnm, dcs);
@@ -75,6 +82,11 @@ void parse_dom_into_dnm(xmlNode *n, dnmPtr dnm, struct tmp_parsedata *dcs, long 
     else {
       parse_dom_into_dnm(node->children, dnm, dcs, parameters);
     }
+
+//write end offset into DOM
+    snprintf(offsetstring, sizeof(offsetstring), "%ld", dcs->plaintext_index-1);
+    xmlNewProp(node, BAD_CAST "llamapun_offset_end", BAD_CAST offsetstring);
+
   }
 }
 
@@ -90,7 +102,7 @@ dnmPtr createDNM(xmlDocPtr doc, long parameters) {
 
   //----------------INITIALIZE----------------
   //dcs (data required only during parsing)
-  struct tmp_parsedata *dcs = (struct tmp_parsedata*)malloc(sizeof(struct tmp_parsedata));
+  struct tmpParseData *dcs = (struct tmpParseData*)malloc(sizeof(struct tmpParseData));
   CHECK_ALLOC(dcs);
 
   //dnm
