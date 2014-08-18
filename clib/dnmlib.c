@@ -35,6 +35,27 @@ struct tmpParseData {
   size_t plaintext_index;
 };
 
+void wrap_text_into_spans(xmlNode *n) {
+  /* puts text which has sibling nodes into a span (simplifies the offset stuff a lot) */
+  xmlNode *node;
+  xmlNode *newNode;
+  for (node=n; node!=NULL; node=node->next) {
+    printf("  %s\n", node->name);
+    if (xmlStrEqual(node->name, BAD_CAST "text")) {
+      printf("try it\n");
+      if (node->next != NULL || node->prev != NULL) {  //if node has siblings
+        printf("do it\n");
+        newNode = xmlNewNode(NULL, BAD_CAST "span");
+        xmlAddNextSibling(node, newNode);
+        xmlUnlinkNode(node);
+        xmlAddChild(newNode, node);
+        node = newNode;  //continue from the span
+      }
+    }
+    wrap_text_into_spans(node->children);
+  }
+}
+
 
 void copy_into_plaintext(const char *string, dnmPtr dnm, struct tmpParseData *dcs) {
   /* appends string to the plaintext, stored in dnm */
@@ -72,7 +93,6 @@ void parse_dom_into_dnm(xmlNode *n, dnmPtr dnm, struct tmpParseData *dcs, long p
     }
     //copy contents of text nodes into plaintext
     else if (xmlStrEqual(node->name, BAD_CAST "text")) {
-
       tmpxmlstr = xmlNodeGetContent(node);
       CHECK_ALLOC(tmpxmlstr);
       copy_into_plaintext((char*)tmpxmlstr, dnm, dcs);
@@ -119,8 +139,8 @@ dnmPtr createDNM(xmlDocPtr doc, long parameters) {
   dcs->plaintext_allocated = 4096;
   dcs->plaintext_index = 0;
 
-
-  //Call the actual parsing function
+  //do the actual parsing
+  wrap_text_into_spans(xmlDocGetRootElement(doc));
   parse_dom_into_dnm(xmlDocGetRootElement(doc), dnm, dcs, parameters);
 
 
