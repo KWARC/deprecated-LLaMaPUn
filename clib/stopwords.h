@@ -22,7 +22,7 @@ void free_stopwords();
 /*! Checks whether a word is regarded a stopword.
     Note that this function is case sensitive.
     @param word the word to be checked
-	@retval returns 1 if the word is a stopword, otherwise 0
+    @retval returns 1 if the word is a stopword, otherwise 0
 */
 int is_stopword(const char * word);
 

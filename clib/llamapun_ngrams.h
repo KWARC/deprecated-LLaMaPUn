@@ -1,6 +1,6 @@
 /*! \defgroup ngrams The ngram library
     Consists of a single function for finding ngrams so far.
-	@file
+    @file
 */
 
 //#include <json-c/json.h>
@@ -14,8 +14,8 @@
 
 /*! creates and returns statistics of the unigrams, bigrams, and trigrams
     found in a document.
-	@param doc the DOM
-	@retval returns the counts as a JSON object
+    @param doc the DOM
+    @retval returns the counts as a JSON object
 */
 json_object* llamapun_get_ngrams (xmlDocPtr doc);
 

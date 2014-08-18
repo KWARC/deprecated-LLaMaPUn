@@ -1,8 +1,8 @@
 /*! \defgroup stemmer A Library for Stemming Words
     Basically, this library is a small wrapper around
-	the (therefore slightly modified) morpha stemmer
-	from the University of Sussex.
-	@file
+    the (therefore slightly modified) morpha stemmer
+    from the University of Sussex.
+    @file
 */
 
 #ifndef NORMALIZER_H_INCLUDED
@@ -24,7 +24,7 @@ void close_stemmer();
 
 /*! stems a sentence
     @param input the input string
-	@param output pointer to the stemmed output
+    @param output pointer to the stemmed output
 */
 void morpha_stem(const char *input, char **output);
 
