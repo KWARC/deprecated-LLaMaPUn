@@ -27,7 +27,7 @@ struct hash_element_string {
 //=======================================================
 
 
-struct dnm_struct {
+struct dnmStruct {
   xmlDocPtr document;
   long parameters;
 
@@ -36,7 +36,15 @@ struct dnm_struct {
   size_t size_plaintext;
 };
 
-typedef struct dnm_struct * dnmPtr;
+typedef struct dnmStruct * dnmPtr;
+
+
+struct _dnmRange {
+  size_t start;
+  size_t end;
+};
+
+typedef struct _dnmRange dnmRange;
 
 
 
@@ -61,4 +69,5 @@ void freeDNM(dnmPtr dnm);
 
 
 //TOKENIZATION
-void markSentences(dnmPtr dnm, size_t *offset_starts, size_t *offset_ends, size_t n);
+int mark_sentence(dnmPtr dnm, dnmRange range);
+char* dnm_node_plaintext(dnmPtr mydnm, xmlNodePtr mynode);

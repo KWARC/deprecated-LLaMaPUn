@@ -19,8 +19,68 @@
 //Section: Tokenization
 //=======================================================
 
-void markSentences(dnmPtr dnm, size_t start_offsets[], size_t end_offsets[], size_t n) {
+
+dnmRange get_range_of_node(xmlNode *node) {
+  xmlAttr *attr;
+  dnmRange answer;
+  answer.start = 0;
+  answer.end = 0;
+
+  xmlChar *value;
+  for (attr = node->properties; attr != NULL; attr = attr->next) {
+    if (xmlStrEqual(attr->name, BAD_CAST "llamapun_offset_start")) {
+      value = xmlNodeGetContent(attr->children);
+      sscanf((char *)value, "%ld", &(answer.start));
+      xmlFree(value);
+    }
+    else if (xmlStrEqual(attr->name, BAD_CAST "llamapun_offset_end")) {
+      value = xmlNodeGetContent(attr->children);
+      sscanf((char *)value, "%ld", &(answer.end));
+      xmlFree(value);
+    }
+  }
+  return answer;
+}
+
+
+xmlNode * get_lowest_surrounding_node(xmlNode *n, dnmRange range) {
+  xmlNode *node;
+  dnmRange r;
+  xmlNode *tmp;
+  for (node=n; node!=NULL; node=node->next) {
+    r = get_range_of_node(node);
+    if (r.start <= range.start && r.end >= range.end) {
+      tmp = get_lowest_surrounding_node(node, range);
+      if (tmp != NULL) return tmp;
+      else return node;
+    }
+  }
+  return NULL;   //didn't find anything
+}
+
+char* dnm_node_plaintext(dnmPtr mydnm, xmlNodePtr mynode) {
+  dnmRange range = get_range_of_node(mynode);
+  if (range.end < range.start) {
+    fprintf(stderr, "ERROR (dnmlib): llamapun range start larger than end\n");
+    return NULL;
+  } else if (range.end == 0) {   //no offset annotations
+    return NULL;
+  } else if (range.end > mydnm->size_plaintext) {
+    fprintf(stderr, "ERROR (dnmlib): llamapun offset out of range\n");
+    return NULL;
+  }
+
+  char tmp = mydnm->plaintext[range.end+1];
+  mydnm->plaintext[range.end+1] = '\0';
+  char *answer = strdup(mydnm->plaintext+range.start);
+  if (range.end > range.start) CHECK_ALLOC(answer);
+  mydnm->plaintext[range.end+1] = tmp;
+  return answer;
+}
+
+int mark_sentence(dnmPtr dnm, dnmRange range) {
   //to be implemented
+  return 0;   //everything went well
 }
 
 
@@ -91,6 +151,10 @@ void parse_dom_into_dnm(xmlNode *n, dnmPtr dnm, struct tmpParseData *dcs, long p
     else if ((parameters&DNM_NORMALIZE_TAGS) && xmlStrEqual(node->name, BAD_CAST "cite")) {
       copy_into_plaintext("[CiteExpression]", dnm, dcs);
     }
+    //skip head
+    else if (xmlStrEqual(node->name, BAD_CAST "head")) {
+      //don't to anything
+    }
     //copy contents of text nodes into plaintext
     else if (xmlStrEqual(node->name, BAD_CAST "text")) {
       tmpxmlstr = xmlNodeGetContent(node);
@@ -126,7 +190,7 @@ dnmPtr createDNM(xmlDocPtr doc, long parameters) {
   CHECK_ALLOC(dcs);
 
   //dnm
-  dnmPtr dnm = (dnmPtr)malloc(sizeof(struct dnm_struct));
+  dnmPtr dnm = (dnmPtr)malloc(sizeof(struct dnmStruct));
   CHECK_ALLOC(dnm);
   dnm->parameters = parameters;
 
