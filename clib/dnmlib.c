@@ -28,12 +28,12 @@ dnmRange get_range_of_node(xmlNode *node) {
 
   xmlChar *value;
   for (attr = node->properties; attr != NULL; attr = attr->next) {
-    if (xmlStrEqual(attr->name, BAD_CAST "llamapun_offset_start")) {
+    if (xmlStrEqual(attr->name, BAD_CAST "dnm_from")) {
       value = xmlNodeGetContent(attr->children);
       sscanf((char *)value, "%ld", &(answer.start));
       xmlFree(value);
     }
-    else if (xmlStrEqual(attr->name, BAD_CAST "llamapun_offset_end")) {
+    else if (xmlStrEqual(attr->name, BAD_CAST "dnm_to")) {
       value = xmlNodeGetContent(attr->children);
       sscanf((char *)value, "%ld", &(answer.end));
       xmlFree(value);
@@ -78,8 +78,45 @@ char* dnm_node_plaintext(dnmPtr mydnm, xmlNodePtr mynode) {
   return answer;
 }
 
+int is_llamapun_text_wrap(xmlNode * n) {
+  if (!xmlStrEqual(n->name, BAD_CAST "span")) return 0;
+  xmlAttr *attr;
+  for (attr = n->properties; attr != NULL; attr = attr->next) {
+    if (xmlStrEqual(attr->name, BAD_CAST "class")) {
+      return xmlStrEqual(xmlNodeGetContent(attr->children), BAD_CAST "dnm_wrapper");
+    }
+  }
+  return 0;   //isn't marked with attribute span="dnm_wrapper"
+}
+
 int mark_sentence(dnmPtr dnm, dnmRange range) {
-  //to be implemented
+  if (range.end <= range.start) {
+    //empty sentence
+    return 1;
+  }
+  xmlNode * parent = get_lowest_surrounding_node(xmlDocGetRootElement(dnm->document), range);
+  //note: we know that parent has children, because it's a node with offset annotations
+
+  xmlNode *start = NULL;
+  xmlNode *end = NULL;
+
+  xmlNode *it = parent->children;    //iterator over children
+  dnmRange tmprange;
+  //find start node
+  while (start == NULL) {
+    tmprange = get_range_of_node(it);
+    if (tmprange.end > range.start) {  //range.start in range of it
+      if (range.start == tmprange.start) {
+        start = it;
+      } else if (is_llamapun_text_wrap(it)) {
+        //in this case we are allowed to and forced to split it
+        
+      } else {     //hits inside unsplittable tag or wouldn't be well-formatted xhtml
+        return 1;
+      }
+    }
+  }
+
   return 0;   //everything went well
 }
 
@@ -109,6 +146,7 @@ void wrap_text_into_spans(xmlNode *n) {
         xmlAddNextSibling(node, newNode);
         xmlUnlinkNode(node);
         xmlAddChild(newNode, node);
+        xmlNewProp(newNode, BAD_CAST "class", BAD_CAST "dnm_wrapper");
         node = newNode;  //continue from the span
       }
     }
@@ -140,7 +178,7 @@ void parse_dom_into_dnm(xmlNode *n, dnmPtr dnm, struct tmpParseData *dcs, long p
 
 //write start offset into DOM
     snprintf(offsetstring, sizeof(offsetstring), "%ld", dcs->plaintext_index);
-    xmlNewProp(node, BAD_CAST "llamapun_offset_start", BAD_CAST offsetstring);
+    xmlNewProp(node, BAD_CAST "dnm_from", BAD_CAST offsetstring);
 
 //DEAL WITH TAG
     //possibly normalize math tags
@@ -168,8 +206,8 @@ void parse_dom_into_dnm(xmlNode *n, dnmPtr dnm, struct tmpParseData *dcs, long p
     }
 
 //write end offset into DOM
-    snprintf(offsetstring, sizeof(offsetstring), "%ld", dcs->plaintext_index-1);
-    xmlNewProp(node, BAD_CAST "llamapun_offset_end", BAD_CAST offsetstring);
+    snprintf(offsetstring, sizeof(offsetstring), "%ld", dcs->plaintext_index);
+    xmlNewProp(node, BAD_CAST "dnm_to", BAD_CAST offsetstring);
 
   }
 }
