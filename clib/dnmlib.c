@@ -50,7 +50,7 @@ xmlNode * get_lowest_surrounding_node(xmlNode *n, dnmRange range) {
   for (node=n; node!=NULL; node=node->next) {
     r = get_range_of_node(node);
     if (r.start <= range.start && r.end >= range.end) {
-      tmp = get_lowest_surrounding_node(node, range);
+      tmp = get_lowest_surrounding_node(node->children, range);
       if (tmp != NULL) return tmp;
       else return node;
     }
@@ -81,9 +81,14 @@ char* dnm_node_plaintext(dnmPtr mydnm, xmlNodePtr mynode) {
 int is_llamapun_text_wrap(xmlNode * n) {
   if (!xmlStrEqual(n->name, BAD_CAST "span")) return 0;
   xmlAttr *attr;
+  xmlChar *xmlstr;
+  int retval;
   for (attr = n->properties; attr != NULL; attr = attr->next) {
     if (xmlStrEqual(attr->name, BAD_CAST "class")) {
-      return xmlStrEqual(xmlNodeGetContent(attr->children), BAD_CAST "dnm_wrapper");
+      xmlstr = xmlNodeGetContent(attr->children);
+      retval = xmlStrEqual(xmlstr, BAD_CAST "dnm_wrapper");
+      xmlFree(xmlstr);
+      return retval;
     }
   }
   return 0;   //isn't marked with attribute span="dnm_wrapper"
@@ -99,23 +104,152 @@ int mark_sentence(dnmPtr dnm, dnmRange range) {
 
   xmlNode *start = NULL;
   xmlNode *end = NULL;
+  xmlNode *old_starttextnode = NULL;
+  xmlNode *old_endtextnode = NULL;
+  xmlNode *tmpnode;
+  xmlNode *tmpnode2;
+  xmlNode *tmpnode3;
+  xmlChar *tmpxmlstr;
+  xmlChar tmpxmlchar;
+  char string[64];
 
   xmlNode *it = parent->children;    //iterator over children
   dnmRange tmprange;
   //find start node
-  while (start == NULL) {
+  while (start == NULL && it != NULL) {
     tmprange = get_range_of_node(it);
     if (tmprange.end > range.start) {  //range.start in range of it
       if (range.start == tmprange.start) {
         start = it;
       } else if (is_llamapun_text_wrap(it)) {
         //in this case we are allowed to and forced to split it
-        
+        old_starttextnode = it;
+        tmpxmlstr = xmlNodeGetContent(it->children);
+        tmpxmlchar = tmpxmlstr[range.start - tmprange.start];
+
+        //create FIRST node
+        tmpxmlstr[range.start - tmprange.start] = '\0';
+        tmpnode = xmlNewNode(NULL, BAD_CAST "span");
+        tmpnode3 = xmlNewText(tmpxmlstr);
+        xmlAddChild(tmpnode, tmpnode3);
+        xmlNewProp(tmpnode, BAD_CAST "class", BAD_CAST "dnm_wrapper");
+        snprintf(string, sizeof(string), "%ld", tmprange.start);
+        xmlNewProp(tmpnode, BAD_CAST "dnm_from", BAD_CAST string);
+        snprintf(string, sizeof(string), "%ld", range.start);
+        xmlNewProp(tmpnode, BAD_CAST "dnm_to", BAD_CAST string);
+        xmlAddNextSibling(old_starttextnode, tmpnode);
+
+        //create second node
+        tmpxmlstr[range.start - tmprange.start] = tmpxmlchar;
+        tmpnode2 = xmlNewNode(NULL, BAD_CAST "span");
+        tmpnode3 = xmlNewText(tmpxmlstr + (range.start-tmprange.start));
+        xmlAddChild(tmpnode2, tmpnode3);
+        xmlNewProp(tmpnode2, BAD_CAST "class", BAD_CAST "dnm_wrapper");
+        snprintf(string, sizeof(string), "%ld", range.start);
+        xmlNewProp(tmpnode2, BAD_CAST "dnm_from", BAD_CAST string);
+        snprintf(string, sizeof(string), "%ld", tmprange.end);
+        xmlNewProp(tmpnode2, BAD_CAST "dnm_to", BAD_CAST string);
+        xmlAddNextSibling(tmpnode, tmpnode2);
+
+        start = tmpnode2;
+        it = start;
+        xmlUnlinkNode(old_starttextnode);
+
+        xmlFree(tmpxmlstr);
       } else {     //hits inside unsplittable tag or wouldn't be well-formatted xhtml
         return 1;
       }
+    } else {
+      it = it->next;
     }
   }
+
+  if (start == NULL) return 1;   //didn't find start node in range
+
+  //now we have the start node, so we start looking for the end node
+  while (end == NULL && it != NULL) {
+    tmprange = get_range_of_node(it);
+    if (tmprange.end >= range.end) {   //we're in the range
+      if (tmprange.end == range.end) {   //the ends match, so we don't need to split
+        end = it;
+      } else if (is_llamapun_text_wrap(it)) {
+        //we need to split
+        old_endtextnode = it;
+        tmpxmlstr = xmlNodeGetContent(it->children);
+//        fprintf(stderr, "%s    %ld   %ld   -  off %ld\n", (char *) tmpxmlstr, range.end, tmprange.start, range.end-tmprange.start);
+        tmpxmlchar = tmpxmlstr[range.end - tmprange.start];
+
+        //create FIRST node
+        tmpxmlstr[range.end - tmprange.start] = '\0';
+        tmpnode = xmlNewNode(NULL, BAD_CAST "span");
+        tmpnode3 = xmlNewText(tmpxmlstr);
+        xmlAddChild(tmpnode, tmpnode3);
+        xmlNewProp(tmpnode, BAD_CAST "class", BAD_CAST "dnm_wrapper");
+        snprintf(string, sizeof(string), "%ld", tmprange.start);
+        xmlNewProp(tmpnode, BAD_CAST "dnm_from", BAD_CAST string);
+        snprintf(string, sizeof(string), "%ld", range.end);
+        xmlNewProp(tmpnode, BAD_CAST "dnm_to", BAD_CAST string);
+        xmlAddNextSibling(old_endtextnode, tmpnode);
+
+        //create second node
+        tmpxmlstr[range.end - tmprange.start] = tmpxmlchar;
+        tmpnode2 = xmlNewNode(NULL, BAD_CAST "span");
+        tmpnode3 = xmlNewText(tmpxmlstr + (range.end-tmprange.start));
+        xmlAddChild(tmpnode2, tmpnode3);
+        xmlNewProp(tmpnode2, BAD_CAST "class", BAD_CAST "dnm_wrapper");
+        snprintf(string, sizeof(string), "%ld", range.end);
+        xmlNewProp(tmpnode2, BAD_CAST "dnm_from", BAD_CAST string);
+        snprintf(string, sizeof(string), "%ld", tmprange.end);
+        xmlNewProp(tmpnode2, BAD_CAST "dnm_to", BAD_CAST string);
+        xmlAddNextSibling(tmpnode, tmpnode2);
+
+        end = tmpnode;
+        //it = tmpnode2;
+        xmlUnlinkNode(old_endtextnode);
+
+        xmlFree(tmpxmlstr);
+      } else {   //we hit an unsplittable tag around the end of the range
+        return 1;
+      }
+    } else {
+      it = it->next;
+    }
+  }
+
+  if (end == NULL) {
+    if (old_starttextnode != NULL) {
+      //undo the start node splitting
+      xmlAddNextSibling(start, old_starttextnode);
+      tmpnode = start->prev;
+      xmlUnlinkNode(start->prev);
+      xmlFreeNode(tmpnode);
+      xmlUnlinkNode(start);
+      xmlFreeNode(start);
+      return 1;
+    }
+    return 1;
+  }
+
+  xmlFreeNode(old_starttextnode);
+  xmlFreeNode(old_endtextnode);
+
+  //put nodes into sentence tag
+  tmpnode = xmlNewNode(NULL, BAD_CAST "span");
+  xmlAddNextSibling(end, tmpnode);
+  it = start;
+  while (it != tmpnode) {
+    tmpnode2 = it->next;
+    xmlUnlinkNode(it);
+    xmlAddChild(tmpnode, it);
+    it = tmpnode2;
+  }
+
+  snprintf(string, sizeof(string), "sentence.%ld", dnm->sentenceCount++);
+  xmlNewProp(tmpnode, BAD_CAST "class", BAD_CAST "sentence");
+  snprintf(string, sizeof(string), "%ld", range.start);
+  xmlNewProp(tmpnode, BAD_CAST "dnm_from", BAD_CAST string);
+  snprintf(string, sizeof(string), "%ld", range.end);
+  xmlNewProp(tmpnode, BAD_CAST "dnm_end", BAD_CAST string);
 
   return 0;   //everything went well
 }
@@ -137,11 +271,8 @@ void wrap_text_into_spans(xmlNode *n) {
   xmlNode *node;
   xmlNode *newNode;
   for (node=n; node!=NULL; node=node->next) {
-    printf("  %s\n", node->name);
     if (xmlStrEqual(node->name, BAD_CAST "text")) {
-      printf("try it\n");
       if (node->next != NULL || node->prev != NULL) {  //if node has siblings
-        printf("do it\n");
         newNode = xmlNewNode(NULL, BAD_CAST "span");
         xmlAddNextSibling(node, newNode);
         xmlUnlinkNode(node);
@@ -240,6 +371,9 @@ dnmPtr createDNM(xmlDocPtr doc, long parameters) {
 
   dcs->plaintext_allocated = 4096;
   dcs->plaintext_index = 0;
+
+  //ids
+  dnm->sentenceCount = 1;   //in the old preprocessor, the first sentence had id="sentence.1"
 
   //do the actual parsing
   wrap_text_into_spans(xmlDocGetRootElement(doc));

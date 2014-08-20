@@ -34,6 +34,8 @@ struct dnmStruct {
   char *plaintext;
 
   size_t size_plaintext;
+
+  unsigned long sentenceCount;   //counter variable for the id attributes
 };
 
 typedef struct dnmStruct * dnmPtr;
