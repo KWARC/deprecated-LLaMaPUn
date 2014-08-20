@@ -2,7 +2,7 @@
     The Document Narrative Model (DNM) can mainly be used
     for the tokenization (sentence and word splitting)
     during the preprocessing.
-        @file
+      @file
 */
 
 #include <libxml/tree.h>
