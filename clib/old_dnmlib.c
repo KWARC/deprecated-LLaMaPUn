@@ -726,7 +726,6 @@ old_dnmPtr old_createDNM(xmlDocPtr doc, long parameters) {
   dnm->size_word_level = dcs->word_level_index;
   dnm->word_level = realloc(dnm->word_level, dnm->size_word_level * sizeof(struct dnm_chunk));
   if (dnm->size_word_level) CHECK_ALLOC(dnm->word_level);
- 
   //after the creation process, we don't need the dcs anymore
   free(dcs->inherited_annotations);
   free(dcs);

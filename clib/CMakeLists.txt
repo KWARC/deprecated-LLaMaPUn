@@ -12,6 +12,7 @@ SET(CMAKE_C_FLAGS
 
 #find the required libraries
 find_library(uthash uthash)
+find_library(pcre pcre)
 FIND_LIBRARY(ICONV_LIBRARIES NAMES iconv libiconv libiconv-2 c)
 find_package(Json REQUIRED)
 find_package(LibXml2 REQUIRED)
@@ -33,6 +34,7 @@ add_library(llamapun_ngrams llamapun_ngrams.c)
 add_library(llamapun_para_discr llamapun_para_discr.c)
 add_library(unicode_normalizer unicode_normalizer.c)
 add_library(llamapun_gt_estimate llamapun_gt_estimate.c)
+add_library(llamapun_tokenizer llamapun_tokenizer.c)
 #add_library(dnmlib dnmlib.c)
 add_library(old_dnmlib old_dnmlib.c)
 #add_library(preprocessor preprocessor.c)
@@ -59,6 +61,7 @@ target_link_libraries(llamapun_para_discr old_dnmlib llamapun_utils ${JSON_LIBRA
 target_link_libraries(old_dnmlib ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 #target_link_libraries(preprocessor ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 target_link_libraries(unicode_normalizer ${ICONV_LIBRARIES})
+target_link_libraries(llamapun_tokenizer old_dnmlib pcre)
 
 #tests
 add_executable(TestSENNA tests/senna_post_test.c)
@@ -79,6 +82,9 @@ target_link_libraries(TestPARA_DISCR llamapun_para_discr ${JSON_LIBRARIES} ${LIB
 add_executable(TestUnicodeNormalizer tests/unicode_normalizer_test.c)
 target_link_libraries(TestUnicodeNormalizer unicode_normalizer)
 
+add_executable(TestTokenization tests/tokenization_test.c)
+target_link_libraries(TestTokenization old_dnmlib llamapun_tokenizer ${LIBXML2_LIBRARIES})
+
 
 enable_testing()
 add_test(SENNA_POS_Test TestSENNA WORKING_DIRECTORY "tests")
@@ -88,7 +94,7 @@ add_test(NGRAMS_Test TestNGRAMS WORKING_DIRECTORY "tests")
 add_test(PARA_DISCR_Test TestPARA_DISCR WORKING_DIRECTORY "tests")
 #add_test(DNMLIB_Test TestDNMLIB WORKING_DIRECTORY "tests")
 add_test(UNICODE_NORMALIZER_Test TestUnicodeNormalizer WORKING_DIRECTORY "tests")
-
+add_test(TOKENIZATION_Test TestTokenization WORKING_DIRECTORY "tests")
 
 #installation of all .c and .h files 
 
