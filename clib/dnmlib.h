@@ -2,7 +2,11 @@
     The Document Narrative Model (DNM) can mainly be used
     for the tokenization (sentence and word splitting)
     during the preprocessing.
+<<<<<<< Updated upstream
   @file
+=======
+        @file
+>>>>>>> Stashed changes
 */
 
 #include <libxml/tree.h>
@@ -30,9 +34,7 @@ struct hash_element_string {
 struct dnmStruct {
   xmlDocPtr document;
   long parameters;
-
   char *plaintext;
-
   size_t size_plaintext;
 };
 
@@ -55,10 +57,17 @@ typedef struct _dnmRange dnmRange;
 /*! creates a DNM
 
     Memory has to be freed later using freeDNM
+<<<<<<< Updated upstream
   @see freeDNM
   @param doc a pointer to the DOM
   @param parameters the parameters
   @retval a pointer to the new DNM
+=======
+        @see freeDNM
+    @param doc a pointer to the DOM
+        @param parameters the parameters
+        @retval a pointer to the new DNM
+>>>>>>> Stashed changes
 */
 dnmPtr createDNM(xmlDocPtr doc, long parameters);
 

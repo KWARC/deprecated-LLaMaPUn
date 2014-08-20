@@ -57,6 +57,17 @@ struct old_dnm_struct {
   size_t size_plaintext;
 };
 
+typedef struct {
+  size_t start;
+  size_t end;
+} old_dnm_offset;
+
+typedef struct old_dnm_offsets_struct {
+  size_t start;
+  size_t end;
+  struct old_dnm_offsets_struct *next;
+} old_dnm_offsets;
+
 typedef struct old_dnm_struct * old_dnmPtr;
 
 //one chunk corresponds to one paragraph, sentence, or word
