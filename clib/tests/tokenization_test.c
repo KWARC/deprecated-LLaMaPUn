@@ -17,7 +17,7 @@ int main(void) {
         dnmRanges sentences = tokenize_sentences(mydnm->plaintext);
 
         //clean up
-        //free(sentences.range);
+        free(sentences.range);
         freeDNM(mydnm);
         xmlFreeDoc(mydoc);
         xmlCleanupParser();
