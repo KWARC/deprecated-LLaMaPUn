@@ -58,6 +58,23 @@ xmlNode * get_lowest_surrounding_node(xmlNode *n, dnmRange range) {
   return NULL;   //didn't find anything
 }
 
+
+xmlNode * get_node_from_offset(xmlNode *n, size_t offset) {
+  xmlNode *node;
+  dnmRange r;
+  xmlNode *tmp;
+  for (node=n; node!=NULL; node=node->next) {
+    r = get_range_of_node(node);
+    if (r.start <= offset && r.end > offset) {
+      tmp = get_node_from_offset(node->children, offset);
+      if (tmp != NULL) return tmp;
+      else return node;
+    }
+  }
+  return NULL;   //didn't find anything
+}
+
+
 char* dnm_node_plaintext(dnmPtr mydnm, xmlNodePtr mynode) {
   dnmRange range = get_range_of_node(mynode);
   if (range.end < range.start) {
