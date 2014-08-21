@@ -29,7 +29,7 @@ dnmRanges tokenize_sentences(char* text) {
   abbreviation_regex = pcre_compile(abbreviation_pattern, 0, &error, &error_offset, NULL);
   math_formula_regex = pcre_compile(math_formula_pattern, 0, &error, &error_offset, NULL);
   dnmRanges sentence_ranges;
-  int allocated_ranges = 512;
+  unsigned int allocated_ranges = 512;
   sentence_ranges.range = malloc(allocated_ranges * sizeof(dnmRange));
 
   char* copy = text;
@@ -38,7 +38,7 @@ dnmRanges tokenize_sentences(char* text) {
   unsigned int end_sentence = 0;
   bool line_break_prior = false;
   while ((copy != NULL) && ((*copy) != '\0')) {
-    if (sentence_count >= allocated_ranges) {
+    if (sentence_count > allocated_ranges-2) {
       // Incrementally grow our sentence array, when needed
       allocated_ranges *= 2;
       sentence_ranges.range = (dnmRange*) realloc(sentence_ranges.range, allocated_ranges * sizeof(dnmRange));
@@ -102,5 +102,7 @@ dnmRanges tokenize_sentences(char* text) {
   sentence_ranges.length = sentence_count;
   //Developer demo:
   //   display_sentences(text, sentence_ranges);
+  pcre_free(abbreviation_regex);
+  pcre_free(math_formula_regex);
   return sentence_ranges;
  }
