@@ -10,6 +10,12 @@ SET(COMMON_FLAGS
 SET(CMAKE_C_FLAGS
     "${CMAKE_C_FLAGS} ${COMMON_FLAGS}")
 
+include(CTest)
+if(UNIX)
+  set(CTEST_MEMORYCHECK_COMMAND, "usr/bin/valgrind")
+  set(CTEST_MEMORYCHECK_COMMAND_OPTIONS, "--trace-children=yes --leak-check=full")
+endif()
+
 #find the required libraries
 find_library(uthash uthash)
 find_library(pcre pcre)
