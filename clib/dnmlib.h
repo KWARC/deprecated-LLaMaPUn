@@ -71,6 +71,8 @@ dnmPtr createDNM(xmlDocPtr doc, long parameters);
 void freeDNM(dnmPtr dnm);
 
 
+xmlNode * get_node_from_offset(xmlNode *n, size_t offset);
+
 //TOKENIZATION
 int mark_sentence(dnmPtr dnm, dnmRange range);
 char* dnm_node_plaintext(dnmPtr mydnm, xmlNodePtr mynode);
