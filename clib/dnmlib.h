@@ -35,7 +35,6 @@ struct dnmStruct {
 
   unsigned long sentenceCount;   //counter variable for the id attributes
 };
-
 typedef struct dnmStruct * dnmPtr;
 
 
@@ -43,9 +42,13 @@ struct _dnmRange {
   size_t start;
   size_t end;
 };
-
 typedef struct _dnmRange dnmRange;
 
+struct _dnmRanges {
+  dnmRange* range;
+  int length;
+};
+typedef struct _dnmRanges dnmRanges;
 
 
 //=======================================================

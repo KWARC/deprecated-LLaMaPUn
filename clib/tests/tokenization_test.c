@@ -11,13 +11,13 @@ int main(void) {
         xmlDocPtr mydoc = xmlReadFile("../../t/documents/1311.0066.xhtml", NULL, XML_PARSE_RECOVER | XML_PARSE_NONET);
         if (mydoc == NULL) { return 1;}
         //Create DNM, with normalized math tags, and ignoring cite tags
-        old_dnmPtr mydnm = old_createDNM(mydoc, DNM_NORMALIZE_MATH | DNM_SKIP_CITE | DNM_EXTEND_PARA_RANGE);
+        dnmPtr mydnm = createDNM(mydoc, DNM_NORMALIZE_TAGS);
         if (mydnm == NULL) { return 1;}
 
-        old_dnm_offset* sentences = tokenize_sentences(mydnm->plaintext);
+        dnmRanges sentences = tokenize_sentences(mydnm->plaintext);
 
         //clean up
-        old_freeDNM(mydnm);
+        freeDNM(mydnm);
         xmlFreeDoc(mydoc);
         xmlCleanupParser();
 

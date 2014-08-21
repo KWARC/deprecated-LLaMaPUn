@@ -35,7 +35,7 @@ add_library(llamapun_para_discr llamapun_para_discr.c)
 add_library(unicode_normalizer unicode_normalizer.c)
 add_library(llamapun_gt_estimate llamapun_gt_estimate.c)
 add_library(llamapun_tokenizer llamapun_tokenizer.c)
-#add_library(dnmlib dnmlib.c)
+add_library(dnmlib dnmlib.c)
 add_library(old_dnmlib old_dnmlib.c)
 #add_library(preprocessor preprocessor.c)
 
@@ -57,11 +57,11 @@ target_link_libraries(llamapun_ngrams stopwords stemmer old_dnmlib unicode_norma
                                         llamapun_utils ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 target_link_libraries(llamapun_gt_estimate ${JSON_LIBRARIES} ${uthash_LIBRARIES})
 target_link_libraries(llamapun_para_discr old_dnmlib llamapun_utils ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
-#target_link_libraries(dnmlib ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
+target_link_libraries(dnmlib ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 target_link_libraries(old_dnmlib ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 #target_link_libraries(preprocessor ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 target_link_libraries(unicode_normalizer ${ICONV_LIBRARIES})
-target_link_libraries(llamapun_tokenizer old_dnmlib pcre)
+target_link_libraries(llamapun_tokenizer dnmlib pcre)
 
 #tests
 add_executable(TestSENNA tests/senna_post_test.c)
@@ -83,7 +83,7 @@ add_executable(TestUnicodeNormalizer tests/unicode_normalizer_test.c)
 target_link_libraries(TestUnicodeNormalizer unicode_normalizer)
 
 add_executable(TestTokenization tests/tokenization_test.c)
-target_link_libraries(TestTokenization old_dnmlib llamapun_tokenizer ${LIBXML2_LIBRARIES})
+target_link_libraries(TestTokenization dnmlib llamapun_tokenizer ${LIBXML2_LIBRARIES})
 
 
 enable_testing()
