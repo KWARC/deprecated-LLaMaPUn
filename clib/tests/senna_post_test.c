@@ -38,6 +38,8 @@ int main() {
     fprintf(stderr,"POS tagged words -- count mismatch, got %d \n",words_total);
     return 1;  }
 
+  json_object_put(response);
+
   // all OK
   return 0;
 }

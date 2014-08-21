@@ -58,6 +58,7 @@ json_object* dom_to_pos_annotations (xmlDocPtr doc) {
       xmlReplaceNode(math_node,new_math_word);
     }
   }
+  xmlXPathFreeObject(xpath_math_result);
   /* Normalize all "a" anchor elements to their text content */
   xmlChar* anchor_xpath = (xmlChar*) "//xhtml:a";
   xmlXPathObjectPtr xpath_anchor_result = xmlXPathEvalExpression(anchor_xpath,xpath_context);
@@ -140,6 +141,7 @@ json_object* dom_to_pos_annotations (xmlDocPtr doc) {
       char* word_content = (char*) xmlNodeGetContent(word_node);
       fprintf(word_stream, "%s", word_content);
       fprintf(word_stream," ");
+      free(word_content);
       ids[words_index] = strdup((char*)xmlGetProp(word_node,BAD_CAST "id"));
     }
     //xmlElemDump(word_stream,doc,sentence);
@@ -156,7 +158,22 @@ json_object* dom_to_pos_annotations (xmlDocPtr doc) {
         json_object_object_add(response,ids[token_index],
                                json_object_new_string(SENNA_Hash_key(pos_hash, pos_labels[token_index])));
     }
+    xmlXPathFreeContext(xpath_sentence_context);
   }
+
+  //clean up senna stuff
+  SENNA_Tokenizer_free(tokenizer);
+  SENNA_POS_free(pos);
+
+  SENNA_Hash_free(word_hash);
+  SENNA_Hash_free(caps_hash);
+  SENNA_Hash_free(suff_hash);
+  SENNA_Hash_free(gazt_hash);
+
+  SENNA_Hash_free(gazl_hash);
+  SENNA_Hash_free(gazm_hash);
+  SENNA_Hash_free(gazo_hash);
+  SENNA_Hash_free(gazp_hash);
 
   // Freedom
   xmlXPathFreeContext(xpath_context);
