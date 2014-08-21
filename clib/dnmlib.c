@@ -315,11 +315,11 @@ void parse_dom_into_dnm(xmlNode *n, dnmPtr dnm, struct tmpParseData *dcs, long p
 //DEAL WITH TAG
     //possibly normalize math tags
     if ((parameters&DNM_NORMALIZE_TAGS) && xmlStrEqual(node->name, BAD_CAST "math")) {
-      copy_into_plaintext("[MathFormula]", dnm, dcs);
+      copy_into_plaintext("MathFormula", dnm, dcs);
     }
     //possibly normalize cite tags
     else if ((parameters&DNM_NORMALIZE_TAGS) && xmlStrEqual(node->name, BAD_CAST "cite")) {
-      copy_into_plaintext("[CiteExpression]", dnm, dcs);
+      copy_into_plaintext("CiteExpression", dnm, dcs);
     }
     //skip head
     else if (xmlStrEqual(node->name, BAD_CAST "head")) {
