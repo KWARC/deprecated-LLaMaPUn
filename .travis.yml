@@ -17,6 +17,7 @@ install:
  - sudo apt-get install libxml2-dev
  - sudo apt-get install libjson0-dev
  - sudo apt-get install uthash-dev
+ - sudo apt-get install valgrind
  - wget http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.14.tar.gz
  - tar -xvzf libiconv-1.14.tar.gz
  - cd libiconv-1.14
@@ -36,4 +37,11 @@ script:
  - cd build && cmake ..
  - make
  - make test
+ - sh ../leak_check.sh TestSENNA
+ - sh ../leak_check.sh TestSTOPWORDS
+ - sh ../leak_check.sh TestSTEMMER
+ - sh ../leak_check.sh TestNGRAMS
+ - sh ../leak_check.sh TestPARA_DISCR
+ - sh ../leak_check.sh TestUnicodeNormalizer
+ - sh ../leak_check.sh TestTokenization
  - sudo make install
