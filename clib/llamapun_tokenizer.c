@@ -14,7 +14,7 @@
 void display_sentences(char* text, dnmRanges sentence_ranges) {
   fprintf(stderr, "Sentences: \n");
   int i;
-  for (i=0; i<sentence_ranges.length;i++) {
+  for (i=0; i<sentence_ranges.length; i++) {
     int start = sentence_ranges.range[i].start;
     int end = sentence_ranges.range[i].end;
     fprintf(stderr,"%d. %.*s\n",i,end-start+1,text+start);
@@ -29,7 +29,8 @@ dnmRanges tokenize_sentences(char* text) {
   abbreviation_regex = pcre_compile(abbreviation_pattern, 0, &error, &error_offset, NULL);
   math_formula_regex = pcre_compile(math_formula_pattern, 0, &error, &error_offset, NULL);
   dnmRanges sentence_ranges;
-  sentence_ranges.range = malloc(512 * sizeof(dnmRange));
+  int allocated_ranges = 512;
+  sentence_ranges.range = malloc(allocated_ranges * sizeof(dnmRange));
 
   char* copy = text;
   unsigned int sentence_count = 0;
@@ -37,14 +38,19 @@ dnmRanges tokenize_sentences(char* text) {
   unsigned int end_sentence = 0;
   bool line_break_prior = false;
   while ((copy != NULL) && ((*copy) != '\0')) {
+    if (sentence_count >= allocated_ranges) {
+      // Incrementally grow our sentence array, when needed
+      allocated_ranges *= 2;
+      sentence_ranges.range = (dnmRange*) realloc(sentence_ranges.range, allocated_ranges * sizeof(dnmRange));
+    }
     switch (*copy) {
       case '.': // Check if abbreviation:
         line_break_prior = false;
       case '?':
       case '!':
         line_break_prior = false;
-        sentence_count++;
         // Save sentence
+        sentence_count++;
         sentence_ranges.range[sentence_count].start = start_sentence;
         sentence_ranges.range[sentence_count].end = end_sentence;
         // Init next sentence start:
@@ -65,6 +71,7 @@ dnmRanges tokenize_sentences(char* text) {
               end_sentence++;
             }
             // Save sentence
+            sentence_count++;
             sentence_ranges.range[sentence_count].start = start_sentence;
             sentence_ranges.range[sentence_count].end = end_sentence;
             // Init next sentence start:
@@ -76,6 +83,7 @@ dnmRanges tokenize_sentences(char* text) {
             copy = copy + ovector[1];
             end_sentence += ovector[1];
             // Save sentence
+            sentence_count++;
             sentence_ranges.range[sentence_count].start = start_sentence;
             sentence_ranges.range[sentence_count].end = end_sentence;
             // Init next sentence start:
@@ -91,7 +99,7 @@ dnmRanges tokenize_sentences(char* text) {
         copy++;
         end_sentence++;
     } }
-
+  sentence_ranges.length = sentence_count;
   //Developer demo:
   //   display_sentences(text, sentence_ranges);
   return sentence_ranges;
