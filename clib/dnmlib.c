@@ -244,8 +244,9 @@ int mark_sentence(dnmPtr dnm, dnmRange range) {
     it = tmpnode2;
   }
 
+  xmlNewProp(tmpnode, BAD_CAST "class", BAD_CAST "ltx_sentence");    //done like this by old standard - rename to dnm_sentence??
   snprintf(string, sizeof(string), "sentence.%ld", dnm->sentenceCount++);
-  xmlNewProp(tmpnode, BAD_CAST "class", BAD_CAST "sentence");
+  xmlNewProp(tmpnode, BAD_CAST "id", BAD_CAST string);
   snprintf(string, sizeof(string), "%ld", range.start);
   xmlNewProp(tmpnode, BAD_CAST "dnm_from", BAD_CAST string);
   snprintf(string, sizeof(string), "%ld", range.end);
