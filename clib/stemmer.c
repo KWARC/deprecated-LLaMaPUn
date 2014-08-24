@@ -141,4 +141,10 @@ void close_stemmer() {
   //free(morpha_instream_buff_ptr);
   //fclose(morpha_outstream);
   //free(morpha_outstream_buff_ptr);
+  yy_delete_buffer(yy_current_buffer);
+  int i;
+  for (i=0; i<verbstem_n; i++) {
+    free(verbstem_list[i]);
+  }
+  free(verbstem_list);
 }
