@@ -44,4 +44,5 @@ script:
  - sh ../leak_check.sh ./TestPARA_DISCR
  - sh ../leak_check.sh ./TestUnicodeNormalizer
  - sh ../leak_check.sh ./TestTokenization
+ - sh ../leak_check.sh ./TestCombined
  - sudo make install
