@@ -5,6 +5,9 @@
       @file
 */
 
+#ifndef DNMLIB_H
+#define DNMLIB_H
+
 #include <libxml/tree.h>
 #include <uthash.h>
 
@@ -76,3 +79,5 @@ xmlNode * get_node_from_offset(xmlNode *n, size_t offset);
 //TOKENIZATION
 int mark_sentence(dnmPtr dnm, dnmRange range);
 char* dnm_node_plaintext(dnmPtr mydnm, xmlNodePtr mynode);
+
+#endif
