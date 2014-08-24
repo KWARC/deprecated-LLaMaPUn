@@ -37,11 +37,11 @@ script:
  - cd build && cmake ..
  - make
  - make test
- - sh ../leak_check.sh TestSENNA
- - sh ../leak_check.sh TestSTOPWORDS
- - sh ../leak_check.sh TestSTEMMER
- - sh ../leak_check.sh TestNGRAMS
- - sh ../leak_check.sh TestPARA_DISCR
- - sh ../leak_check.sh TestUnicodeNormalizer
- - sh ../leak_check.sh TestTokenization
+ - sh ../leak_check.sh ./TestSENNA
+ - sh ../leak_check.sh ./TestSTOPWORDS
+ - sh ../leak_check.sh ./TestSTEMMER
+ - sh ../leak_check.sh ./TestNGRAMS
+ - sh ../leak_check.sh ./TestPARA_DISCR
+ - sh ../leak_check.sh ./TestUnicodeNormalizer
+ - sh ../leak_check.sh ./TestTokenization
  - sudo make install
