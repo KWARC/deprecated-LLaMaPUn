@@ -46,6 +46,7 @@ xmlDocPtr read_document(const char* filename) {
   doc = xmlReadMemory(content, size, /* URL = */ "", "UTF-8",
                             XML_PARSE_NOWARNING | XML_PARSE_NOERROR);
   if (doc != NULL) {
+    free(content);
     return doc;
   }
   // Try as HTML
@@ -54,6 +55,7 @@ xmlDocPtr read_document(const char* filename) {
           htmlParserCtxt, content, size, /* URL = */ "", "UTF-8",
           HTML_PARSE_RECOVER | HTML_PARSE_NOWARNING | HTML_PARSE_NOERROR);
   htmlFreeParserCtxt(htmlParserCtxt);
+  free(content);
   if (doc != NULL) {
     return doc;
   }
