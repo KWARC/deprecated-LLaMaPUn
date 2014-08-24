@@ -22,6 +22,7 @@
 #include "llamapun_utils.h"
 
 json_object* dom_to_pos_annotations (xmlDocPtr doc) {
+  xmlChar *tmpxmlstr;    //will be needed a lot
   char* log_message;
   if (doc == NULL) {
     fprintf(stderr, "Failed to parse workload!\n");
@@ -53,12 +54,16 @@ json_object* dom_to_pos_annotations (xmlDocPtr doc) {
       xmlNodePtr new_math_word = xmlNewNode(xhtml_ns, BAD_CAST "span");
       xmlNewProp(new_math_word, BAD_CAST "class", BAD_CAST "ltx_word");
       xmlNodePtr math_stub_text = xmlNewText(BAD_CAST "MathFormula");
-      xmlSetProp(new_math_word,BAD_CAST "id", BAD_CAST xmlGetProp(math_node,BAD_CAST "id"));
+      tmpxmlstr = xmlGetProp(math_node,BAD_CAST "id");
+      xmlSetProp(new_math_word,BAD_CAST "id", BAD_CAST tmpxmlstr);
+      xmlFree(tmpxmlstr);
       xmlAddChild(new_math_word,math_stub_text);
       xmlReplaceNode(math_node,new_math_word);
+      xmlFreeNode(math_node);
     }
   }
-  xmlXPathFreeObject(xpath_math_result);
+  xmlXPathFreeNodeSetList(xpath_math_result);
+
   /* Normalize all "a" anchor elements to their text content */
   xmlChar* anchor_xpath = (xmlChar*) "//xhtml:a";
   xmlXPathObjectPtr xpath_anchor_result = xmlXPathEvalExpression(anchor_xpath,xpath_context);
@@ -69,12 +74,18 @@ json_object* dom_to_pos_annotations (xmlDocPtr doc) {
       xmlNodePtr anchor_node = anchor_nodeset->nodeTab[anchor_index];
       xmlNodePtr new_anchor_word = xmlNewNode(xhtml_ns, BAD_CAST "span");
       xmlNewProp(new_anchor_word, BAD_CAST "class", BAD_CAST "ltx_word");
-      xmlNodePtr anchor_text = xmlNewText(BAD_CAST xmlNodeGetContent(anchor_node));
-      xmlSetProp(new_anchor_word,BAD_CAST "id", BAD_CAST xmlGetProp(anchor_node,BAD_CAST "id"));
+      tmpxmlstr = xmlNodeGetContent(anchor_node);
+      xmlNodePtr anchor_text = xmlNewText(BAD_CAST tmpxmlstr);
+      xmlFree(tmpxmlstr);
+      tmpxmlstr = xmlGetProp(anchor_node,BAD_CAST "id");
+      xmlSetProp(new_anchor_word,BAD_CAST "id", BAD_CAST tmpxmlstr);
+      xmlFree(tmpxmlstr);
       xmlAddChild(new_anchor_word,anchor_text);
       xmlReplaceNode(anchor_node,new_anchor_word);
+      xmlFreeNode(anchor_node);
     }
   }
+  xmlXPathFreeNodeSetList(xpath_anchor_result);
 
   /* Initialize SENNA toolkit components: */
   int *pos_labels = NULL;
@@ -125,8 +136,8 @@ json_object* dom_to_pos_annotations (xmlDocPtr doc) {
     xmlXPathRegisterNs(xpath_sentence_context,  BAD_CAST "xhtml", BAD_CAST "http://www.w3.org/1999/xhtml");
     /* We want a list of words and a corresponding list of IDs */
     xmlXPathObjectPtr words_xpath_result = xmlXPathEvalExpression(words_xpath, xpath_sentence_context);
+    xmlXPathFreeContext(xpath_sentence_context);
     if(words_xpath_result == NULL) { // No words, skip
-      xmlXPathFreeContext(xpath_sentence_context);
       continue; }
     xmlNodeSetPtr words_nodeset = words_xpath_result->nodesetval;
     char* word_input_string;
@@ -134,7 +145,7 @@ json_object* dom_to_pos_annotations (xmlDocPtr doc) {
     FILE *word_stream;
     word_stream = open_memstream (&word_input_string, &sentence_size);
     int word_count = words_nodeset->nodeNr;
-    const char* ids[word_count];
+    char* ids[word_count];
     int words_index;
     for (words_index=0; words_index < word_count; words_index++) {
       xmlNodePtr word_node = words_nodeset->nodeTab[words_index];
@@ -142,14 +153,22 @@ json_object* dom_to_pos_annotations (xmlDocPtr doc) {
       fprintf(word_stream, "%s", word_content);
       fprintf(word_stream," ");
       free(word_content);
-      ids[words_index] = strdup((char*)xmlGetProp(word_node,BAD_CAST "id"));
+      tmpxmlstr = xmlGetProp(word_node,BAD_CAST "id");
+      ids[words_index] = strdup((char*)tmpxmlstr);
+      xmlFree(tmpxmlstr);
     }
+    xmlXPathFreeNodeSetList(words_xpath_result);
     //xmlElemDump(word_stream,doc,sentence);
     fclose(word_stream);
     /* Get the list of tokens from the input string */
     SENNA_Tokens* tokens = SENNA_Tokenizer_tokenize(tokenizer, word_input_string);
-    if(tokens->n == 0)
+    free(word_input_string);
+    if(tokens->n == 0) {
+      //free ids and continue
+      int i;
+      for (i=0; i<word_count; i++) free(ids[i]);
       continue;
+    }
     /* Obtain the corresponding list of POS tags for the list of words */
     pos_labels = SENNA_POS_forward(pos, tokens->word_idx, tokens->caps_idx, tokens->suff_idx, tokens->n);
     int token_index;
@@ -158,7 +177,9 @@ json_object* dom_to_pos_annotations (xmlDocPtr doc) {
         json_object_object_add(response,ids[token_index],
                                json_object_new_string(SENNA_Hash_key(pos_hash, pos_labels[token_index])));
     }
-    xmlXPathFreeContext(xpath_sentence_context);
+
+    int i;
+    for (i=0; i<word_count; i++) free(ids[i]);
   }
 
   //clean up senna stuff
@@ -174,6 +195,8 @@ json_object* dom_to_pos_annotations (xmlDocPtr doc) {
   SENNA_Hash_free(gazm_hash);
   SENNA_Hash_free(gazo_hash);
   SENNA_Hash_free(gazp_hash);
+
+  SENNA_Hash_free(pos_hash);
 
   // Freedom
   xmlXPathFreeContext(xpath_context);
