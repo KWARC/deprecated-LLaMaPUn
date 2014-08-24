@@ -91,6 +91,9 @@ target_link_libraries(TestUnicodeNormalizer unicode_normalizer)
 add_executable(TestTokenization tests/tokenization_test.c)
 target_link_libraries(TestTokenization dnmlib llamapun_tokenizer ${LIBXML2_LIBRARIES})
 
+add_executable(TestCombined tests/combined_test.c)
+target_link_libraries(TestCombined dnmlib unicode_normalizer ${LIBXML2_LIBRARIES})
+
 
 enable_testing()
 add_test(SENNA_POS_Test TestSENNA WORKING_DIRECTORY "tests")
@@ -101,6 +104,7 @@ add_test(PARA_DISCR_Test TestPARA_DISCR WORKING_DIRECTORY "tests")
 #add_test(DNMLIB_Test TestDNMLIB WORKING_DIRECTORY "tests")
 add_test(UNICODE_NORMALIZER_Test TestUnicodeNormalizer WORKING_DIRECTORY "tests")
 add_test(TOKENIZATION_Test TestTokenization WORKING_DIRECTORY "tests")
+add_test(COMBINED_Test TestCombined WORKING_DIRECTORY "tests")
 
 #installation of all .c and .h files 
 
