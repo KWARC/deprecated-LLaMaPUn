@@ -75,3 +75,42 @@ void normalize_unicode(char *input, char **output) {
     
   iconv_close(conv);
 }
+
+void unicode_normalize_dom_actual(xmlNode *n) {
+  xmlNode *node;
+  xmlNode *newnode;
+  xmlNode *tmpnode;
+  xmlChar *xmlstr;
+  char *newstring;
+  for (node = n; node; node = node->next) {
+    if (xmlStrEqual(node->name, BAD_CAST "text")) {
+      xmlstr = xmlNodeGetContent(node);
+      normalize_unicode((char *)xmlstr, &newstring);
+      tmpnode = xmlNewText(BAD_CAST newstring);
+      if (node->next == NULL && node->prev==NULL) {   //for some reason text nodes cannot be added as siblings
+        node = node->parent;
+        newnode = node->children;
+        xmlUnlinkNode(node->children);
+        xmlFreeNode(newnode);
+        xmlAddChild(node, tmpnode);
+        newnode = tmpnode;
+      } else {
+        newnode = xmlNewNode(NULL, BAD_CAST "span");
+        xmlAddChild(newnode, tmpnode);
+        xmlAddNextSibling(node, newnode);
+        xmlUnlinkNode(node);
+        xmlFreeNode(node);
+      }
+      node = newnode;
+      free(newstring);
+      xmlFree(xmlstr);
+    } else {
+      unicode_normalize_dom_actual(node->children);
+    }
+  }
+}
+
+
+void unicode_normalize_dom(xmlDocPtr doc) {
+  unicode_normalize_dom_actual(xmlDocGetRootElement(doc));
+}

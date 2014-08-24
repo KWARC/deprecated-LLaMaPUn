@@ -66,7 +66,7 @@ target_link_libraries(llamapun_para_discr old_dnmlib llamapun_utils ${JSON_LIBRA
 target_link_libraries(dnmlib ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 target_link_libraries(old_dnmlib ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 #target_link_libraries(preprocessor ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
-target_link_libraries(unicode_normalizer ${ICONV_LIBRARIES})
+target_link_libraries(unicode_normalizer ${ICONV_LIBRARIES} ${LIBXML2_LIBRARIES})
 target_link_libraries(llamapun_tokenizer dnmlib pcre)
 
 #tests

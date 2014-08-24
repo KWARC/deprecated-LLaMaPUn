@@ -62,7 +62,10 @@ json_object* dom_to_pos_annotations (xmlDocPtr doc) {
       xmlFreeNode(math_node);
     }
   }
-  xmlXPathFreeNodeSetList(xpath_math_result);
+  //xmlXPathFreeNodeSet(xpath_math_result->nodesetval);
+  free(xpath_math_result->nodesetval->nodeTab);
+  free(xpath_math_result->nodesetval);
+  xmlFree(xpath_math_result);
 
   /* Normalize all "a" anchor elements to their text content */
   xmlChar* anchor_xpath = (xmlChar*) "//xhtml:a";
@@ -85,7 +88,11 @@ json_object* dom_to_pos_annotations (xmlDocPtr doc) {
       xmlFreeNode(anchor_node);
     }
   }
-  xmlXPathFreeNodeSetList(xpath_anchor_result);
+  //xmlXPathFreeNodeSet(xpath_anchor_result->nodesetval);
+  //free xpath result - is there a (working) function provided for this?
+  free(xpath_anchor_result->nodesetval->nodeTab);
+  free(xpath_anchor_result->nodesetval);
+  xmlFree(xpath_anchor_result);
 
   /* Initialize SENNA toolkit components: */
   int *pos_labels = NULL;
@@ -157,7 +164,8 @@ json_object* dom_to_pos_annotations (xmlDocPtr doc) {
       ids[words_index] = strdup((char*)tmpxmlstr);
       xmlFree(tmpxmlstr);
     }
-    xmlXPathFreeNodeSetList(words_xpath_result);
+    xmlXPathFreeNodeSet(words_xpath_result->nodesetval);
+    xmlFree(words_xpath_result);
     //xmlElemDump(word_stream,doc,sentence);
     fclose(word_stream);
     /* Get the list of tokens from the input string */
@@ -181,6 +189,9 @@ json_object* dom_to_pos_annotations (xmlDocPtr doc) {
     int i;
     for (i=0; i<word_count; i++) free(ids[i]);
   }
+
+  xmlXPathFreeNodeSet(xpath_sentence_result->nodesetval);
+  xmlFree(xpath_sentence_result);
 
   //clean up senna stuff
   SENNA_Tokenizer_free(tokenizer);
