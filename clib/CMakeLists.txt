@@ -92,7 +92,7 @@ add_executable(TestTokenization tests/tokenization_test.c)
 target_link_libraries(TestTokenization dnmlib llamapun_tokenizer ${LIBXML2_LIBRARIES})
 
 add_executable(TestCombined tests/combined_test.c)
-target_link_libraries(TestCombined dnmlib unicode_normalizer ${LIBXML2_LIBRARIES})
+target_link_libraries(TestCombined dnmlib unicode_normalizer llamapun_utils ${LIBXML2_LIBRARIES})
 
 
 enable_testing()

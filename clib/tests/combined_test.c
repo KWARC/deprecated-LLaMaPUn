@@ -3,7 +3,7 @@
 #include "../jsoninclude.h"
 #include "../dnmlib.h"
 #include "../unicode_normalizer.h"
-
+#include "../llamapun_utils.h"
 
 const char TEST_XHTML_DOCUMENT[] = "../../t/documents/1311.0066.xhtml";
 
@@ -20,9 +20,10 @@ int is_ASCII(unsigned char *string) {
 
 
 int main(void) {
-  xmlDoc* doc = xmlReadFile(TEST_XHTML_DOCUMENT, NULL, 0);
+  //xmlDoc* doc = xmlReadFile(TEST_XHTML_DOCUMENT, NULL, 0);
+  xmlDoc *doc = read_document(TEST_XHTML_DOCUMENT);
   if (doc == NULL) {
-    fprintf(stderr,"Test XHTML document could not be parsed, failing");
+    fprintf(stderr,"Test XHTML document could not be parsed, failing\n");
     return 1; }
   unicode_normalize_dom(doc);
   dnmPtr dnm = createDNM(doc, DNM_NORMALIZE_TAGS);
