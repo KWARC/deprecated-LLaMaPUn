@@ -12,6 +12,9 @@
 	@param output a pointer to the (normalized) output
 */
 void normalize_unicode(char *input, char **output);
+/*! normalizes the unicode characters of a DOM
+  @param doc the DOM to be normalized
+*/
 void unicode_normalize_dom(xmlDocPtr doc);
 
 #endif

@@ -38,19 +38,24 @@ struct dnmStruct {
 
   unsigned long sentenceCount;   //counter variable for the id attributes
 };
-typedef struct dnmStruct * dnmPtr;
 
+/*! pointer to a DNM */
+typedef struct dnmStruct * dnmPtr;
 
 struct _dnmRange {
   size_t start;
   size_t end;
 };
+
+/*! a range of the plaintext */
 typedef struct _dnmRange dnmRange;
 
 struct _dnmRanges {
   dnmRange* range;
   int length;
 };
+
+/*! a list of ranges */
 typedef struct _dnmRanges dnmRanges;
 
 
@@ -73,11 +78,26 @@ dnmPtr createDNM(xmlDocPtr doc, long parameters);
 */
 void freeDNM(dnmPtr dnm);
 
-
+/*! get the node corresponding to an offset in the plaintext
+  @param n the root node
+  @param offset the plaintext offset
+  @retval a pointer to the lowest with offset annotations around the given offset
+*/
 xmlNode * get_node_from_offset(xmlNode *n, size_t offset);
 
 //TOKENIZATION
+/*! marks a sentence in the DOM (using a span tag)
+  
+  @param dnm a pointer to the DNM
+  @range the offsets of the sentence
+  @retval returns 1 if something went wrong (e.g. doesn't fit into XML structure), otherwise 0
+*/
 int mark_sentence(dnmPtr dnm, dnmRange range);
+/*! returns the plaintext of a node
+  @param mydnm a pointer to the DNM
+  @param mynode a pointer to the node you want to get plaintext from
+  @retval a string containing the plaintext (has to be free'd manually)
+*/
 char* dnm_node_plaintext(dnmPtr mydnm, xmlNodePtr mynode);
 
 #endif
