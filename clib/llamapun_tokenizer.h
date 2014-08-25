@@ -1,3 +1,6 @@
+#ifndef LLAMAPUN_TOKENIZER_H
+#define LLAMAPUN_TOKENIZER_H
+
 // Some everyday C includes
 #include <stdlib.h>
 #include <stdio.h>
@@ -10,3 +13,5 @@
 dnmRanges tokenize_sentences(char* text);
 void display_sentences(dnmRanges sentence_offsets, char* text);
 dnmRange trim_sentence(dnmRange range, char* text);
+
+#endif
