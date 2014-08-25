@@ -7,13 +7,15 @@
 
 var indexSectionsWithContent =
 {
-  0: "acdfghilmnprstu",
-  1: "dh",
-  2: "dlsu",
-  3: "cdfgilmnr",
+  0: "_acdfghilmnoprstu",
+  1: "_dho",
+  2: "dlosu",
+  3: "cdfgilmnoru",
   4: "d",
   5: "d",
-  6: "adpstu"
+  6: "d",
+  7: "adopstu",
+  8: "t"
 };
 
 var indexSectionNames =
@@ -22,9 +24,11 @@ var indexSectionNames =
   1: "classes",
   2: "files",
   3: "functions",
-  4: "enums",
-  5: "defines",
-  6: "groups"
+  4: "typedefs",
+  5: "enums",
+  6: "defines",
+  7: "groups",
+  8: "pages"
 };
 
 function convertToId(search)

@@ -37,6 +37,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
       <li><a href="modules.html"><span>Modules</span></a></li>
       <li><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
       <li class="current"><a href="files.html"><span>Files</span></a></li>
@@ -69,7 +70,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Macros</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Groups</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Macros</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Groups</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(8)"><span class="SelectionMark">&#160;</span>Pages</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -84,7 +85,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <a href="#nested-classes">Data Structures</a> &#124;
 <a href="#define-members">Macros</a> &#124;
 <a href="#typedef-members">Typedefs</a> &#124;
-<a href="#enum-members">Enumerations</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
 <div class="title">dnmlib.h File Reference</div>  </div>
@@ -100,114 +100,91 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 Data Structures</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structhash__element__string.html">hash_element_string</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structdnm__struct.html">dnm_struct</a></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structdnmStruct.html">dnmStruct</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structdnm__chunk.html">dnm_chunk</a></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct__dnmRange.html">_dnmRange</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structdnm__iterator.html">dnm_iterator</a></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct__dnmRanges.html">_dnmRanges</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:adaefeea10cd8b72a43a2d7dbd81d72aa"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dnmlib_8h.html#adaefeea10cd8b72a43a2d7dbd81d72aa">DNM_NORMALIZE_MATH</a>&#160;&#160;&#160;(1 &lt;&lt; 0)</td></tr>
-<tr class="separator:adaefeea10cd8b72a43a2d7dbd81d72aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3fdb2cf6d21aae12db2fc207f063aef2"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dnmlib_8h.html#a3fdb2cf6d21aae12db2fc207f063aef2">DNM_SKIP_MATH</a>&#160;&#160;&#160;(1 &lt;&lt; 1)</td></tr>
-<tr class="separator:a3fdb2cf6d21aae12db2fc207f063aef2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a377af1b1df87c15703d6cd1653c8d399"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dnmlib_8h.html#a377af1b1df87c15703d6cd1653c8d399">DNM_SKIP_CITE</a>&#160;&#160;&#160;(1 &lt;&lt; 2)</td></tr>
-<tr class="separator:a377af1b1df87c15703d6cd1653c8d399"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9ea5983adbfacc508bddcda48cf59462"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dnmlib_8h.html#a9ea5983adbfacc508bddcda48cf59462">DNM_NORMALIZE_TAGS</a>&#160;&#160;&#160;(1 &lt;&lt; 0)</td></tr>
+<tr class="separator:a9ea5983adbfacc508bddcda48cf59462"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:a9ada9e7bf9260b8793bd67d63aa56aab"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9ada9e7bf9260b8793bd67d63aa56aab"></a>
-typedef struct <a class="el" href="structdnm__struct.html">dnm_struct</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>dnmPtr</b></td></tr>
-<tr class="separator:a9ada9e7bf9260b8793bd67d63aa56aab"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af5bd30f9dcb83fb7265022971324d775"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af5bd30f9dcb83fb7265022971324d775"></a>
-typedef struct <a class="el" href="structdnm__iterator.html">dnm_iterator</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>dnmIteratorPtr</b></td></tr>
-<tr class="separator:af5bd30f9dcb83fb7265022971324d775"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
-Enumerations</h2></td></tr>
-<tr class="memitem:a350448b8429d24aff8788962064ff3fa"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dnmlib_8h.html#a350448b8429d24aff8788962064ff3fa">dnm_level</a> { <b>DNM_LEVEL_PARA</b>, 
-<b>DNM_LEVEL_SENTENCE</b>, 
-<b>DNM_LEVEL_WORD</b>, 
-<b>DNM_LEVEL_NONE</b>
- }</td></tr>
-<tr class="separator:a350448b8429d24aff8788962064ff3fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1a836076588e85ad00e44feeafa06d80"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structdnmStruct.html">dnmStruct</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dnmlib_8h.html#a1a836076588e85ad00e44feeafa06d80">dnmPtr</a></td></tr>
+<tr class="separator:a1a836076588e85ad00e44feeafa06d80"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a129a3ab0a148f2da48eda9d7454efb5c"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="struct__dnmRange.html">_dnmRange</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dnmlib_8h.html#a129a3ab0a148f2da48eda9d7454efb5c">dnmRange</a></td></tr>
+<tr class="separator:a129a3ab0a148f2da48eda9d7454efb5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4b142ed2dde77f803e74c17195b4c7f1"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="struct__dnmRanges.html">_dnmRanges</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dnmlib_8h.html#a4b142ed2dde77f803e74c17195b4c7f1">dnmRanges</a></td></tr>
+<tr class="separator:a4b142ed2dde77f803e74c17195b4c7f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a47f143f9edd8f8072d7ec1c4730fa17a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structdnm__struct.html">dnmPtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dnmlib_8h.html#a47f143f9edd8f8072d7ec1c4730fa17a">createDNM</a> (xmlDocPtr doc, long parameters)</td></tr>
+<tr class="memitem:a47f143f9edd8f8072d7ec1c4730fa17a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="dnmlib_8h.html#a1a836076588e85ad00e44feeafa06d80">dnmPtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dnmlib_8h.html#a47f143f9edd8f8072d7ec1c4730fa17a">createDNM</a> (xmlDocPtr doc, long parameters)</td></tr>
 <tr class="separator:a47f143f9edd8f8072d7ec1c4730fa17a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aeb07d5daa59a184901a0c3b2badf7407"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dnmlib_8h.html#aeb07d5daa59a184901a0c3b2badf7407">freeDNM</a> (<a class="el" href="structdnm__struct.html">dnmPtr</a> dnm)</td></tr>
+<tr class="memitem:aeb07d5daa59a184901a0c3b2badf7407"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dnmlib_8h.html#aeb07d5daa59a184901a0c3b2badf7407">freeDNM</a> (<a class="el" href="dnmlib_8h.html#a1a836076588e85ad00e44feeafa06d80">dnmPtr</a> dnm)</td></tr>
 <tr class="separator:aeb07d5daa59a184901a0c3b2badf7407"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad54889e90f0d30177bbe4567bf235bfa"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structdnm__iterator.html">dnmIteratorPtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dnmlib_8h.html#ad54889e90f0d30177bbe4567bf235bfa">getDnmIterator</a> (<a class="el" href="structdnm__struct.html">dnmPtr</a> dnm, enum <a class="el" href="dnmlib_8h.html#a350448b8429d24aff8788962064ff3fa">dnm_level</a> level)</td></tr>
-<tr class="separator:ad54889e90f0d30177bbe4567bf235bfa"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acabc90e778f7c7db669acd536a4a5a7f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structdnm__iterator.html">dnmIteratorPtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dnmlib_8h.html#acabc90e778f7c7db669acd536a4a5a7f">getDnmChildrenIterator</a> (<a class="el" href="structdnm__iterator.html">dnmIteratorPtr</a> it)</td></tr>
-<tr class="separator:acabc90e778f7c7db669acd536a4a5a7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad88dcf0770e790543f9dc6d5188bb9e0"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dnmlib_8h.html#ad88dcf0770e790543f9dc6d5188bb9e0">dnmIteratorNext</a> (<a class="el" href="structdnm__iterator.html">dnmIteratorPtr</a> it)</td></tr>
-<tr class="separator:ad88dcf0770e790543f9dc6d5188bb9e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac71d576a0905ea2fbbcad8c4a51c41eb"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dnmlib_8h.html#ac71d576a0905ea2fbbcad8c4a51c41eb">dnmIteratorPrevious</a> (<a class="el" href="structdnm__iterator.html">dnmIteratorPtr</a> it)</td></tr>
-<tr class="separator:ac71d576a0905ea2fbbcad8c4a51c41eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaf0b24349d01320ddec0cfaee6642ae1"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dnmlib_8h.html#aaf0b24349d01320ddec0cfaee6642ae1">getDnmIteratorContent</a> (<a class="el" href="structdnm__iterator.html">dnmIteratorPtr</a> it)</td></tr>
-<tr class="separator:aaf0b24349d01320ddec0cfaee6642ae1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a56d35f14474aa8f36b3636db7ab08b2c"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dnmlib_8h.html#a56d35f14474aa8f36b3636db7ab08b2c">dnmIteratorHasAnnotation</a> (<a class="el" href="structdnm__iterator.html">dnmIteratorPtr</a> it, const char *annotation)</td></tr>
-<tr class="separator:a56d35f14474aa8f36b3636db7ab08b2c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8816e54ffbff3e6472c1972f4673eb0a"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dnmlib_8h.html#a8816e54ffbff3e6472c1972f4673eb0a">dnmIteratorHasAnnotationInherited</a> (<a class="el" href="structdnm__iterator.html">dnmIteratorPtr</a> it, const char *annotation)</td></tr>
-<tr class="separator:a8816e54ffbff3e6472c1972f4673eb0a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a36e1d173945279f86680668599d6ef83"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dnmlib_8h.html#a36e1d173945279f86680668599d6ef83">dnmIteratorAddAnnotation</a> (<a class="el" href="structdnm__iterator.html">dnmIteratorPtr</a> it, const char *annotation, int writeIntoDOM, int inheritToChildren)</td></tr>
-<tr class="separator:a36e1d173945279f86680668599d6ef83"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac8b8f61c74795d10565ab48b1d940ec1"><td class="memItemLeft" align="right" valign="top">xmlNode *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dnmlib_8h.html#ac8b8f61c74795d10565ab48b1d940ec1">get_node_from_offset</a> (xmlNode *n, size_t offset)</td></tr>
+<tr class="separator:ac8b8f61c74795d10565ab48b1d940ec1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adcbd942198b0ec8c0959246ee27dce51"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dnmlib_8h.html#adcbd942198b0ec8c0959246ee27dce51">mark_sentence</a> (<a class="el" href="dnmlib_8h.html#a1a836076588e85ad00e44feeafa06d80">dnmPtr</a> dnm, <a class="el" href="dnmlib_8h.html#a129a3ab0a148f2da48eda9d7454efb5c">dnmRange</a> range)</td></tr>
+<tr class="separator:adcbd942198b0ec8c0959246ee27dce51"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1aba1457c28636648fb10237e3e4c196"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dnmlib_8h.html#a1aba1457c28636648fb10237e3e4c196">dnm_node_plaintext</a> (<a class="el" href="dnmlib_8h.html#a1a836076588e85ad00e44feeafa06d80">dnmPtr</a> mydnm, xmlNodePtr mynode)</td></tr>
+<tr class="separator:a1aba1457c28636648fb10237e3e4c196"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
-<a class="anchor" id="adaefeea10cd8b72a43a2d7dbd81d72aa"></a>
+<a class="anchor" id="a9ea5983adbfacc508bddcda48cf59462"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define DNM_NORMALIZE_MATH&#160;&#160;&#160;(1 &lt;&lt; 0)</td>
+          <td class="memname">#define DNM_NORMALIZE_TAGS&#160;&#160;&#160;(1 &lt;&lt; 0)</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>normalize math tags in document </p>
+<p>normalize tags (eg math tags) in document </p>
 
 </div>
 </div>
-<a class="anchor" id="a377af1b1df87c15703d6cd1653c8d399"></a>
+<h2 class="groupheader">Typedef Documentation</h2>
+<a class="anchor" id="a1a836076588e85ad00e44feeafa06d80"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define DNM_SKIP_CITE&#160;&#160;&#160;(1 &lt;&lt; 2)</td>
+          <td class="memname">typedef struct <a class="el" href="structdnmStruct.html">dnmStruct</a>* <a class="el" href="dnmlib_8h.html#a1a836076588e85ad00e44feeafa06d80">dnmPtr</a></td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>skip, i.e. ignore, cite tags in document </p>
+<p>pointer to a DNM </p>
 
 </div>
 </div>
-<a class="anchor" id="a3fdb2cf6d21aae12db2fc207f063aef2"></a>
+<a class="anchor" id="a129a3ab0a148f2da48eda9d7454efb5c"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define DNM_SKIP_MATH&#160;&#160;&#160;(1 &lt;&lt; 1)</td>
+          <td class="memname">typedef struct <a class="el" href="struct__dnmRange.html">_dnmRange</a> <a class="el" href="dnmlib_8h.html#a129a3ab0a148f2da48eda9d7454efb5c">dnmRange</a></td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>skip, i.e. ignore, math tags in document </p>
+<p>a range of the plaintext </p>
 
 </div>
 </div>
-<h2 class="groupheader">Enumeration Type Documentation</h2>
-<a class="anchor" id="a350448b8429d24aff8788962064ff3fa"></a>
+<a class="anchor" id="a4b142ed2dde77f803e74c17195b4c7f1"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">enum <a class="el" href="dnmlib_8h.html#a350448b8429d24aff8788962064ff3fa">dnm_level</a></td>
+          <td class="memname">typedef struct <a class="el" href="struct__dnmRanges.html">_dnmRanges</a> <a class="el" href="dnmlib_8h.html#a4b142ed2dde77f803e74c17195b4c7f1">dnmRanges</a></td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>the different levels for iterators </p>
+<p>a list of ranges </p>
 
 </div>
 </div>
@@ -217,7 +194,7 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="structdnm__struct.html">dnmPtr</a> createDNM </td>
+          <td class="memname"><a class="el" href="dnmlib_8h.html#a1a836076588e85ad00e44feeafa06d80">dnmPtr</a> createDNM </td>
           <td>(</td>
           <td class="paramtype">xmlDocPtr&#160;</td>
           <td class="paramname"><em>doc</em>, </td>
@@ -236,7 +213,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>creates a DNM</p>
-<p>Example call: createDNM(mydoc, DNM_NORMALIZE_MATH | DNM_SKIP_CITE); Memory has to be freed later using freeDNM </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="dnmlib_8h.html#aeb07d5daa59a184901a0c3b2badf7407">freeDNM</a> </dd></dl>
+<p>Memory has to be freed later using freeDNM </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="dnmlib_8h.html#aeb07d5daa59a184901a0c3b2badf7407">freeDNM</a> </dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">doc</td><td>a pointer to the DOM </td></tr>
@@ -253,33 +230,21 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a36e1d173945279f86680668599d6ef83"></a>
+<a class="anchor" id="a1aba1457c28636648fb10237e3e4c196"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void dnmIteratorAddAnnotation </td>
+          <td class="memname">char* dnm_node_plaintext </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structdnm__iterator.html">dnmIteratorPtr</a>&#160;</td>
-          <td class="paramname"><em>it</em>, </td>
+          <td class="paramtype"><a class="el" href="dnmlib_8h.html#a1a836076588e85ad00e44feeafa06d80">dnmPtr</a>&#160;</td>
+          <td class="paramname"><em>mydnm</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname"><em>annotation</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>writeIntoDOM</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>inheritToChildren</em>&#160;</td>
+          <td class="paramtype">xmlNodePtr&#160;</td>
+          <td class="paramname"><em>mynode</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -288,126 +253,19 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>adds an annotation to a chunk. Again: A faster way for repeatedly adding one annotation should be implemented. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>returns the plaintext of a node </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">it</td><td>An iterator referring to the chunk </td></tr>
-    <tr><td class="paramname">annotation</td><td>The string representation of the annotation </td></tr>
-    <tr><td class="paramname">writeIntoDOM</td><td>If non-zero: The annotation is also written into the DOM </td></tr>
-    <tr><td class="paramname">inheritToChildren</td><td>If non-zero: The annotation is inherited to the child chunks </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a class="anchor" id="a56d35f14474aa8f36b3636db7ab08b2c"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">int dnmIteratorHasAnnotation </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="structdnm__iterator.html">dnmIteratorPtr</a>&#160;</td>
-          <td class="paramname"><em>it</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname"><em>annotation</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>Checks whether a chunk has a certain annotation. Note that a faster way should be implemented, if you want to repeatedly check for one annotation. </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">it</td><td>A pointer to an iterator </td></tr>
-    <tr><td class="paramname">annotation</td><td>The string representation of the annotation </td></tr>
+    <tr><td class="paramname">mydnm</td><td>a pointer to the DNM </td></tr>
+    <tr><td class="paramname">mynode</td><td>a pointer to the node you want to get plaintext from </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="retval"><dt>Return values</dt><dd>
   <table class="retval">
-    <tr><td class="paramname">1</td><td>if the chunk has the annotation, 0 otherwise </td></tr>
+    <tr><td class="paramname">a</td><td>string containing the plaintext (has to be free'd manually) </td></tr>
   </table>
   </dd>
 </dl>
-
-</div>
-</div>
-<a class="anchor" id="a8816e54ffbff3e6472c1972f4673eb0a"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">int dnmIteratorHasAnnotationInherited </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="structdnm__iterator.html">dnmIteratorPtr</a>&#160;</td>
-          <td class="paramname"><em>it</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname"><em>annotation</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>like dnmIteratorHasAnnotation, just for annotations inherited (i.e. annotations from the parent tags) </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="dnmlib_8h.html#a56d35f14474aa8f36b3636db7ab08b2c">dnmIteratorHasAnnotation</a> </dd></dl>
-
-</div>
-</div>
-<a class="anchor" id="ad88dcf0770e790543f9dc6d5188bb9e0"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">int dnmIteratorNext </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="structdnm__iterator.html">dnmIteratorPtr</a>&#160;</td>
-          <td class="paramname"><em>it</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>Make an iterator point to the next chunk </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">it</td><td>the iterator that shall be incremented </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="retval"><dt>Return values</dt><dd>
-  <table class="retval">
-    <tr><td class="paramname">0</td><td>if the iterator points to the last element already, otherwise 1 </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a class="anchor" id="ac71d576a0905ea2fbbcad8c4a51c41eb"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">int dnmIteratorPrevious </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="structdnm__iterator.html">dnmIteratorPtr</a>&#160;</td>
-          <td class="paramname"><em>it</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>Make an iterator point to the previous chunk </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="dnmlib_8h.html#ad88dcf0770e790543f9dc6d5188bb9e0">dnmIteratorNext</a> </dd></dl>
 
 </div>
 </div>
@@ -418,7 +276,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname">void freeDNM </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structdnm__struct.html">dnmPtr</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="dnmlib_8h.html#a1a836076588e85ad00e44feeafa06d80">dnmPtr</a>&#160;</td>
           <td class="paramname"><em>dnm</em></td><td>)</td>
           <td></td>
         </tr>
@@ -433,49 +291,21 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="acabc90e778f7c7db669acd536a4a5a7f"></a>
+<a class="anchor" id="ac8b8f61c74795d10565ab48b1d940ec1"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="structdnm__iterator.html">dnmIteratorPtr</a> getDnmChildrenIterator </td>
+          <td class="memname">xmlNode* get_node_from_offset </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structdnm__iterator.html">dnmIteratorPtr</a>&#160;</td>
-          <td class="paramname"><em>it</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>creates an iterator for the children of the current position of an iterator, i.e. over the sentences of a certain paragraph, or over the words of a sentence. The new iterator has to be free'd manually as well </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">it</td><td>the iterator to which tells us what to iterate over </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="retval"><dt>Return values</dt><dd>
-  <table class="retval">
-    <tr><td class="paramname">the</td><td>iterator for the children </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a class="anchor" id="ad54889e90f0d30177bbe4567bf235bfa"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="structdnm__iterator.html">dnmIteratorPtr</a> getDnmIterator </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="structdnm__struct.html">dnmPtr</a>&#160;</td>
-          <td class="paramname"><em>dnm</em>, </td>
+          <td class="paramtype">xmlNode *&#160;</td>
+          <td class="paramname"><em>n</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">enum <a class="el" href="dnmlib_8h.html#a350448b8429d24aff8788962064ff3fa">dnm_level</a>&#160;</td>
-          <td class="paramname"><em>level</em>&#160;</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>offset</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -484,38 +314,55 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>creates an iterator over the document (uses malloc -&gt; has to be free'd later) </p><dl class="params"><dt>Parameters</dt><dd>
+<p>get the node corresponding to an offset in the plaintext </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">dnm</td><td>the document to be iterated over </td></tr>
-    <tr><td class="paramname">level</td><td>the chunks we want to iterate over (DNM_LEVEL_PARA, DNM_LEVEL_SENTENCE, DNM_LEVEL_WORD) </td></tr>
+    <tr><td class="paramname">n</td><td>the root node </td></tr>
+    <tr><td class="paramname">offset</td><td>the plaintext offset </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="retval"><dt>Return values</dt><dd>
   <table class="retval">
-    <tr><td class="paramname">a</td><td>pointer to the iterator </td></tr>
+    <tr><td class="paramname">a</td><td>pointer to the lowest with offset annotations around the given offset </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a class="anchor" id="aaf0b24349d01320ddec0cfaee6642ae1"></a>
+<a class="anchor" id="adcbd942198b0ec8c0959246ee27dce51"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">char* getDnmIteratorContent </td>
+          <td class="memname">int mark_sentence </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structdnm__iterator.html">dnmIteratorPtr</a>&#160;</td>
-          <td class="paramname"><em>it</em></td><td>)</td>
+          <td class="paramtype"><a class="el" href="dnmlib_8h.html#a1a836076588e85ad00e44feeafa06d80">dnmPtr</a>&#160;</td>
+          <td class="paramname"><em>dnm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype"><a class="el" href="dnmlib_8h.html#a129a3ab0a148f2da48eda9d7454efb5c">dnmRange</a>&#160;</td>
+          <td class="paramname"><em>range</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Returns the plain text of the chunk an iterator points to </p><dl class="params"><dt>Parameters</dt><dd>
+<p>marks a sentence in the DOM (using a span tag)</p>
+<dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">it</td><td>The iterator  The plain text, ended by \0, which has to be free'd manually </td></tr>
+    <tr><td class="paramname">dnm</td><td>a pointer to the DNM  the offsets of the sentence </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="retval"><dt>Return values</dt><dd>
+  <table class="retval">
+    <tr><td class="paramname">returns</td><td>1 if something went wrong (e.g. doesn't fit into XML structure), otherwise 0 </td></tr>
   </table>
   </dd>
 </dl>
@@ -525,7 +372,7 @@ Functions</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Aug 10 2014 01:20:32 for LLaMaPUn C library by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Aug 25 2014 16:33:15 for LLaMaPUn C library by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.7
 </small></address>

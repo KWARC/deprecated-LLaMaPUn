@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['stopword_20library',['Stopword Library',['../group__stopwords.html',1,'']]]
+  ['paragraph_20discrimination',['Paragraph Discrimination',['../group__para__discr.html',1,'']]]
 ];

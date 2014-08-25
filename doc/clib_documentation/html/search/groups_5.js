@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['unicode_20normalizer',['Unicode Normalizer',['../group__unicode__normalizer.html',1,'']]]
+  ['the_20ngram_20library',['The ngram library',['../group__ngrams.html',1,'']]]
 ];

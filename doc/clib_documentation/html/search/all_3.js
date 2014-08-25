@@ -1,5 +1,23 @@
 var searchData=
 [
-  ['free_5fstopwords',['free_stopwords',['../stopwords_8h.html#a378f3a25c9f48f8fb1d0e847a45c0fe6',1,'stopwords.h']]],
-  ['freednm',['freeDNM',['../dnmlib_8h.html#aeb07d5daa59a184901a0c3b2badf7407',1,'dnmlib.h']]]
+  ['dnm_5fchunk',['dnm_chunk',['../structdnm__chunk.html',1,'']]],
+  ['dnm_5fextend_5fpara_5frange',['DNM_EXTEND_PARA_RANGE',['../old__dnmlib_8h.html#a603c63d27e31cd61554efcb67571080d',1,'old_dnmlib.h']]],
+  ['dnm_5fiterator',['dnm_iterator',['../structdnm__iterator.html',1,'']]],
+  ['dnm_5flevel',['dnm_level',['../old__dnmlib_8h.html#a350448b8429d24aff8788962064ff3fa',1,'old_dnmlib.h']]],
+  ['dnm_5fnode_5fplaintext',['dnm_node_plaintext',['../dnmlib_8h.html#a1aba1457c28636648fb10237e3e4c196',1,'dnmlib.h']]],
+  ['dnm_5fnormalize_5fmath',['DNM_NORMALIZE_MATH',['../old__dnmlib_8h.html#adaefeea10cd8b72a43a2d7dbd81d72aa',1,'old_dnmlib.h']]],
+  ['dnm_5fnormalize_5ftags',['DNM_NORMALIZE_TAGS',['../dnmlib_8h.html#a9ea5983adbfacc508bddcda48cf59462',1,'dnmlib.h']]],
+  ['dnm_5fskip_5fcite',['DNM_SKIP_CITE',['../old__dnmlib_8h.html#a377af1b1df87c15703d6cd1653c8d399',1,'old_dnmlib.h']]],
+  ['dnm_5fskip_5fmath',['DNM_SKIP_MATH',['../old__dnmlib_8h.html#a3fdb2cf6d21aae12db2fc207f063aef2',1,'old_dnmlib.h']]],
+  ['dnmiteratoraddannotation',['dnmIteratorAddAnnotation',['../old__dnmlib_8h.html#a36e1d173945279f86680668599d6ef83',1,'old_dnmlib.h']]],
+  ['dnmiteratorhasannotation',['dnmIteratorHasAnnotation',['../old__dnmlib_8h.html#a56d35f14474aa8f36b3636db7ab08b2c',1,'old_dnmlib.h']]],
+  ['dnmiteratorhasannotationinherited',['dnmIteratorHasAnnotationInherited',['../old__dnmlib_8h.html#a8816e54ffbff3e6472c1972f4673eb0a',1,'old_dnmlib.h']]],
+  ['dnmiteratornext',['dnmIteratorNext',['../old__dnmlib_8h.html#ad88dcf0770e790543f9dc6d5188bb9e0',1,'old_dnmlib.h']]],
+  ['dnmiteratorprevious',['dnmIteratorPrevious',['../old__dnmlib_8h.html#ac71d576a0905ea2fbbcad8c4a51c41eb',1,'old_dnmlib.h']]],
+  ['dnmlib',['DNMlib',['../group__dnmlib.html',1,'']]],
+  ['dnmlib_2eh',['dnmlib.h',['../dnmlib_8h.html',1,'']]],
+  ['dnmptr',['dnmPtr',['../dnmlib_8h.html#a1a836076588e85ad00e44feeafa06d80',1,'dnmlib.h']]],
+  ['dnmrange',['dnmRange',['../dnmlib_8h.html#a129a3ab0a148f2da48eda9d7454efb5c',1,'dnmlib.h']]],
+  ['dnmranges',['dnmRanges',['../dnmlib_8h.html#a4b142ed2dde77f803e74c17195b4c7f1',1,'dnmlib.h']]],
+  ['dnmstruct',['dnmStruct',['../structdnmStruct.html',1,'']]]
 ];

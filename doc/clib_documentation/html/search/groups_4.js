@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['the_20ngram_20library',['The ngram library',['../group__ngrams.html',1,'']]]
+  ['stopword_20library',['Stopword Library',['../group__stopwords.html',1,'']]]
 ];

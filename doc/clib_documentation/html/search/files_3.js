@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['unicode_5fnormalizer_2eh',['unicode_normalizer.h',['../unicode__normalizer_8h.html',1,'']]]
+  ['stemmer_2eh',['stemmer.h',['../stemmer_8h.html',1,'']]],
+  ['stopwords_2eh',['stopwords.h',['../stopwords_8h.html',1,'']]]
 ];

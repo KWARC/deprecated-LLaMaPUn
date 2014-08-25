@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['paragraph_20discrimination',['Paragraph Discrimination',['../group__para__discr.html',1,'']]]
+  ['normalize_5funicode',['normalize_unicode',['../unicode__normalizer_8h.html#ab55ab640a52295e74695409f7b16ebaf',1,'unicode_normalizer.h']]]
 ];

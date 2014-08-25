@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['getdnmchildreniterator',['getDnmChildrenIterator',['../dnmlib_8h.html#acabc90e778f7c7db669acd536a4a5a7f',1,'dnmlib.h']]],
-  ['getdnmiterator',['getDnmIterator',['../dnmlib_8h.html#ad54889e90f0d30177bbe4567bf235bfa',1,'dnmlib.h']]],
-  ['getdnmiteratorcontent',['getDnmIteratorContent',['../dnmlib_8h.html#aaf0b24349d01320ddec0cfaee6642ae1',1,'dnmlib.h']]]
+  ['free_5fstopwords',['free_stopwords',['../stopwords_8h.html#a378f3a25c9f48f8fb1d0e847a45c0fe6',1,'stopwords.h']]],
+  ['freednm',['freeDNM',['../dnmlib_8h.html#aeb07d5daa59a184901a0c3b2badf7407',1,'dnmlib.h']]]
 ];

@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['a_20library_20for_20stemming_20words',['A Library for Stemming Words',['../group__stemmer.html',1,'']]]
+  ['_5fdnmrange',['_dnmRange',['../struct__dnmRange.html',1,'']]],
+  ['_5fdnmranges',['_dnmRanges',['../struct__dnmRanges.html',1,'']]]
 ];

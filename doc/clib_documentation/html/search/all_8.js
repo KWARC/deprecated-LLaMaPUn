@@ -1,4 +1,8 @@
 var searchData=
 [
-  ['morpha_5fstem',['morpha_stem',['../stemmer_8h.html#a40b92c6be764d18e7748cacb6362e419',1,'stemmer.h']]]
+  ['llamapun_5fget_5fngrams',['llamapun_get_ngrams',['../llamapun__ngrams_8h.html#a7326b7b2c03ce0c7ebca56f877ed6838',1,'llamapun_ngrams.h']]],
+  ['llamapun_5fngrams_2eh',['llamapun_ngrams.h',['../llamapun__ngrams_8h.html',1,'']]],
+  ['llamapun_5fpara_5fdiscr_2eh',['llamapun_para_discr.h',['../llamapun__para__discr_8h.html',1,'']]],
+  ['llamapun_5fpara_5fdiscr_5fget_5fbags',['llamapun_para_discr_get_bags',['../llamapun__para__discr_8h.html#a9b95585a0264498d325099e2aa3037ce',1,'llamapun_para_discr.h']]],
+  ['load_5fstopwords',['load_stopwords',['../stopwords_8h.html#ae433a83d34b7b3dee7a8433e25f4e221',1,'stopwords.h']]]
 ];

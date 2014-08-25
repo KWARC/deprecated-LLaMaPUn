@@ -37,6 +37,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
       <li><a href="modules.html"><span>Modules</span></a></li>
       <li><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
       <li class="current"><a href="files.html"><span>Files</span></a></li>
@@ -70,7 +71,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Macros</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Groups</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Macros</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Groups</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(8)"><span class="SelectionMark">&#160;</span>Pages</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -85,133 +86,84 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!--header-->
 <div class="contents">
 <a href="dnmlib_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;</div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="preprocessor">#include &lt;libxml/tree.h&gt;</span></div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="preprocessor">#include &lt;uthash.h&gt;</span></div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;</div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="preprocessor">#include &lt;string.h&gt;</span></div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="preprocessor">#ifndef DNMLIB_H</span></div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="preprocessor">#define DNMLIB_H</span></div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;</div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor">#include &lt;libxml/tree.h&gt;</span></div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="preprocessor">#include &lt;uthash.h&gt;</span></div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;</div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="preprocessor">#include &lt;string.h&gt;</span></div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;</div>
 <div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;</div>
-<div class="line"><a name="l00018"></a><span class="lineno"><a class="line" href="dnmlib_8h.html#adaefeea10cd8b72a43a2d7dbd81d72aa">   18</a></span>&#160;<span class="preprocessor">#define DNM_NORMALIZE_MATH (1 &lt;&lt; 0)</span></div>
+<div class="line"><a name="l00018"></a><span class="lineno"><a class="line" href="dnmlib_8h.html#a9ea5983adbfacc508bddcda48cf59462">   18</a></span>&#160;<span class="preprocessor">#define DNM_NORMALIZE_TAGS (1 &lt;&lt; 0)</span></div>
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;</div>
-<div class="line"><a name="l00020"></a><span class="lineno"><a class="line" href="dnmlib_8h.html#a3fdb2cf6d21aae12db2fc207f063aef2">   20</a></span>&#160;<span class="preprocessor">#define DNM_SKIP_MATH      (1 &lt;&lt; 1)</span></div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;</div>
-<div class="line"><a name="l00022"></a><span class="lineno"><a class="line" href="dnmlib_8h.html#a377af1b1df87c15703d6cd1653c8d399">   22</a></span>&#160;<span class="preprocessor">#define DNM_SKIP_CITE      (1 &lt;&lt; 2)</span></div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;</div>
-<div class="line"><a name="l00025"></a><span class="lineno"><a class="line" href="dnmlib_8h.html#a350448b8429d24aff8788962064ff3fa">   25</a></span>&#160;<span class="keyword">enum</span> <a class="code" href="dnmlib_8h.html#a350448b8429d24aff8788962064ff3fa">dnm_level</a> {DNM_LEVEL_PARA, DNM_LEVEL_SENTENCE, DNM_LEVEL_WORD, DNM_LEVEL_NONE};</div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;</div>
+<div class="line"><a name="l00022"></a><span class="lineno"><a class="line" href="structhash__element__string.html">   22</a></span>&#160;<span class="keyword">struct </span><a class="code" href="structhash__element__string.html">hash_element_string</a> {</div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;  <span class="keywordtype">char</span> *string;</div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;  UT_hash_handle hh;</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;};</div>
 <div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;</div>
-<div class="line"><a name="l00028"></a><span class="lineno"><a class="line" href="structhash__element__string.html">   28</a></span>&#160;<span class="keyword">struct </span><a class="code" href="structhash__element__string.html">hash_element_string</a> {</div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;    <span class="keywordtype">char</span> *string;</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;    UT_hash_handle hh;</div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;};</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;</div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="comment">//=======================================================</span></div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="comment">//Section: Types</span></div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="comment">//=======================================================</span></div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;</div>
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;</div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="comment">//=======================================================</span></div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="comment">//Section: Types</span></div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="comment">//=======================================================</span></div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;</div>
+<div class="line"><a name="l00033"></a><span class="lineno"><a class="line" href="structdnmStruct.html">   33</a></span>&#160;<span class="keyword">struct </span><a class="code" href="structdnmStruct.html">dnmStruct</a> {</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;  xmlDocPtr document;</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;  <span class="keywordtype">long</span> parameters;</div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;  <span class="keywordtype">char</span> *plaintext;</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;  <span class="keywordtype">size_t</span> size_plaintext;</div>
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;</div>
-<div class="line"><a name="l00039"></a><span class="lineno"><a class="line" href="structdnm__struct.html">   39</a></span>&#160;<span class="keyword">struct </span><a class="code" href="structdnm__struct.html">dnm_struct</a> {</div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    xmlDocPtr document;</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;  <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> sentenceCount;   <span class="comment">//counter variable for the id attributes</span></div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;};</div>
 <div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    <span class="keywordtype">char</span> *plaintext;</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    <span class="keyword">struct </span><a class="code" href="structhash__element__string.html">hash_element_string</a> *annotation_handle;</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    <span class="keyword">struct </span><a class="code" href="structdnm__chunk.html">dnm_chunk</a> * para_level;</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    <span class="keyword">struct </span><a class="code" href="structdnm__chunk.html">dnm_chunk</a> * sent_level;</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    <span class="keyword">struct </span><a class="code" href="structdnm__chunk.html">dnm_chunk</a> * word_level;</div>
+<div class="line"><a name="l00043"></a><span class="lineno"><a class="line" href="dnmlib_8h.html#a1a836076588e85ad00e44feeafa06d80">   43</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structdnmStruct.html">dnmStruct</a> * <a class="code" href="dnmlib_8h.html#a1a836076588e85ad00e44feeafa06d80">dnmPtr</a>;</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;</div>
+<div class="line"><a name="l00045"></a><span class="lineno"><a class="line" href="struct__dnmRange.html">   45</a></span>&#160;<span class="keyword">struct </span><a class="code" href="struct__dnmRange.html">_dnmRange</a> {</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;  <span class="keywordtype">size_t</span> start;</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;  <span class="keywordtype">size_t</span> end;</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;};</div>
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    <span class="keywordtype">size_t</span> size_para_level;</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    <span class="keywordtype">size_t</span> size_sent_level;</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    <span class="keywordtype">size_t</span> size_word_level;</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    <span class="keywordtype">size_t</span> size_plaintext;</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;};</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structdnm__struct.html">dnm_struct</a> * <a class="code" href="structdnm__struct.html">dnmPtr</a>;</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;<span class="comment">//one chunk corresponds to one paragraph, sentence, or word</span></div>
-<div class="line"><a name="l00060"></a><span class="lineno"><a class="line" href="structdnm__chunk.html">   60</a></span>&#160;<span class="keyword">struct </span><a class="code" href="structdnm__chunk.html">dnm_chunk</a> {</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    <span class="keywordtype">char</span> *id;</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;    xmlNode *dom_node;</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    <span class="keyword">enum</span> <a class="code" href="dnmlib_8h.html#a350448b8429d24aff8788962064ff3fa">dnm_level</a> level;</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;    <span class="keywordtype">long</span> offset_parent;</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    <span class="keywordtype">long</span> offset_children_start;</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;    <span class="keywordtype">long</span> offset_children_end;</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;    <span class="keywordtype">char</span> **annotations;</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    <span class="keywordtype">size_t</span> number_of_annotations;</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;    <span class="keywordtype">size_t</span> annotations_allocated;</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;    <span class="keywordtype">char</span> **inherited_annotations;</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;    <span class="keywordtype">size_t</span> number_of_inherited_annotations;</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;    <span class="keywordtype">size_t</span> inherited_annotations_allocated;</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;    <span class="keywordtype">size_t</span> offset_start;</div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;    <span class="keywordtype">size_t</span> offset_end;</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;};</div>
+<div class="line"><a name="l00051"></a><span class="lineno"><a class="line" href="dnmlib_8h.html#a129a3ab0a148f2da48eda9d7454efb5c">   51</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="struct__dnmRange.html">_dnmRange</a> <a class="code" href="struct__dnmRange.html">dnmRange</a>;</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;</div>
+<div class="line"><a name="l00053"></a><span class="lineno"><a class="line" href="struct__dnmRanges.html">   53</a></span>&#160;<span class="keyword">struct </span><a class="code" href="struct__dnmRanges.html">_dnmRanges</a> {</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;  <a class="code" href="struct__dnmRange.html">dnmRange</a>* range;</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;  <span class="keywordtype">int</span> length;</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;};</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;</div>
+<div class="line"><a name="l00059"></a><span class="lineno"><a class="line" href="dnmlib_8h.html#a4b142ed2dde77f803e74c17195b4c7f1">   59</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="struct__dnmRanges.html">_dnmRanges</a> <a class="code" href="struct__dnmRanges.html">dnmRanges</a>;</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;<span class="comment">//=======================================================</span></div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="comment">//Section: Functions</span></div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="comment">//=======================================================</span></div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;dnmPtr <a class="code" href="dnmlib_8h.html#a47f143f9edd8f8072d7ec1c4730fa17a">createDNM</a>(xmlDocPtr doc, <span class="keywordtype">long</span> parameters);</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;<span class="keywordtype">void</span> <a class="code" href="dnmlib_8h.html#aeb07d5daa59a184901a0c3b2badf7407">freeDNM</a>(dnmPtr dnm);</div>
 <div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;</div>
-<div class="line"><a name="l00081"></a><span class="lineno"><a class="line" href="structdnm__iterator.html">   81</a></span>&#160;<span class="keyword">struct </span><a class="code" href="structdnm__iterator.html">dnm_iterator</a> {</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;    dnmPtr dnm;</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;    <span class="keyword">enum</span> <a class="code" href="dnmlib_8h.html#a350448b8429d24aff8788962064ff3fa">dnm_level</a> level;</div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;    <span class="keywordtype">size_t</span> pos;</div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;    <span class="keywordtype">size_t</span> start;</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;    <span class="keywordtype">size_t</span> end;</div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;};</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structdnm__iterator.html">dnm_iterator</a> * <a class="code" href="structdnm__iterator.html">dnmIteratorPtr</a>;</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;</div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;<span class="comment">//=======================================================</span></div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;<span class="comment">//Section: Functions</span></div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;<span class="comment">//=======================================================</span></div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;</div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;dnmPtr <a class="code" href="dnmlib_8h.html#a47f143f9edd8f8072d7ec1c4730fa17a">createDNM</a>(xmlDocPtr doc, <span class="keywordtype">long</span> parameters);</div>
-<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;</div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;<span class="keywordtype">void</span> <a class="code" href="dnmlib_8h.html#aeb07d5daa59a184901a0c3b2badf7407">freeDNM</a>(dnmPtr dnm);</div>
-<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;</div>
-<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;</div>
-<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;<span class="comment">//ITERATORS</span></div>
-<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;</div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;dnmIteratorPtr <a class="code" href="dnmlib_8h.html#ad54889e90f0d30177bbe4567bf235bfa">getDnmIterator</a>(dnmPtr dnm, <span class="keyword">enum</span> <a class="code" href="dnmlib_8h.html#a350448b8429d24aff8788962064ff3fa">dnm_level</a> level);</div>
-<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;</div>
-<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;</div>
-<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;dnmIteratorPtr <a class="code" href="dnmlib_8h.html#acabc90e778f7c7db669acd536a4a5a7f">getDnmChildrenIterator</a>(dnmIteratorPtr it);</div>
-<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;</div>
-<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;<span class="keywordtype">int</span> <a class="code" href="dnmlib_8h.html#ad88dcf0770e790543f9dc6d5188bb9e0">dnmIteratorNext</a>(dnmIteratorPtr it);</div>
-<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;</div>
-<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;<span class="keywordtype">int</span> <a class="code" href="dnmlib_8h.html#ac71d576a0905ea2fbbcad8c4a51c41eb">dnmIteratorPrevious</a>(dnmIteratorPtr it);</div>
-<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;</div>
-<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;<span class="keywordtype">char</span> *<a class="code" href="dnmlib_8h.html#aaf0b24349d01320ddec0cfaee6642ae1">getDnmIteratorContent</a>(dnmIteratorPtr it);</div>
-<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;</div>
-<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;</div>
-<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;<span class="comment">//ANNOTATIONS</span></div>
-<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;</div>
-<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;<span class="keywordtype">int</span> <a class="code" href="dnmlib_8h.html#a56d35f14474aa8f36b3636db7ab08b2c">dnmIteratorHasAnnotation</a>(dnmIteratorPtr it, <span class="keyword">const</span> <span class="keywordtype">char</span> *annotation);</div>
-<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;</div>
-<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;<span class="keywordtype">int</span> <a class="code" href="dnmlib_8h.html#a8816e54ffbff3e6472c1972f4673eb0a">dnmIteratorHasAnnotationInherited</a>(dnmIteratorPtr it, <span class="keyword">const</span> <span class="keywordtype">char</span> *annotation);</div>
-<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;</div>
-<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;<span class="keywordtype">void</span> <a class="code" href="dnmlib_8h.html#a36e1d173945279f86680668599d6ef83">dnmIteratorAddAnnotation</a>(dnmIteratorPtr it, <span class="keyword">const</span> <span class="keywordtype">char</span> *annotation, <span class="keywordtype">int</span> writeIntoDOM, <span class="keywordtype">int</span> inheritToChildren);</div>
-<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;</div>
-<div class="ttc" id="dnmlib_8h_html_ad54889e90f0d30177bbe4567bf235bfa"><div class="ttname"><a href="dnmlib_8h.html#ad54889e90f0d30177bbe4567bf235bfa">getDnmIterator</a></div><div class="ttdeci">dnmIteratorPtr getDnmIterator(dnmPtr dnm, enum dnm_level level)</div></div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;xmlNode * <a class="code" href="dnmlib_8h.html#ac8b8f61c74795d10565ab48b1d940ec1">get_node_from_offset</a>(xmlNode *n, <span class="keywordtype">size_t</span> offset);</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;<span class="comment">//TOKENIZATION</span></div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;<span class="comment"></span><span class="keywordtype">int</span> <a class="code" href="dnmlib_8h.html#adcbd942198b0ec8c0959246ee27dce51">mark_sentence</a>(dnmPtr dnm, <a class="code" href="struct__dnmRange.html">dnmRange</a> range);</div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;<span class="keywordtype">char</span>* <a class="code" href="dnmlib_8h.html#a1aba1457c28636648fb10237e3e4c196">dnm_node_plaintext</a>(dnmPtr mydnm, xmlNodePtr mynode);</div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;</div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="ttc" id="structdnmStruct_html"><div class="ttname"><a href="structdnmStruct.html">dnmStruct</a></div><div class="ttdef"><b>Definition:</b> dnmlib.h:33</div></div>
 <div class="ttc" id="dnmlib_8h_html_a47f143f9edd8f8072d7ec1c4730fa17a"><div class="ttname"><a href="dnmlib_8h.html#a47f143f9edd8f8072d7ec1c4730fa17a">createDNM</a></div><div class="ttdeci">dnmPtr createDNM(xmlDocPtr doc, long parameters)</div></div>
-<div class="ttc" id="dnmlib_8h_html_acabc90e778f7c7db669acd536a4a5a7f"><div class="ttname"><a href="dnmlib_8h.html#acabc90e778f7c7db669acd536a4a5a7f">getDnmChildrenIterator</a></div><div class="ttdeci">dnmIteratorPtr getDnmChildrenIterator(dnmIteratorPtr it)</div></div>
-<div class="ttc" id="dnmlib_8h_html_a56d35f14474aa8f36b3636db7ab08b2c"><div class="ttname"><a href="dnmlib_8h.html#a56d35f14474aa8f36b3636db7ab08b2c">dnmIteratorHasAnnotation</a></div><div class="ttdeci">int dnmIteratorHasAnnotation(dnmIteratorPtr it, const char *annotation)</div></div>
-<div class="ttc" id="structhash__element__string_html"><div class="ttname"><a href="structhash__element__string.html">hash_element_string</a></div><div class="ttdef"><b>Definition:</b> dnmlib.h:28</div></div>
-<div class="ttc" id="dnmlib_8h_html_a8816e54ffbff3e6472c1972f4673eb0a"><div class="ttname"><a href="dnmlib_8h.html#a8816e54ffbff3e6472c1972f4673eb0a">dnmIteratorHasAnnotationInherited</a></div><div class="ttdeci">int dnmIteratorHasAnnotationInherited(dnmIteratorPtr it, const char *annotation)</div></div>
-<div class="ttc" id="structdnm__chunk_html"><div class="ttname"><a href="structdnm__chunk.html">dnm_chunk</a></div><div class="ttdef"><b>Definition:</b> dnmlib.h:60</div></div>
-<div class="ttc" id="dnmlib_8h_html_aaf0b24349d01320ddec0cfaee6642ae1"><div class="ttname"><a href="dnmlib_8h.html#aaf0b24349d01320ddec0cfaee6642ae1">getDnmIteratorContent</a></div><div class="ttdeci">char * getDnmIteratorContent(dnmIteratorPtr it)</div></div>
-<div class="ttc" id="dnmlib_8h_html_ac71d576a0905ea2fbbcad8c4a51c41eb"><div class="ttname"><a href="dnmlib_8h.html#ac71d576a0905ea2fbbcad8c4a51c41eb">dnmIteratorPrevious</a></div><div class="ttdeci">int dnmIteratorPrevious(dnmIteratorPtr it)</div></div>
-<div class="ttc" id="structdnm__iterator_html"><div class="ttname"><a href="structdnm__iterator.html">dnm_iterator</a></div><div class="ttdef"><b>Definition:</b> dnmlib.h:81</div></div>
+<div class="ttc" id="dnmlib_8h_html_a1aba1457c28636648fb10237e3e4c196"><div class="ttname"><a href="dnmlib_8h.html#a1aba1457c28636648fb10237e3e4c196">dnm_node_plaintext</a></div><div class="ttdeci">char * dnm_node_plaintext(dnmPtr mydnm, xmlNodePtr mynode)</div></div>
+<div class="ttc" id="dnmlib_8h_html_adcbd942198b0ec8c0959246ee27dce51"><div class="ttname"><a href="dnmlib_8h.html#adcbd942198b0ec8c0959246ee27dce51">mark_sentence</a></div><div class="ttdeci">int mark_sentence(dnmPtr dnm, dnmRange range)</div></div>
+<div class="ttc" id="structhash__element__string_html"><div class="ttname"><a href="structhash__element__string.html">hash_element_string</a></div><div class="ttdef"><b>Definition:</b> dnmlib.h:22</div></div>
+<div class="ttc" id="struct__dnmRange_html"><div class="ttname"><a href="struct__dnmRange.html">_dnmRange</a></div><div class="ttdef"><b>Definition:</b> dnmlib.h:45</div></div>
+<div class="ttc" id="dnmlib_8h_html_a1a836076588e85ad00e44feeafa06d80"><div class="ttname"><a href="dnmlib_8h.html#a1a836076588e85ad00e44feeafa06d80">dnmPtr</a></div><div class="ttdeci">struct dnmStruct * dnmPtr</div><div class="ttdef"><b>Definition:</b> dnmlib.h:43</div></div>
 <div class="ttc" id="dnmlib_8h_html_aeb07d5daa59a184901a0c3b2badf7407"><div class="ttname"><a href="dnmlib_8h.html#aeb07d5daa59a184901a0c3b2badf7407">freeDNM</a></div><div class="ttdeci">void freeDNM(dnmPtr dnm)</div></div>
-<div class="ttc" id="dnmlib_8h_html_ad88dcf0770e790543f9dc6d5188bb9e0"><div class="ttname"><a href="dnmlib_8h.html#ad88dcf0770e790543f9dc6d5188bb9e0">dnmIteratorNext</a></div><div class="ttdeci">int dnmIteratorNext(dnmIteratorPtr it)</div></div>
-<div class="ttc" id="structdnm__struct_html"><div class="ttname"><a href="structdnm__struct.html">dnm_struct</a></div><div class="ttdef"><b>Definition:</b> dnmlib.h:39</div></div>
-<div class="ttc" id="dnmlib_8h_html_a350448b8429d24aff8788962064ff3fa"><div class="ttname"><a href="dnmlib_8h.html#a350448b8429d24aff8788962064ff3fa">dnm_level</a></div><div class="ttdeci">dnm_level</div><div class="ttdef"><b>Definition:</b> dnmlib.h:25</div></div>
-<div class="ttc" id="dnmlib_8h_html_a36e1d173945279f86680668599d6ef83"><div class="ttname"><a href="dnmlib_8h.html#a36e1d173945279f86680668599d6ef83">dnmIteratorAddAnnotation</a></div><div class="ttdeci">void dnmIteratorAddAnnotation(dnmIteratorPtr it, const char *annotation, int writeIntoDOM, int inheritToChildren)</div></div>
+<div class="ttc" id="dnmlib_8h_html_ac8b8f61c74795d10565ab48b1d940ec1"><div class="ttname"><a href="dnmlib_8h.html#ac8b8f61c74795d10565ab48b1d940ec1">get_node_from_offset</a></div><div class="ttdeci">xmlNode * get_node_from_offset(xmlNode *n, size_t offset)</div></div>
+<div class="ttc" id="struct__dnmRanges_html"><div class="ttname"><a href="struct__dnmRanges.html">_dnmRanges</a></div><div class="ttdef"><b>Definition:</b> dnmlib.h:53</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Aug 10 2014 01:20:32 for LLaMaPUn C library by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Aug 25 2014 16:33:15 for LLaMaPUn C library by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.7
 </small></address>

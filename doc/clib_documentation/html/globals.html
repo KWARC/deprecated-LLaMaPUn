@@ -37,6 +37,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
       <li><a href="modules.html"><span>Modules</span></a></li>
       <li><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
       <li class="current"><a href="files.html"><span>Files</span></a></li>
@@ -68,8 +69,24 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     <ul class="tablist">
       <li class="current"><a href="globals.html"><span>All</span></a></li>
       <li><a href="globals_func.html"><span>Functions</span></a></li>
+      <li><a href="globals_type.html"><span>Typedefs</span></a></li>
       <li><a href="globals_enum.html"><span>Enumerations</span></a></li>
       <li><a href="globals_defs.html"><span>Macros</span></a></li>
+    </ul>
+  </div>
+  <div id="navrow4" class="tabs3">
+    <ul class="tablist">
+      <li><a href="#index_c"><span>c</span></a></li>
+      <li><a href="#index_d"><span>d</span></a></li>
+      <li><a href="#index_f"><span>f</span></a></li>
+      <li><a href="#index_g"><span>g</span></a></li>
+      <li><a href="#index_i"><span>i</span></a></li>
+      <li><a href="#index_l"><span>l</span></a></li>
+      <li><a href="#index_m"><span>m</span></a></li>
+      <li><a href="#index_n"><span>n</span></a></li>
+      <li><a href="#index_o"><span>o</span></a></li>
+      <li><a href="#index_r"><span>r</span></a></li>
+      <li class="current"><a href="#index_u"><span>u</span></a></li>
     </ul>
   </div>
 </div><!-- top -->
@@ -78,7 +95,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Macros</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Groups</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Macros</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Groups</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(8)"><span class="SelectionMark">&#160;</span>Pages</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -88,61 +105,104 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div>
 
 <div class="contents">
-<div class="textblock">Here is a list of all documented functions, variables, defines, enums, and typedefs with links to the documentation:</div><ul>
+<div class="textblock">Here is a list of all documented functions, variables, defines, enums, and typedefs with links to the documentation:</div>
+
+<h3><a class="anchor" id="index_c"></a>- c -</h3><ul>
 <li>close_stemmer()
 : <a class="el" href="stemmer_8h.html#a13e8dd878f2f9257d96ddd83c3c5376c">stemmer.h</a>
 </li>
 <li>createDNM()
 : <a class="el" href="dnmlib_8h.html#a47f143f9edd8f8072d7ec1c4730fa17a">dnmlib.h</a>
 </li>
+</ul>
+
+
+<h3><a class="anchor" id="index_d"></a>- d -</h3><ul>
+<li>DNM_EXTEND_PARA_RANGE
+: <a class="el" href="old__dnmlib_8h.html#a603c63d27e31cd61554efcb67571080d">old_dnmlib.h</a>
+</li>
 <li>dnm_level
-: <a class="el" href="dnmlib_8h.html#a350448b8429d24aff8788962064ff3fa">dnmlib.h</a>
+: <a class="el" href="old__dnmlib_8h.html#a350448b8429d24aff8788962064ff3fa">old_dnmlib.h</a>
+</li>
+<li>dnm_node_plaintext()
+: <a class="el" href="dnmlib_8h.html#a1aba1457c28636648fb10237e3e4c196">dnmlib.h</a>
 </li>
 <li>DNM_NORMALIZE_MATH
-: <a class="el" href="dnmlib_8h.html#adaefeea10cd8b72a43a2d7dbd81d72aa">dnmlib.h</a>
+: <a class="el" href="old__dnmlib_8h.html#adaefeea10cd8b72a43a2d7dbd81d72aa">old_dnmlib.h</a>
+</li>
+<li>DNM_NORMALIZE_TAGS
+: <a class="el" href="dnmlib_8h.html#a9ea5983adbfacc508bddcda48cf59462">dnmlib.h</a>
 </li>
 <li>DNM_SKIP_CITE
-: <a class="el" href="dnmlib_8h.html#a377af1b1df87c15703d6cd1653c8d399">dnmlib.h</a>
+: <a class="el" href="old__dnmlib_8h.html#a377af1b1df87c15703d6cd1653c8d399">old_dnmlib.h</a>
 </li>
 <li>DNM_SKIP_MATH
-: <a class="el" href="dnmlib_8h.html#a3fdb2cf6d21aae12db2fc207f063aef2">dnmlib.h</a>
+: <a class="el" href="old__dnmlib_8h.html#a3fdb2cf6d21aae12db2fc207f063aef2">old_dnmlib.h</a>
 </li>
 <li>dnmIteratorAddAnnotation()
-: <a class="el" href="dnmlib_8h.html#a36e1d173945279f86680668599d6ef83">dnmlib.h</a>
+: <a class="el" href="old__dnmlib_8h.html#a36e1d173945279f86680668599d6ef83">old_dnmlib.h</a>
 </li>
 <li>dnmIteratorHasAnnotation()
-: <a class="el" href="dnmlib_8h.html#a56d35f14474aa8f36b3636db7ab08b2c">dnmlib.h</a>
+: <a class="el" href="old__dnmlib_8h.html#a56d35f14474aa8f36b3636db7ab08b2c">old_dnmlib.h</a>
 </li>
 <li>dnmIteratorHasAnnotationInherited()
-: <a class="el" href="dnmlib_8h.html#a8816e54ffbff3e6472c1972f4673eb0a">dnmlib.h</a>
+: <a class="el" href="old__dnmlib_8h.html#a8816e54ffbff3e6472c1972f4673eb0a">old_dnmlib.h</a>
 </li>
 <li>dnmIteratorNext()
-: <a class="el" href="dnmlib_8h.html#ad88dcf0770e790543f9dc6d5188bb9e0">dnmlib.h</a>
+: <a class="el" href="old__dnmlib_8h.html#ad88dcf0770e790543f9dc6d5188bb9e0">old_dnmlib.h</a>
 </li>
 <li>dnmIteratorPrevious()
-: <a class="el" href="dnmlib_8h.html#ac71d576a0905ea2fbbcad8c4a51c41eb">dnmlib.h</a>
+: <a class="el" href="old__dnmlib_8h.html#ac71d576a0905ea2fbbcad8c4a51c41eb">old_dnmlib.h</a>
 </li>
+<li>dnmPtr
+: <a class="el" href="dnmlib_8h.html#a1a836076588e85ad00e44feeafa06d80">dnmlib.h</a>
+</li>
+<li>dnmRange
+: <a class="el" href="dnmlib_8h.html#a129a3ab0a148f2da48eda9d7454efb5c">dnmlib.h</a>
+</li>
+<li>dnmRanges
+: <a class="el" href="dnmlib_8h.html#a4b142ed2dde77f803e74c17195b4c7f1">dnmlib.h</a>
+</li>
+</ul>
+
+
+<h3><a class="anchor" id="index_f"></a>- f -</h3><ul>
 <li>free_stopwords()
 : <a class="el" href="stopwords_8h.html#a378f3a25c9f48f8fb1d0e847a45c0fe6">stopwords.h</a>
 </li>
 <li>freeDNM()
 : <a class="el" href="dnmlib_8h.html#aeb07d5daa59a184901a0c3b2badf7407">dnmlib.h</a>
 </li>
+</ul>
+
+
+<h3><a class="anchor" id="index_g"></a>- g -</h3><ul>
+<li>get_node_from_offset()
+: <a class="el" href="dnmlib_8h.html#ac8b8f61c74795d10565ab48b1d940ec1">dnmlib.h</a>
+</li>
 <li>getDnmChildrenIterator()
-: <a class="el" href="dnmlib_8h.html#acabc90e778f7c7db669acd536a4a5a7f">dnmlib.h</a>
+: <a class="el" href="old__dnmlib_8h.html#acabc90e778f7c7db669acd536a4a5a7f">old_dnmlib.h</a>
 </li>
 <li>getDnmIterator()
-: <a class="el" href="dnmlib_8h.html#ad54889e90f0d30177bbe4567bf235bfa">dnmlib.h</a>
+: <a class="el" href="old__dnmlib_8h.html#aebadeaae649115b97a72467563741e8b">old_dnmlib.h</a>
 </li>
 <li>getDnmIteratorContent()
-: <a class="el" href="dnmlib_8h.html#aaf0b24349d01320ddec0cfaee6642ae1">dnmlib.h</a>
+: <a class="el" href="old__dnmlib_8h.html#aaf0b24349d01320ddec0cfaee6642ae1">old_dnmlib.h</a>
 </li>
+</ul>
+
+
+<h3><a class="anchor" id="index_i"></a>- i -</h3><ul>
 <li>init_stemmer()
 : <a class="el" href="stemmer_8h.html#a41610e545d6efecf0f15898f5437b24e">stemmer.h</a>
 </li>
 <li>is_stopword()
 : <a class="el" href="stopwords_8h.html#a39a2b9e1941271a526a4ab1ac27e24b6">stopwords.h</a>
 </li>
+</ul>
+
+
+<h3><a class="anchor" id="index_l"></a>- l -</h3><ul>
 <li>llamapun_get_ngrams()
 : <a class="el" href="llamapun__ngrams_8h.html#a7326b7b2c03ce0c7ebca56f877ed6838">llamapun_ngrams.h</a>
 </li>
@@ -152,20 +212,52 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li>load_stopwords()
 : <a class="el" href="stopwords_8h.html#ae433a83d34b7b3dee7a8433e25f4e221">stopwords.h</a>
 </li>
+</ul>
+
+
+<h3><a class="anchor" id="index_m"></a>- m -</h3><ul>
+<li>mark_sentence()
+: <a class="el" href="dnmlib_8h.html#adcbd942198b0ec8c0959246ee27dce51">dnmlib.h</a>
+</li>
 <li>morpha_stem()
 : <a class="el" href="stemmer_8h.html#a40b92c6be764d18e7748cacb6362e419">stemmer.h</a>
 </li>
+</ul>
+
+
+<h3><a class="anchor" id="index_n"></a>- n -</h3><ul>
 <li>normalize_unicode()
 : <a class="el" href="unicode__normalizer_8h.html#ab55ab640a52295e74695409f7b16ebaf">unicode_normalizer.h</a>
 </li>
+</ul>
+
+
+<h3><a class="anchor" id="index_o"></a>- o -</h3><ul>
+<li>old_createDNM()
+: <a class="el" href="old__dnmlib_8h.html#a91e4d3c28f8e4baa4f6f55e7860f9f1f">old_dnmlib.h</a>
+</li>
+<li>old_freeDNM()
+: <a class="el" href="old__dnmlib_8h.html#a2758f9b13242c37362a45d8ab21be98f">old_dnmlib.h</a>
+</li>
+</ul>
+
+
+<h3><a class="anchor" id="index_r"></a>- r -</h3><ul>
 <li>read_stopwords_from_json()
 : <a class="el" href="stopwords_8h.html#ac1055fe1479846a7b717f2f44f795135">stopwords.h</a>
+</li>
+</ul>
+
+
+<h3><a class="anchor" id="index_u"></a>- u -</h3><ul>
+<li>unicode_normalize_dom()
+: <a class="el" href="unicode__normalizer_8h.html#a2fb0e022dcb049a81cfd80bb16e4035f">unicode_normalizer.h</a>
 </li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Aug 10 2014 01:20:32 for LLaMaPUn C library by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Aug 25 2014 16:33:15 for LLaMaPUn C library by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.7
 </small></address>

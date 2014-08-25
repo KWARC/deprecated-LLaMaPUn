@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['stemmer_2eh',['stemmer.h',['../stemmer_8h.html',1,'']]],
-  ['stopwords_2eh',['stopwords.h',['../stopwords_8h.html',1,'']]]
+  ['old_5fdnmlib_2eh',['old_dnmlib.h',['../old__dnmlib_8h.html',1,'']]]
 ];
