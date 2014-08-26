@@ -13,7 +13,7 @@
 #define OVECCOUNT 30    /* should be a multiple of 3 */
 
 void display_sentences(dnmRanges sentence_ranges, char* text) {
-  fprintf(stderr, "Sentences: \n");
+  fprintf(stderr, "\n--------------\nSentences: \n");
   int i;
   for (i=0; i<sentence_ranges.length; i++) {
     int start = sentence_ranges.range[i].start;
@@ -67,8 +67,16 @@ dnmRanges tokenize_sentences(char* text) {
         }
       case '?':
       case '!':
-        // Don't consider single letters followed by a punctuation sign an end of a sentence, if the next char is not a space/line break.
-        if (isspace(*(copy-2))) {
+        // Skippable punctuation cases:
+        if ( (isalnum(*(copy-1)) && (
+               // Don't consider single letters followed by a punctuation sign an end of a sentence, if the next char is not a space/line break.
+               // also "a.m." and "p.m." shouldn't get split
+               (isspace(*(copy-2)) || (*(copy-2) == '.')) ||
+               // additionally, if we have an immediately following lowercase letter, don't split
+               (islower(*(copy+1))) )) ||
+           // Or quote-enclosed punctuation: "." "?" "!"
+             ((*(copy-1) == '"') && (*(copy+1) == '"'))
+          ){ //TODO: Handle "..."
           copy++;
           end_sentence++;
           break;
@@ -76,8 +84,8 @@ dnmRanges tokenize_sentences(char* text) {
         // Save sentence, if content is present:
         if (has_content) {
           sentence_count++;
-          sentence_ranges.range[sentence_count].start = start_sentence;
-          sentence_ranges.range[sentence_count].end = end_sentence;
+          sentence_ranges.range[sentence_count-1].start = start_sentence;
+          sentence_ranges.range[sentence_count-1].end = end_sentence;
         }
         // Init next sentence start:
         copy++;
@@ -101,8 +109,8 @@ dnmRanges tokenize_sentences(char* text) {
             // Save sentence, if content is present:
             if (has_content) {
               sentence_count++;
-              sentence_ranges.range[sentence_count].start = start_sentence;
-              sentence_ranges.range[sentence_count].end = end_sentence;
+              sentence_ranges.range[sentence_count-1].start = start_sentence;
+              sentence_ranges.range[sentence_count-1].end = end_sentence;
             }
             // Init next sentence start:
             copy++;
@@ -118,8 +126,8 @@ dnmRanges tokenize_sentences(char* text) {
               // OR if the next letter is capital (math sentence terminator),
               //  make a sentence break and save:
               sentence_count++;
-              sentence_ranges.range[sentence_count].start = start_sentence;
-              sentence_ranges.range[sentence_count].end = end_sentence-1;
+              sentence_ranges.range[sentence_count-1].start = start_sentence;
+              sentence_ranges.range[sentence_count-1].end = end_sentence-1;
               // Init next sentence start:
               start_sentence = end_sentence;
               has_content=false;
@@ -146,7 +154,7 @@ dnmRanges tokenize_sentences(char* text) {
     sentence_ranges.range[index] = trim_sentence(sentence_ranges.range[index], text);
   }
   //Developer demo:
-  //   display_sentences(sentence_ranges, text);
+     display_sentences(sentence_ranges, text);
   pcre_free(abbreviation_regex);
   pcre_free(math_formula_regex);
   return sentence_ranges;
