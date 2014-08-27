@@ -48,30 +48,31 @@ void normalize_unicode(char *input, char **output) {
   if (*input == '\0') {
     *output = (char *) malloc(sizeof(char));
     **output = '\0';
+    return;
   }
   iconv_t conv = iconv_open("ASCII//TRANSLIT//IGNORE", "UTF-8");
-    if((long long) conv == -1) {
-        if (errno == EINVAL) {
-            fprintf(stderr, "unicode_normalizer: Error: Conversion is not supported\n");
-        } else {
-            fprintf(stderr, "unicode_normalizer: Error: Initialization failure!\n");
-        }   
-    }
+  if((long long) conv == -1) {
+      if (errno == EINVAL) {
+          fprintf(stderr, "unicode_normalizer: Error: Conversion is not supported\n");
+      } else {
+          fprintf(stderr, "unicode_normalizer: Error: Initialization failure!\n");
+      }   
+  }
 
-    norm_preprocess(input);
+  norm_preprocess(input);
 
-    char *tmp = (char *) malloc(sizeof(char) * (strlen(input) * 10 + 10));   //some memory for the conversion
+  char *tmp = (char *) malloc(sizeof(char) * (strlen(input) * 10 + 10));   //some memory for the conversion
 
-    char *inptr = input;
-    char *outptr = tmp;
-    size_t inlength = strlen(input);
-    size_t outlength = sizeof(char) * (strlen(input) * 10 + 10);
+  char *inptr = input;
+  char *outptr = tmp;
+  size_t inlength = strlen(input);
+  size_t outlength = sizeof(char) * (strlen(input) * 10 + 10);
 
-    iconv(conv, &inptr, &inlength, &outptr, &outlength);
+  iconv(conv, &inptr, &inlength, &outptr, &outlength);
 
-    *outptr = '\0';
-    *output = strdup(tmp);
-    free(tmp);
+  *outptr = '\0';
+  *output = strdup(tmp);
+  free(tmp);
     
   iconv_close(conv);
 }
