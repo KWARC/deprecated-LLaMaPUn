@@ -8,6 +8,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <pcre.h>
+#include "stopwords.h"
 #include "dnmlib.h"
 
 dnmRanges tokenize_sentences(char* text);
