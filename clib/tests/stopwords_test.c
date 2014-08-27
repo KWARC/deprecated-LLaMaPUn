@@ -26,7 +26,7 @@ int main(void) {
     fprintf(stderr, "test stopwords -- wrong result: 'group' shouldn't be a stopword\n");
     errors++;
   }
-  if (!is_stopword("in")) {
+  if (!is_stopword("IN")) {
     fprintf(stderr, "test stopwords -- wrong result: 'in' should be a stopword\n");
     errors++;
   }

@@ -50,6 +50,7 @@ set_source_files_properties(stemmer.c PROPERTIES COMPILE_FLAGS " -w ")
 set_source_files_properties(llamapun_gt_estimate.c PROPERTIES COMPILE_FLAGS " -std=c99 ")
 
 #link libraries
+target_link_libraries(stopwords ${JSON_LIBRARIES} ${uthash_LIBRARIES})
 target_link_libraries(SENNA_Hash SENNA_utils)
 target_link_libraries(SENNA_Tokenizer SENNA_Hash SENNA_utils)
 target_link_libraries(SENNA_nn SENNA_utils)
@@ -63,7 +64,7 @@ target_link_libraries(llamapun_gt_estimate ${JSON_LIBRARIES} ${uthash_LIBRARIES}
 target_link_libraries(dnmlib ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 #target_link_libraries(preprocessor ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 target_link_libraries(unicode_normalizer ${ICONV_LIBRARIES} ${LIBXML2_LIBRARIES})
-target_link_libraries(llamapun_tokenizer dnmlib pcre)
+target_link_libraries(llamapun_tokenizer stopwords dnmlib pcre)
 
 #tests
 add_executable(TestSENNA tests/senna_post_test.c)

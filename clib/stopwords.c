@@ -62,7 +62,11 @@ int is_stopword(const char *word) {
     return 0;
   }
   struct stopword_element* tmp;
-  HASH_FIND_STR(STOPWORDS, word, tmp);
+  char* lower_cased_word = strdup(word);
+  char* p;
+  for(p=lower_cased_word ; *p; p++) { *p = tolower(*p); }
+  HASH_FIND_STR(STOPWORDS, lower_cased_word, tmp);
+  free(lower_cased_word);
   if (tmp == NULL) return 0;
   else return 1;
 }
