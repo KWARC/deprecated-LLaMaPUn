@@ -81,7 +81,7 @@ dnmRanges tokenize_sentences(char* text) {
   unsigned int allocated_ranges = 512;
   sentence_ranges.range = malloc(allocated_ranges * sizeof(dnmRange));
 
-  char* copy = text;
+  char* copy = text+2; // Sentences have at least two characters (and we avoid invalid reads )
   unsigned int sentence_count = 0;
   unsigned int start_sentence = 0;
   unsigned int end_sentence = 0;
@@ -147,10 +147,10 @@ dnmRanges tokenize_sentences(char* text) {
         // None of our special cases was matched, we have a
         // REAL SENTENCE BREAK:
         // Save sentence, if content is present:
-        if (has_content) {
+        if (has_content && (end_sentence-start_sentence>2)) {
+          sentence_ranges.range[sentence_count].start = start_sentence;
+          sentence_ranges.range[sentence_count].end = end_sentence;
           sentence_count++;
-          sentence_ranges.range[sentence_count-1].start = start_sentence;
-          sentence_ranges.range[sentence_count-1].end = end_sentence;
         }
         // Init next sentence start:
         copy++;
@@ -172,10 +172,10 @@ dnmRanges tokenize_sentences(char* text) {
               end_sentence++;
             }
             // Save sentence, if content is present:
-            if (has_content) {
+            if (has_content && (end_sentence-start_sentence>2)) {
+              sentence_ranges.range[sentence_count].start = start_sentence;
+              sentence_ranges.range[sentence_count].end = end_sentence;
               sentence_count++;
-              sentence_ranges.range[sentence_count-1].start = start_sentence;
-              sentence_ranges.range[sentence_count-1].end = end_sentence;
             }
             // Init next sentence start:
             copy++;
@@ -184,21 +184,24 @@ dnmRanges tokenize_sentences(char* text) {
           }
           else {
             // MathFormula match, so don't break the sentence and move cursor to after math (if we have content)
-            copy = copy + ovector[1];
+            copy += ovector[1];
             end_sentence += ovector[1];
             if ((! has_content) || (isupper(*copy))) {
               // But if we have no content (stand-alone formula),
               // OR if the next letter is capital (math sentence terminator),
               //  make a sentence break and save:
-              sentence_count++;
-              sentence_ranges.range[sentence_count-1].start = start_sentence;
-              sentence_ranges.range[sentence_count-1].end = end_sentence-1;
+              if (has_content && (end_sentence-start_sentence>1)) {
+                sentence_ranges.range[sentence_count].start = start_sentence;
+                sentence_ranges.range[sentence_count].end = end_sentence-1;
+                sentence_count++;
+              }
               // Init next sentence start:
               start_sentence = end_sentence;
               has_content=false;
             }
           }
-        } else {
+        }
+        else {
           // Neutral otherwise:
           copy++;
           end_sentence++;
@@ -211,7 +214,8 @@ dnmRanges tokenize_sentences(char* text) {
 
         // spaces are essentially neutral characters
         if ((!has_content) && (isalnum(*copy))) {
-          has_content = true; }
+          has_content=true;
+        }
         copy++;
         end_sentence++;
     } }
@@ -249,5 +253,6 @@ dnmRanges tokenize_words(dnmRange sentence_range, char* text) {
     word_ranges.range[token_index].end = start + tokens->end_offset[token_index];
     word_ranges.range[token_index] = trim_range(word_ranges.range[token_index], text);
   }
+  free(sentence);
   return word_ranges;
 }
