@@ -19,7 +19,7 @@
 #define OVECCOUNT 30    /* should be a multiple of 3 */
 
 SENNA_Hash *word_hash, *caps_hash, *suff_hash, *gazt_hash, *gazl_hash, *gazm_hash, *gazo_hash, *gazp_hash;
-SENNA_Tokenizer *tokenizer;
+SENNA_Tokenizer *tokenizer_active, *tokenizer_passive;
 void initialize_tokenizer() {
   /* Initialize SENNA toolkit components: */
   const char *opt_path = "../third-party/senna/";
@@ -34,11 +34,14 @@ void initialize_tokenizer() {
   gazo_hash = SENNA_Hash_new_with_admissible_keys(opt_path, "hash/ner.org.lst", "data/ner.org.dat");
   gazp_hash = SENNA_Hash_new_with_admissible_keys(opt_path, "hash/ner.per.lst", "data/ner.per.dat");
   /* Tokenizer */
-  tokenizer = SENNA_Tokenizer_new(word_hash, caps_hash, suff_hash, gazt_hash, gazl_hash, gazm_hash, gazo_hash, gazp_hash, 1);
+  // We turn the SENNA smart tokenization on with "0", but we should take care, as the word ranges vary badly.
+  // TODO: Read up on how SENNA requires its word tokens split for further processing, see if there is a sane setup
+  tokenizer_active = SENNA_Tokenizer_new(word_hash, caps_hash, suff_hash, gazt_hash, gazl_hash, gazm_hash, gazo_hash, gazp_hash, 0);
+  //tokenizer_passive = SENNA_Tokenizer_new(word_hash, caps_hash, suff_hash, gazt_hash, gazl_hash, gazm_hash, gazo_hash, gazp_hash, 1);
 }
 void free_tokenizer() {
   //clean up senna stuff
-  SENNA_Tokenizer_free(tokenizer);
+  SENNA_Tokenizer_free(tokenizer_active);
 
   SENNA_Hash_free(word_hash);
   SENNA_Hash_free(caps_hash);
@@ -83,8 +86,8 @@ dnmRanges tokenize_sentences(char* text) {
 
   char* copy = text+2; // Sentences have at least two characters (and we avoid invalid reads )
   unsigned int sentence_count = 0;
-  unsigned int start_sentence = 0;
-  unsigned int end_sentence = 0;
+  unsigned int start_sentence = 2;
+  unsigned int end_sentence = 2;
   bool has_content = false;
   while ((copy != NULL) && ((*copy) != '\0')) {
     if (sentence_count > allocated_ranges-2) {
@@ -241,8 +244,8 @@ dnmRanges tokenize_words(dnmRange sentence_range, char* text) {
   sentence[(end-start+1)] = '\0';
 
   // Tokenize with SENNA:
-  if (tokenizer == NULL) { initialize_tokenizer(); }
-  SENNA_Tokens* tokens = SENNA_Tokenizer_tokenize(tokenizer, sentence);
+  if (tokenizer_active == NULL) { initialize_tokenizer(); }
+  SENNA_Tokens* tokens = SENNA_Tokenizer_tokenize(tokenizer_active, sentence);
 
   dnmRanges word_ranges;
   word_ranges.length = tokens->n;
@@ -250,7 +253,7 @@ dnmRanges tokenize_words(dnmRange sentence_range, char* text) {
   int token_index;
   for(token_index = 0; token_index < tokens->n; token_index++) {
     word_ranges.range[token_index].start = start + tokens->start_offset[token_index];
-    word_ranges.range[token_index].end = start + tokens->end_offset[token_index];
+    word_ranges.range[token_index].end = start + tokens->end_offset[token_index] - 1;
     word_ranges.range[token_index] = trim_range(word_ranges.range[token_index], text);
   }
   free(sentence);

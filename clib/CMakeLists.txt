@@ -56,7 +56,7 @@ target_link_libraries(llamapun_ngrams stopwords stemmer unicode_normalizer
 target_link_libraries(llamapun_gt_estimate ${JSON_LIBRARIES} ${uthash_LIBRARIES})
 target_link_libraries(dnmlib ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 target_link_libraries(unicode_normalizer ${ICONV_LIBRARIES} ${LIBXML2_LIBRARIES})
-target_link_libraries(llamapun_tokenizer stopwords dnmlib pcre SENNA_utils SENNA_Hash SENNA_nn SENNA_Tokenizer)
+target_link_libraries(llamapun_tokenizer stopwords unicode_normalizer dnmlib pcre SENNA_utils SENNA_Hash SENNA_nn SENNA_Tokenizer)
 
 
 #executables

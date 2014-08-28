@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "../unicode_normalizer.h"
 #include "../llamapun_tokenizer.h"
 #include <libxml/parser.h>
 #include <libxml/tree.h>
@@ -8,10 +9,11 @@
 int main(void) {
   //load example document
   fprintf(stderr, "\n\n Tokenization tests\n\n");
-  xmlDocPtr mydoc = xmlReadFile("../../t/documents/1311.0066.xhtml", NULL, XML_PARSE_RECOVER | XML_PARSE_NONET);
-  if (mydoc == NULL) { return 1;}
+  xmlDocPtr doc = xmlReadFile("../../t/documents/1311.0066.xhtml", NULL, XML_PARSE_RECOVER | XML_PARSE_NONET);
+  if (doc == NULL) { return 1;}
+  unicode_normalize_dom(doc);
   //Create DNM, with normalized math tags, and ignoring cite tags
-  dnmPtr mydnm = createDNM(mydoc, DNM_NORMALIZE_TAGS);
+  dnmPtr mydnm = createDNM(doc, DNM_NORMALIZE_TAGS);
   if (mydnm == NULL) { return 1;}
   char* text = mydnm->plaintext;
   dnmRanges sentences = tokenize_sentences(text);
@@ -21,7 +23,7 @@ int main(void) {
     free_tokenizer();
     free(sentences.range);
     freeDNM(mydnm);
-    xmlFreeDoc(mydoc);
+    xmlFreeDoc(doc);
     xmlCleanupParser();
     return 1;
   }
@@ -31,7 +33,7 @@ int main(void) {
     free_tokenizer();
     free(sentences.range);
     freeDNM(mydnm);
-    xmlFreeDoc(mydoc);
+    xmlFreeDoc(doc);
     xmlCleanupParser();
     return 1;
   }
@@ -45,7 +47,7 @@ int main(void) {
       free_tokenizer();
       free(sentences.range);
       freeDNM(mydnm);
-      xmlFreeDoc(mydoc);
+      xmlFreeDoc(doc);
       xmlCleanupParser();
       return 1;
     }
@@ -54,6 +56,17 @@ int main(void) {
 //    fprintf(stderr,"%.*s\n",(sentences.range[sentence_index].end-sentences.range[sentence_index].start+1),(text+sentences.range[sentence_index].start));
 //    fprintf(stderr,"-----\n");
 //    display_ranges(words, mydnm->plaintext);
+    if (words.length == 0) {
+        fprintf(stderr, "Sentence had no words tokenized, aborting.\n");
+        //clean up
+        free_tokenizer();
+        free(sentences.range);
+        free(words.range);
+        freeDNM(mydnm);
+        xmlFreeDoc(doc);
+        xmlCleanupParser();
+        return 1;
+    }
     free(words.range);
   }
 
@@ -61,7 +74,7 @@ int main(void) {
   free_tokenizer();
   free(sentences.range);
   freeDNM(mydnm);
-  xmlFreeDoc(mydoc);
+  xmlFreeDoc(doc);
   xmlCleanupParser();
 
   return 0;
