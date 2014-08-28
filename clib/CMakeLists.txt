@@ -41,7 +41,6 @@ add_library(unicode_normalizer unicode_normalizer.c)
 add_library(llamapun_gt_estimate llamapun_gt_estimate.c)
 add_library(llamapun_tokenizer llamapun_tokenizer.c)
 add_library(dnmlib dnmlib.c)
-#add_library(preprocessor preprocessor.c)
 
 #special compiler settings:
 #morpha yields many warnings
@@ -62,7 +61,6 @@ target_link_libraries(llamapun_ngrams stopwords stemmer unicode_normalizer
                                         llamapun_utils ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 target_link_libraries(llamapun_gt_estimate ${JSON_LIBRARIES} ${uthash_LIBRARIES})
 target_link_libraries(dnmlib ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
-#target_link_libraries(preprocessor ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 target_link_libraries(unicode_normalizer ${ICONV_LIBRARIES} ${LIBXML2_LIBRARIES})
 target_link_libraries(llamapun_tokenizer stopwords dnmlib pcre)
 
@@ -94,10 +92,28 @@ add_test(SENNA_POS_Test TestSENNA WORKING_DIRECTORY "tests")
 add_test(STOPWORDS_Test TestSTOPWORDS WORKING_DIRECTORY "tests")
 add_test(STEMMER_Test TestSTEMMER WORKING_DIRECTORY "tests")
 add_test(NGRAMS_Test TestNGRAMS WORKING_DIRECTORY "tests")
-#add_test(DNMLIB_Test TestDNMLIB WORKING_DIRECTORY "tests")
 add_test(UNICODE_NORMALIZER_Test TestUnicodeNormalizer WORKING_DIRECTORY "tests")
 add_test(TOKENIZATION_Test TestTokenization WORKING_DIRECTORY "tests")
 add_test(COMBINED_Test TestCombined WORKING_DIRECTORY "tests")
+
+
+ADD_TEST(NAME TestSENNA_leaks COMMAND sh ../leak_check.sh ./TestSENNA)
+ADD_TEST(NAME TestSTOPWORDS_leaks COMMAND sh ../leak_check.sh ./TestSTOPWORDS)
+ADD_TEST(NAME TestSTEMMER_leaks COMMAND sh ../leak_check.sh ./TestSTEMMER)
+ADD_TEST(NAME TestNGRAMS_leaks COMMAND sh ../leak_check.sh ./TestNGRAMS)
+ADD_TEST(NAME TestUnicodeNormalizer_leaks COMMAND sh ../leak_check.sh ./TestUnicodeNormalizer)
+ADD_TEST(NAME TestTokenization_leaks COMMAND sh ../leak_check.sh ./TestTokenization)
+ADD_TEST(NAME TestCombined_leaks COMMAND sh ../leak_check.sh ./TestCombined)
+
+
+
+
+
+
+
+
+
+
 
 #installation of all .c and .h files 
 
