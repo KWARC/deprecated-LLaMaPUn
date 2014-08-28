@@ -16,6 +16,8 @@
 
 /*! normalize tags (eg math tags) in document */
 #define DNM_NORMALIZE_TAGS (1 << 0)
+/*! skip tags such as math */
+#define DNM_SKIP_TAGS (1 << 1)
 
 
 /*! string element for uthash */

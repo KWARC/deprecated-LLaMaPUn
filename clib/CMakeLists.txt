@@ -10,12 +10,6 @@ SET(COMMON_FLAGS
 SET(CMAKE_C_FLAGS
     "${CMAKE_C_FLAGS} ${COMMON_FLAGS}")
 
-include(CTest)
-if(UNIX)
-  set(CTEST_MEMORYCHECK_COMMAND, "usr/bin/valgrind")
-  set(CTEST_MEMORYCHECK_COMMAND_OPTIONS, "--trace-children=yes --leak-check=full")
-endif()
-
 #find the required libraries
 find_library(uthash uthash)
 find_library(pcre pcre)
@@ -23,8 +17,8 @@ FIND_LIBRARY(ICONV_LIBRARIES NAMES iconv libiconv libiconv-2 c)
 find_package(Json REQUIRED)
 find_package(LibXml2 REQUIRED)
 include_directories(${LIBXML2_INCLUDE_DIR} ${JSON_INCLUDE_DIRS} ${ICONV_INCLUDE_DIR})
-
 include_directories("third-party")
+include(CMakeList_thirdparty.txt)
 
 #add libraries
 add_library(SENNA_utils third-party/senna/SENNA_utils.c)
@@ -64,6 +58,12 @@ target_link_libraries(dnmlib ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 target_link_libraries(unicode_normalizer ${ICONV_LIBRARIES} ${LIBXML2_LIBRARIES})
 target_link_libraries(llamapun_tokenizer stopwords dnmlib pcre)
 
+
+#executables
+add_executable(language_detector language_detector.c)
+target_link_libraries(language_detector llamapun_utils LIBTEXTCAT_textcat dnmlib ${LIBXML2_LIBRARIES})
+
+
 #tests
 add_executable(TestSENNA tests/senna_post_test.c)
 target_link_libraries(TestSENNA llamapun_senna_pos ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
@@ -95,7 +95,6 @@ add_test(NGRAMS_Test TestNGRAMS WORKING_DIRECTORY "tests")
 add_test(UNICODE_NORMALIZER_Test TestUnicodeNormalizer WORKING_DIRECTORY "tests")
 add_test(TOKENIZATION_Test TestTokenization WORKING_DIRECTORY "tests")
 add_test(COMBINED_Test TestCombined WORKING_DIRECTORY "tests")
-
 
 ADD_TEST(NAME TestSENNA_leaks COMMAND sh ../leak_check.sh ./TestSENNA)
 ADD_TEST(NAME TestSTOPWORDS_leaks COMMAND sh ../leak_check.sh ./TestSTOPWORDS)

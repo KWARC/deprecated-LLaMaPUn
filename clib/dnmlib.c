@@ -333,10 +333,14 @@ void parse_dom_into_dnm(xmlNode *n, dnmPtr dnm, struct tmpParseData *dcs, long p
     //possibly normalize math tags
     if ((parameters&DNM_NORMALIZE_TAGS) && xmlStrEqual(node->name, BAD_CAST "math")) {
       copy_into_plaintext("MathFormula", dnm, dcs);
+    } else if ((parameters&DNM_SKIP_TAGS) && xmlStrEqual(node->name, BAD_CAST "math")) {
+      //just don't do anything
     }
     //possibly normalize cite tags
     else if ((parameters&DNM_NORMALIZE_TAGS) && xmlStrEqual(node->name, BAD_CAST "cite")) {
       copy_into_plaintext("CiteExpression", dnm, dcs);
+    } else if ((parameters&DNM_SKIP_TAGS) && xmlStrEqual(node->name, BAD_CAST "cite")) {
+      //just don't do anything
     }
     //skip head
     else if (xmlStrEqual(node->name, BAD_CAST "head")) {
