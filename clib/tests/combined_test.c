@@ -4,6 +4,7 @@
 #include "../dnmlib.h"
 #include "../unicode_normalizer.h"
 #include "../llamapun_utils.h"
+#include "../llamapun_tokenizer.h"
 
 const char TEST_XHTML_DOCUMENT[] = "../../t/documents/1311.0066.xhtml";
 
@@ -35,6 +36,10 @@ int main(void) {
     fprintf(stderr, "The unicode-normalized document contains non-ascii characters\n");
     return 1;
   }
+
+  //dnmRanges sentences = tokenize_sentences(dnm->plaintext);
+
+  // Clean up after ourselves
   freeDNM(dnm);
   xmlFreeDoc(doc);
   xmlCleanupParser();

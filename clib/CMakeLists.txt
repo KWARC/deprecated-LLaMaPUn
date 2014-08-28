@@ -62,7 +62,7 @@ target_link_libraries(llamapun_ngrams stopwords stemmer unicode_normalizer
 target_link_libraries(llamapun_gt_estimate ${JSON_LIBRARIES} ${uthash_LIBRARIES})
 target_link_libraries(dnmlib ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 target_link_libraries(unicode_normalizer ${ICONV_LIBRARIES} ${LIBXML2_LIBRARIES})
-target_link_libraries(llamapun_tokenizer stopwords dnmlib pcre)
+target_link_libraries(llamapun_tokenizer stopwords dnmlib pcre SENNA_utils SENNA_Hash SENNA_nn SENNA_Tokenizer)
 
 #tests
 add_executable(TestSENNA tests/senna_post_test.c)
@@ -84,7 +84,7 @@ add_executable(TestTokenization tests/tokenization_test.c)
 target_link_libraries(TestTokenization dnmlib llamapun_tokenizer ${LIBXML2_LIBRARIES})
 
 add_executable(TestCombined tests/combined_test.c)
-target_link_libraries(TestCombined dnmlib unicode_normalizer llamapun_utils ${LIBXML2_LIBRARIES})
+target_link_libraries(TestCombined dnmlib unicode_normalizer llamapun_utils llamapun_tokenizer ${LIBXML2_LIBRARIES})
 
 
 enable_testing()
