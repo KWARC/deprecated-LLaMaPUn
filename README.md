@@ -24,7 +24,7 @@ and provide an outlook for a number of fixes and features to be added to the lib
    * Tokenization - rule-based sentence segmentation, and [SENNA](http://ml.nec-labs.com/senna/) word tokenization
  
  * **Shallow Analysis**
-   * [TODO] Language identification (via [libTextCat](http://software.wise-guys.nl/libtextcat/)),
+   * Language identification (via [libTextCat](http://software.wise-guys.nl/libtextcat/)),
    * N-gram footprints,
    * Part-of-speech tagging (via [SENNA](http://ml.nec-labs.com/senna/)),
    * Named Entity recognition (via [SENNA](http://ml.nec-labs.com/senna/)),
