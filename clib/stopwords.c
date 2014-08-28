@@ -11,7 +11,6 @@
 
 struct stopword_element *STOPWORDS = NULL;
 
-
 struct stopword_element {
   char *word;
   UT_hash_handle hh;
