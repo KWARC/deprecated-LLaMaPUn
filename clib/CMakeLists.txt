@@ -47,7 +47,7 @@ add_library(dnmlib dnmlib.c)
 #morpha yields many warnings
 set_source_files_properties(stemmer.c PROPERTIES COMPILE_FLAGS " -w ")
 #required for parsing json
-set_source_files_properties(llamapun_gt_estimate.c PROPERTIES COMPILE_FLAGS " -std=c99 ")
+set_source_files_properties(llamapun_gt_estimate.c PROPERTIES COMPILE_FLAGS "-Wno-unused-but-set-variable -std=c99 ")
 
 #link libraries
 target_link_libraries(stopwords ${JSON_LIBRARIES} ${uthash_LIBRARIES})
