@@ -29,7 +29,7 @@ and provide an outlook for a number of fixes and features to be added to the lib
    * Part-of-speech tagging (via [SENNA](http://ml.nec-labs.com/senna/)),
    * Named Entity recognition (via [SENNA](http://ml.nec-labs.com/senna/)),
    * Chunking and shallow parsing (via [SENNA](http://ml.nec-labs.com/senna/)),
-   * [TODO] Definition Discovery -- paragraph discrimination task
+   * [TODO] Definition Discovery -- paragraph discrimination task (based on [CRF++](http://crfpp.googlecode.com/svn/trunk/doc/index.html) or [CRFsuite](http://www.chokkan.org/software/crfsuite/), yet to decide).
  
  * **Representation Toolkit**
    * Document Narrative Model (DNM) addition to the XML DOM
