@@ -135,7 +135,7 @@ static uint4 simplehash( const char *p, int len )
 
 
 /* checks if n-gram lex is a prefix of key and of length len */
-inline int issame( char *lex, char *key, int len )
+static inline int issame( char *lex, char *key, int len )
 {
 	int i;
 	for (i=0; i<len; i++) {
