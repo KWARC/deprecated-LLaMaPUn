@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "llamapun_utils.h"
+#include "utils.h"
 
 
 char* cortex_stringify_response(json_object* response, size_t *size) {

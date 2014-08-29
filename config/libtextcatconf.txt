@@ -1,0 +1,89 @@
+#
+# A sample config file for the language models 
+# provided with Gertjan van Noords language guesser
+# (http://odur.let.rug.nl/~vannoord/TextCat/)
+#
+# Notes: 
+# - You may consider eliminating a couple of small languages from this
+# list because they cause false positives with big languages and are
+# bad for performance. (Do you really want to recognize Drents?)
+# - Putting the most probable languages at the top of the list
+# improves performance, because this will raise the threshold for
+# likely candidates more quickly.
+#
+../../../third-party/libtextcat-2.2/langclass/LM/english.lm			english
+../../../third-party/libtextcat-2.2/langclass/LM/afrikaans.lm			afrikaans
+../../../third-party/libtextcat-2.2/langclass/LM/albanian.lm			albanian
+../../../third-party/libtextcat-2.2/langclass/LM/amharic-utf.lm		amharic-utf
+../../../third-party/libtextcat-2.2/langclass/LM/arabic-iso8859_6.lm		arabic-iso8859_6
+../../../third-party/libtextcat-2.2/langclass/LM/arabic-windows1256.lm	arabic-windows1256
+../../../third-party/libtextcat-2.2/langclass/LM/armenian.lm			armenian
+../../../third-party/libtextcat-2.2/langclass/LM/basque.lm			basque
+../../../third-party/libtextcat-2.2/langclass/LM/belarus-windows1251.lm	belarus-windows1251
+../../../third-party/libtextcat-2.2/langclass/LM/bosnian.lm			bosnian
+../../../third-party/libtextcat-2.2/langclass/LM/breton.lm			breton
+../../../third-party/libtextcat-2.2/langclass/LM/bulgarian-iso8859_5.lm	bulgarian-iso8859_5
+../../../third-party/libtextcat-2.2/langclass/LM/catalan.lm			catalan
+../../../third-party/libtextcat-2.2/langclass/LM/chinese-big5.lm		chinese-big5
+../../../third-party/libtextcat-2.2/langclass/LM/chinese-gb2312.lm		chinese-gb2312
+../../../third-party/libtextcat-2.2/langclass/LM/croatian-ascii.lm		croatian-ascii
+../../../third-party/libtextcat-2.2/langclass/LM/czech-iso8859_2.lm		czech-iso8859_2
+../../../third-party/libtextcat-2.2/langclass/LM/danish.lm			danish
+../../../third-party/libtextcat-2.2/langclass/LM/drents.lm			drents   # Dutch dialect
+../../../third-party/libtextcat-2.2/langclass/LM/dutch.lm			dutch
+../../../third-party/libtextcat-2.2/langclass/LM/esperanto.lm			esperanto
+../../../third-party/libtextcat-2.2/langclass/LM/estonian.lm			estonian
+../../../third-party/libtextcat-2.2/langclass/LM/finnish.lm			finnish
+../../../third-party/libtextcat-2.2/langclass/LM/french.lm			french
+../../../third-party/libtextcat-2.2/langclass/LM/frisian.lm			frisian
+../../../third-party/libtextcat-2.2/langclass/LM/georgian.lm			georgian
+../../../third-party/libtextcat-2.2/langclass/LM/german.lm			german
+../../../third-party/libtextcat-2.2/langclass/LM/greek-iso8859-7.lm		greek-iso8859-7
+../../../third-party/libtextcat-2.2/langclass/LM/hebrew-iso8859_8.lm		hebrew-iso8859_8
+../../../third-party/libtextcat-2.2/langclass/LM/hindi.lm			hindi
+../../../third-party/libtextcat-2.2/langclass/LM/hungarian.lm			hungarian
+../../../third-party/libtextcat-2.2/langclass/LM/icelandic.lm			icelandic
+../../../third-party/libtextcat-2.2/langclass/LM/indonesian.lm		indonesian
+../../../third-party/libtextcat-2.2/langclass/LM/irish.lm			irish
+../../../third-party/libtextcat-2.2/langclass/LM/italian.lm			italian
+../../../third-party/libtextcat-2.2/langclass/LM/japanese-euc_jp.lm		japanese-euc_jp
+../../../third-party/libtextcat-2.2/langclass/LM/japanese-shift_jis.lm	japanese-shift_jis
+../../../third-party/libtextcat-2.2/langclass/LM/korean.lm			korean
+../../../third-party/libtextcat-2.2/langclass/LM/latin.lm			latin
+../../../third-party/libtextcat-2.2/langclass/LM/latvian.lm			latvian
+../../../third-party/libtextcat-2.2/langclass/LM/lithuanian.lm		lithuanian
+../../../third-party/libtextcat-2.2/langclass/LM/malay.lm			malay
+../../../third-party/libtextcat-2.2/langclass/LM/manx.lm			manx
+../../../third-party/libtextcat-2.2/langclass/LM/marathi.lm			marathi
+../../../third-party/libtextcat-2.2/langclass/LM/middle_frisian.lm		middle_frisian
+../../../third-party/libtextcat-2.2/langclass/LM/mingo.lm			mingo
+../../../third-party/libtextcat-2.2/langclass/LM/nepali.lm			nepali
+../../../third-party/libtextcat-2.2/langclass/LM/norwegian.lm			norwegian
+../../../third-party/libtextcat-2.2/langclass/LM/persian.lm			persian
+../../../third-party/libtextcat-2.2/langclass/LM/polish.lm			polish
+../../../third-party/libtextcat-2.2/langclass/LM/portuguese.lm		portuguese
+../../../third-party/libtextcat-2.2/langclass/LM/quechua.lm			quechua
+../../../third-party/libtextcat-2.2/langclass/LM/romanian.lm			romanian
+../../../third-party/libtextcat-2.2/langclass/LM/rumantsch.lm			rumantsch
+../../../third-party/libtextcat-2.2/langclass/LM/russian-iso8859_5.lm		russian-iso8859_5
+../../../third-party/libtextcat-2.2/langclass/LM/russian-koi8_r.lm		russian-koi8_r
+../../../third-party/libtextcat-2.2/langclass/LM/russian-windows1251.lm	russian-windows1251
+../../../third-party/libtextcat-2.2/langclass/LM/sanskrit.lm			sanskrit
+../../../third-party/libtextcat-2.2/langclass/LM/scots.lm			scots
+../../../third-party/libtextcat-2.2/langclass/LM/scots_gaelic.lm		scots_gaelic
+../../../third-party/libtextcat-2.2/langclass/LM/serbian-ascii.lm		serbian-ascii
+../../../third-party/libtextcat-2.2/langclass/LM/slovak-ascii.lm		slovak-ascii
+../../../third-party/libtextcat-2.2/langclass/LM/slovak-windows1250.lm	slovak-windows1250
+../../../third-party/libtextcat-2.2/langclass/LM/slovenian-ascii.lm		slovenian-ascii
+../../../third-party/libtextcat-2.2/langclass/LM/slovenian-iso8859_2.lm	slovenian-iso8859_2
+../../../third-party/libtextcat-2.2/langclass/LM/spanish.lm			spanish
+../../../third-party/libtextcat-2.2/langclass/LM/swahili.lm			swahili
+../../../third-party/libtextcat-2.2/langclass/LM/swedish.lm			swedish
+../../../third-party/libtextcat-2.2/langclass/LM/tagalog.lm			tagalog
+../../../third-party/libtextcat-2.2/langclass/LM/tamil.lm			tamil
+../../../third-party/libtextcat-2.2/langclass/LM/thai.lm			thai
+../../../third-party/libtextcat-2.2/langclass/LM/turkish.lm			turkish
+../../../third-party/libtextcat-2.2/langclass/LM/ukrainian-koi8_r.lm		ukrainian-koi8_r
+../../../third-party/libtextcat-2.2/langclass/LM/vietnamese.lm		vietnamese
+../../../third-party/libtextcat-2.2/langclass/LM/welsh.lm			welsh
+../../../third-party/libtextcat-2.2/langclass/LM/yiddish-utf.lm		yiddish-utf

@@ -1,7 +1,6 @@
 #define interactive   /*required for morpha to work properly*/
 #include <ctype.h>
-#include "third-party/morpha/morpha.yy.c"
-#include "stemmer.h"
+#include "morpha.yy.c"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>

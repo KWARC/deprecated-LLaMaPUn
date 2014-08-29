@@ -4,10 +4,10 @@
 #include <ftw.h>
 #include <sys/stat.h>
 
-#include "third-party/libtextcat-2.2/src/textcat.h"
+#include <textcat.h>
 
-#include "llamapun_utils.h"
-#include "dnmlib.h"
+#include "llamapun/utils.h"
+#include "llamapun/dnmlib.h"
 
 void *my_tc = NULL;
 
@@ -42,9 +42,9 @@ int parse(const char *filename, const struct stat *status, int type) {
 
 
 int main(int argc, char *argv[]) {
-  my_tc = textcat_Init("../libtextcatconf.txt");
+  my_tc = textcat_Init("../../../config/libtextcatconf.txt");
   if (my_tc == NULL) {
-    fprintf(stderr, "Fatal: Couldn't load languages (make sure that the paths in ../libtextcatconf.txt are valid)\n");
+    fprintf(stderr, "Fatal: Couldn't load languages (make sure that the paths in ../../../config/libtextcatconf.txt are valid)\n");
     exit(1);
   }
 

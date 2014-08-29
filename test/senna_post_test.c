@@ -2,14 +2,14 @@
 #include <stdio.h>
 // JSON
 //#include <json-c/json.h>
-#include "../jsoninclude.h"
+#include "llamapun/jsoninclude.h"
 // XML DOM and XPath
 #include <libxml/tree.h>
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
 
-#include "../llamapun_senna_pos.h"
+#include "llamapun/senna_pos.h"
 
 const char TEST_XHTML_DOCUMENT[] = "../../t/documents/1311.6767.xhtml";
 

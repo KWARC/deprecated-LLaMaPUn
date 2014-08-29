@@ -1,4 +1,4 @@
-#include "../stemmer.h"
+#include "llamapun/stemmer.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>

@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../unicode_normalizer.h"
-#include "../llamapun_tokenizer.h"
+#include "llamapun/unicode_normalizer.h"
+#include "llamapun/tokenizer.h"
+
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 

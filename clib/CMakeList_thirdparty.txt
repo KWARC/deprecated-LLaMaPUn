@@ -1,8 +1,0 @@
-#libtextcat
-add_library(LIBTEXTCAT_common third-party/libtextcat-2.2/src/common.c)
-add_library(LIBTEXTCAT_createfp third-party/libtextcat-2.2/src/createfp.c)
-add_library(LIBTEXTCAT_fingerprint third-party/libtextcat-2.2/src/fingerprint.c)
-add_library(LIBTEXTCAT_wg_mempool third-party/libtextcat-2.2/src/wg_mempool.c)
-add_library(LIBTEXTCAT_textcat third-party/libtextcat-2.2/src/textcat.c)
-
-target_link_libraries(LIBTEXTCAT_textcat LIBTEXTCAT_common LIBTEXTCAT_createfp LIBTEXTCAT_fingerprint LIBTEXTCAT_wg_mempool)

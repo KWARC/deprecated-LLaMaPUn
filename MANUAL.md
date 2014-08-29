@@ -1,6 +1,19 @@
 The LLaMaPUn C library
 ======================
 
+Content
+-------
+* `config/` configuration files
+* `src/scripts/` utility scripts
+* `src/llamapun` source code
+* `test/` test source code and data
+* `third_party/` third party source code
+* `CMakeLists.txt` CMake build script
+* `LICENSE` copy of the license under which this software is distributed
+* `Makefile` build makefile
+* `README.md` documentation overview about the project
+* `MANUAL.md` high-end overview of the LLaMaPUn library
+
 Installation
 ------------
 
@@ -21,7 +34,7 @@ LLaMaPUn C library, including the installation of the above mentioned libraries 
 Since there are some issues issues with older versions of the JSON library,
 you might want to run a small script to fix the includes, if necessary:
 ```bash
-sh jsonincludecheck.sh > /dev/null
+cd src/script && sh jsonincludecheck.sh > /dev/null
 ```
 
 Now we can compile, test, and install the library, using `cmake`:
@@ -101,5 +114,4 @@ int main(void) {
 The Other Libraries
 -------------------
 
-The other libraries are very small and easy to use, so I won't include any examples here.
-
+[TODO] Documentation is incoming soon.

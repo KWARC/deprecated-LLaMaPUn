@@ -7,10 +7,10 @@
 #include "stopwords.h"
 #include "dnmlib.h"
 // Senna POS tagger
-#include <senna/SENNA_utils.h>
-#include <senna/SENNA_Hash.h>
-#include <senna/SENNA_Tokenizer.h>
-#include <senna/SENNA_POS.h>
+#include <SENNA_utils.h>
+#include <SENNA_Hash.h>
+#include <SENNA_Tokenizer.h>
+#include <SENNA_POS.h>
 
 #define abbreviation_pattern "\\W(?:C(?:[ft]|o(?:n[jn]|lo?|rp)?|a(?:l(?:if)?|pt)|mdr|p?l|res)|M(?:[dst]|a(?:[jnry]|ss)|i(?:ch|nn|ss)|o(?:nt)?|ex?|rs?)|A(?:r(?:[ck]|iz)|l(?:t?a)?|ttys?|ssn|dm|pr|ug|ve)|c(?:o(?:rp|l)?|(?:ap)?t|mdr|p?l|res|f)|S(?:e(?:ns?|pt?|c)|(?:up|g)?t|ask|r)|s(?:e(?:ns?|pt?|c)|(?:up|g)?t|r)|a(?:ttys?|ssn|dm|pr|rc|ug|ve|l)|P(?:enna?|-a.s|de?|lz?|rof|a)|D(?:e(?:[cfl]|p?t)|ist|ak|r)|I(?:[as]|n[cd]|da?|.e|ll)|F(?:e[bd]|w?y|ig|la|t)|O(?:k(?:la)?|[cn]t|re)|d(?:e(?:p?t|c)|ist|r)|E(?:xpy?|.g|sp|tc|q)|R(?:e(?:ps?|sp|v)|d)|T(?:e(?:nn|x)|ce|hm)|e(?:xpy?|.g|sp|tc|q)|m(?:[st]|a[jry]|rs?)|r(?:e(?:ps?|sp|v)|d)|N(?:e(?:br?|v)|ov?)|W(?:isc?|ash|yo?)|f(?:w?y|eb|ig|t)|p(?:de?|lz?|rof)|J(?:u[ln]|an|r)|U(?:SAFA|niv|t)|j(?:u[ln]|an|r)|K(?:ans?|en|y)|B(?:lv?d|ros)|b(?:lv?d|ros)|G(?:en|ov|a)|L(?:td?|a)|g(?:en|ov)|i(?:.e|nc)|l(?:td?|a)|[Hh]wa?y|V[ast]|Que|nov?|univ|Yuk|oct|tce|vs)$"
 #define math_formula_pattern "^\\s*MathFormula\\s*\\n"
@@ -22,7 +22,7 @@ SENNA_Hash *word_hash, *caps_hash, *suff_hash, *gazt_hash, *gazl_hash, *gazm_has
 SENNA_Tokenizer *tokenizer_active, *tokenizer_passive;
 void initialize_tokenizer() {
   /* Initialize SENNA toolkit components: */
-  const char *opt_path = "../third-party/senna/";
+  const char *opt_path = "../../third-party/senna/";
   /* SENNA inputs */
   word_hash = SENNA_Hash_new(opt_path, "hash/words.lst");
   caps_hash = SENNA_Hash_new(opt_path, "hash/caps.lst");

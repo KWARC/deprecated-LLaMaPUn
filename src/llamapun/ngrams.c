@@ -15,10 +15,10 @@
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
 // LLaMaPUn Utils
-#include "llamapun_utils.h"
+#include "utils.h"
 #include "stopwords.h"
 #include "stemmer.h"
-#include "llamapun_ngrams.h"
+#include "ngrams.h"
 #include "unicode_normalizer.h"
 
 

@@ -4,10 +4,10 @@
 #include <ctype.h>
 
 // Senna POS tagger
-#include <senna/SENNA_utils.h>
-#include <senna/SENNA_Hash.h>
-#include <senna/SENNA_Tokenizer.h>
-#include <senna/SENNA_POS.h>
+#include <SENNA_utils.h>
+#include <SENNA_Hash.h>
+#include <SENNA_Tokenizer.h>
+#include <SENNA_POS.h>
 // Hashes
 #include <uthash.h>
 // JSON
@@ -19,7 +19,7 @@
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
 // LLaMaPUn Utils
-#include "llamapun_utils.h"
+#include "utils.h"
 
 json_object* dom_to_pos_annotations (xmlDocPtr doc) {
   xmlChar *tmpxmlstr;    //will be needed a lot
@@ -96,7 +96,7 @@ json_object* dom_to_pos_annotations (xmlDocPtr doc) {
 
   /* Initialize SENNA toolkit components: */
   int *pos_labels = NULL;
-  char *opt_path = "../third-party/senna/";
+  char *opt_path = "../../third-party/senna/";
   /* SENNA inputs */
   SENNA_Hash *word_hash = SENNA_Hash_new(opt_path, "hash/words.lst");
   SENNA_Hash *caps_hash = SENNA_Hash_new(opt_path, "hash/caps.lst");
