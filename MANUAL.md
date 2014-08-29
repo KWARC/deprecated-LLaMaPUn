@@ -88,24 +88,13 @@ The DNM library simplifies this switching by creating a DNM
 int main(void) {
 	//load example document
 	xmlDocPtr mydoc = xmlReadFile("document.xhtml", NULL, 0);
-	//Create DNM, with normalized math tags, and ignoring cite tags
-	dnmPtr mydnm = createDNM(mydoc, DNM_NORMALIZE_MATH | DNM_SKIP_CITE);
+	//Create DNM, with special tags (like math tags) normalized
+	dnmPtr mydnm = createDNM(mydoc, DNM_NORMALIZE_TAGS);
 
-	//create an iterator over the paragraphs of the document
-	dnmIteratorPtr myIterator = getDnmIterator(mydnm, DNM_LEVEL_PARA);
-
-	do {
-		//check if paragraph is in a tag marked up as a theorem
-		if (dnmIteratorHasAnnotationInherited(myIterator, "ltx_theorem_thm")) {
-			//get the plain text of the paragraph
-			char *string = getDnmIteratorContent(myIterator);
-			printf("Found theorem paragraph:\n%s\n\n", string);
-			free(string);
-		}
-	} while (dnmIteratorNext(myIterator));
+	//Do some fancy stuff with the DNM
+	printf("The plaintext: %s\n", mydnm->plaintext);
 	
 	//clean up
-	free(myIterator);
 	freeDNM(mydnm);
 	xmlFreeDoc(mydoc);
 	xmlCleanupParser();
