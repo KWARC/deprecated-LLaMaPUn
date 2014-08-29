@@ -19,7 +19,7 @@
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
 // LLaMaPUn Utils
-#include "utils.h"
+#include "llamapun/utils.h"
 
 json_object* dom_to_pos_annotations (xmlDocPtr doc) {
   xmlChar *tmpxmlstr;    //will be needed a lot
