@@ -5,7 +5,9 @@ Content
 -------
 * `config/` configuration files
 * `src/scripts/` utility scripts
-* `src/llamapun` source code
+* `src/llamapun` library source code
+* `src/tasks` individual analysis tasks
+* `src/examples` examples of library use
 * `test/` test source code and data
 * `third_party/` third party source code
 * `CMakeLists.txt` CMake build script
@@ -13,6 +15,8 @@ Content
 * `Makefile` build makefile
 * `README.md` documentation overview about the project
 * `MANUAL.md` high-end overview of the LLaMaPUn library
+
+[TODO] The `lib` and `t` directories are yet to be migrated away from the Perl setup.
 
 Installation
 ------------
