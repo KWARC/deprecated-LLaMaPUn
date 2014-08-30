@@ -19,9 +19,12 @@
 dnmRanges tokenize_sentences(char* text);
 dnmRanges tokenize_words(dnmRange sentence, char* text);
 void display_ranges(dnmRanges ranges, char* text);
-dnmRange trim_range(dnmRange range, char* text);
 
 // SENNA loading (how do we make this thread safe?)
 void initialize_tokenizer(const char *opt_path);
 void free_tokenizer();
+
+// Utility function:
+bool has_alnum(dnmRange range, char* text);
+dnmRange trim_range(dnmRange range, char* text);
 #endif

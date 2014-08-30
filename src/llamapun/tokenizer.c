@@ -36,11 +36,12 @@ void initialize_tokenizer(const char *opt_path) {
   // We turn the SENNA smart tokenization on with "0", but we should take care, as the word ranges vary badly.
   // TODO: Read up on how SENNA requires its word tokens split for further processing, see if there is a sane setup
   tokenizer_active = SENNA_Tokenizer_new(word_hash, caps_hash, suff_hash, gazt_hash, gazl_hash, gazm_hash, gazo_hash, gazp_hash, 0);
-  //tokenizer_passive = SENNA_Tokenizer_new(word_hash, caps_hash, suff_hash, gazt_hash, gazl_hash, gazm_hash, gazo_hash, gazp_hash, 1);
+  tokenizer_passive = SENNA_Tokenizer_new(word_hash, caps_hash, suff_hash, gazt_hash, gazl_hash, gazm_hash, gazo_hash, gazp_hash, 1);
 }
 void free_tokenizer() {
   //clean up senna stuff
   SENNA_Tokenizer_free(tokenizer_active);
+  SENNA_Tokenizer_free(tokenizer_passive);
 
   SENNA_Hash_free(word_hash);
   SENNA_Hash_free(caps_hash);
@@ -72,6 +73,18 @@ dnmRange trim_range(dnmRange range, char* text) {
   return range;
 }
 
+bool has_alnum(dnmRange range, char* text) {
+  unsigned int index;
+  bool alnum_found = false;
+  for (index=range.start; index<=range.end; index++) {
+    if (isalnum(*(text+index))) {
+      alnum_found = true;
+      break;
+    }
+  }
+  return alnum_found;
+}
+
 dnmRanges tokenize_sentences(char* text) {
   load_stopwords(); // We need to filter against the stopwords
   const char* error;
@@ -82,10 +95,10 @@ dnmRanges tokenize_sentences(char* text) {
   dnmRanges sentence_ranges;
   unsigned int allocated_ranges = 512;
   sentence_ranges.range = malloc(allocated_ranges * sizeof(dnmRange));
-
+  sentence_ranges.length = 0;
   char* copy = text+2; // Sentences have at least two characters (and we avoid invalid reads )
   unsigned int sentence_count = 0;
-  unsigned int start_sentence = 2;
+  unsigned int start_sentence = 0;
   unsigned int end_sentence = 2;
   bool has_content = false;
   while ((copy != NULL) && ((*copy) != '\0')) {
@@ -250,13 +263,18 @@ dnmRanges tokenize_words(dnmRange sentence_range, char* text) {
   SENNA_Tokens* tokens = SENNA_Tokenizer_tokenize(tokenizer_active, sentence);
 
   dnmRanges word_ranges;
-  word_ranges.length = tokens->n;
+  word_ranges.length = 0;
   word_ranges.range = malloc(tokens->n * sizeof(dnmRange));
   int token_index;
   for(token_index = 0; token_index < tokens->n; token_index++) {
-    word_ranges.range[token_index].start = start + tokens->start_offset[token_index];
-    word_ranges.range[token_index].end = start + tokens->end_offset[token_index] - 1;
-    word_ranges.range[token_index] = trim_range(word_ranges.range[token_index], text);
+    dnmRange current_word;
+    current_word.start = start + tokens->start_offset[token_index];
+    current_word.end = start + tokens->end_offset[token_index] - 1;
+    current_word = trim_range(current_word, text);
+    // TODO: Add parameter that controls whether we want alnum words or not
+    // TODO: Maybe also a parameter for filtering out stopwords?
+    if (has_alnum(current_word, text)) {
+      word_ranges.range[word_ranges.length++] = current_word; }
   }
   free(sentence);
   return word_ranges;
