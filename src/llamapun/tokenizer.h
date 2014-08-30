@@ -22,6 +22,6 @@ void display_ranges(dnmRanges ranges, char* text);
 dnmRange trim_range(dnmRange range, char* text);
 
 // SENNA loading (how do we make this thread safe?)
-void initialize_tokenizer();
+void initialize_tokenizer(const char *opt_path);
 void free_tokenizer();
 #endif

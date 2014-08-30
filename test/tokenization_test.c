@@ -39,7 +39,7 @@ int main(void) {
     return 1;
   }
 
-  initialize_tokenizer();
+  initialize_tokenizer("../../third-party/senna/");
   int sentence_index;
   for (sentence_index=0; sentence_index < sentences.length; sentence_index++) {
     if (sentences.range[sentence_index].end < sentences.range[sentence_index].start) {

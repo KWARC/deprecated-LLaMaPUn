@@ -20,9 +20,8 @@
 
 SENNA_Hash *word_hash, *caps_hash, *suff_hash, *gazt_hash, *gazl_hash, *gazm_hash, *gazo_hash, *gazp_hash;
 SENNA_Tokenizer *tokenizer_active, *tokenizer_passive;
-void initialize_tokenizer() {
+void initialize_tokenizer(const char *opt_path) {
   /* Initialize SENNA toolkit components: */
-  const char *opt_path = "../../third-party/senna/";
   /* SENNA inputs */
   word_hash = SENNA_Hash_new(opt_path, "hash/words.lst");
   caps_hash = SENNA_Hash_new(opt_path, "hash/caps.lst");
@@ -244,7 +243,10 @@ dnmRanges tokenize_words(dnmRange sentence_range, char* text) {
   sentence[(end-start+1)] = '\0';
 
   // Tokenize with SENNA:
-  if (tokenizer_active == NULL) { initialize_tokenizer(); }
+  if (tokenizer_active == NULL) {
+    fprintf(stderr,"Please first initialize tokenizer before running tokenize_words!\n");
+    exit(1);
+  }
   SENNA_Tokens* tokens = SENNA_Tokenizer_tokenize(tokenizer_active, sentence);
 
   dnmRanges word_ranges;
