@@ -27,7 +27,7 @@ int main(void) {
     fprintf(stderr,"Test XHTML document could not be parsed, failing\n");
     return 1; }
   unicode_normalize_dom(doc);
-  dnmPtr dnm = createDNM(doc, DNM_NORMALIZE_TAGS);
+  dnmPtr dnm = create_DNM(xmlDocGetRootElement(doc), DNM_NORMALIZE_TAGS);
   if (strlen(dnm->plaintext) < 100) {   //something could have gone wrong...
     fprintf(stderr, "The plaintext seems to be way too short\n");
     return 1;
@@ -40,7 +40,7 @@ int main(void) {
   //dnmRanges sentences = tokenize_sentences(dnm->plaintext);
 
   // Clean up after ourselves
-  freeDNM(dnm);
+  free_DNM(dnm);
   xmlFreeDoc(doc);
   xmlCleanupParser();
   return 0;

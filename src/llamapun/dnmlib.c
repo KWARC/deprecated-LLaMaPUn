@@ -116,7 +116,7 @@ int mark_sentence(dnmPtr dnm, dnmRange range) {
     //empty sentence
     return 1;
   }
-  xmlNode * parent = get_lowest_surrounding_node(xmlDocGetRootElement(dnm->document), range);
+  xmlNode * parent = get_lowest_surrounding_node(dnm->root, range);
   //note: we know that parent has children, because it's a node with offset annotations
 
   xmlNode *start = NULL;
@@ -365,13 +365,13 @@ void parse_dom_into_dnm(xmlNode *n, dnmPtr dnm, struct tmpParseData *dcs, long p
   }
 }
 
-dnmPtr createDNM(xmlDocPtr doc, long parameters) {
+dnmPtr create_DNM(xmlNode *root, long parameters) {
   /* Creates a DNM and returns a pointer to it.
-     The memory has to be free'd later by calling freeDNM */
+     The memory has to be free'd later by calling free_DNM */
 
   //check arguments
-  if (doc==NULL) {
-    fprintf(stderr, "dnmlib - Didn't get an xmlDoc - parse error??\n");
+  if (root==NULL) {
+    fprintf(stderr, "dnmlib - Didn't get an root node - parse error??\n");
     return NULL;
   }
 
@@ -385,7 +385,7 @@ dnmPtr createDNM(xmlDocPtr doc, long parameters) {
   CHECK_ALLOC(dnm);
   dnm->parameters = parameters;
 
-  dnm->document = doc;
+  dnm->root = root;
 
   //plaintext
   dnm->plaintext = (char*)malloc(sizeof(char)*4096);
@@ -398,8 +398,8 @@ dnmPtr createDNM(xmlDocPtr doc, long parameters) {
   dnm->sentenceCount = 1;   //in the old preprocessor, the first sentence had id="sentence.1"
 
   //do the actual parsing
-  wrap_text_into_spans(xmlDocGetRootElement(doc));
-  parse_dom_into_dnm(xmlDocGetRootElement(doc), dnm, dcs, parameters);
+  wrap_text_into_spans(root);
+  parse_dom_into_dnm(root, dnm, dcs, parameters);
 
 
   //----------------CLEAN UP----------------
@@ -424,7 +424,7 @@ dnmPtr createDNM(xmlDocPtr doc, long parameters) {
 //Section: Freeing DNM
 //=======================================================
 
-void freeDNM(dnmPtr dnm) {
+void free_DNM(dnmPtr dnm) {
   /* frees the dnm */
 
   //free plaintext

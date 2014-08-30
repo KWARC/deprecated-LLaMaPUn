@@ -89,13 +89,13 @@ int main(void) {
 	//load example document
 	xmlDocPtr mydoc = xmlReadFile("document.xhtml", NULL, 0);
 	//Create DNM, with special tags (like math tags) normalized
-	dnmPtr mydnm = createDNM(mydoc, DNM_NORMALIZE_TAGS);
+	dnmPtr mydnm = create_DNM(xmlDocGetRootElement(mydoc), DNM_NORMALIZE_TAGS);
 
 	//Do some fancy stuff with the DNM
 	printf("The plaintext: %s\n", mydnm->plaintext);
 	
 	//clean up
-	freeDNM(mydnm);
+	free_DNM(mydnm);
 	xmlFreeDoc(mydoc);
 	xmlCleanupParser();
 	

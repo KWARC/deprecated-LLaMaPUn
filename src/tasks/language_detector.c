@@ -20,7 +20,7 @@ int parse(const char *filename, const struct stat *status, int type) {
 
   if (doc == NULL) return 0;   //error message printed by read_document
 
-  dnmPtr dnm = createDNM(doc, DNM_SKIP_TAGS);
+  dnmPtr dnm = create_DNM(xmlDocGetRootElement(doc), DNM_SKIP_TAGS);
 
   if (dnm == NULL) {
     fprintf(stderr, "Couldn't create DNM\n");
@@ -35,7 +35,7 @@ int parse(const char *filename, const struct stat *status, int type) {
     printf("%s\t%s\n", filename, result);
   }
 
-  freeDNM(dnm);
+  free_DNM(dnm);
   xmlFreeDoc(doc);
   return 0;
 }

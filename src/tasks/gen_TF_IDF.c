@@ -34,12 +34,12 @@ int process_file(const char *filename, const struct stat *status, int type) {
   for (para_index=0; para_index < paragraph_nodeset->nodeNr; para_index++) {
     xmlNodePtr paragraph_node = paragraph_nodeset->nodeTab[para_index];
     // TODO: Continue here once createDNM works on libxml Nodes
-//    dnmPtr paragraph_dnm = createDNM(paragraph_node, DNM_SKIP_TAGS);
+//    dnmPtr paragraph_dnm = create_DNM(paragraph_node, DNM_SKIP_TAGS);
 //    if (paragraph_dnm == NULL) {
 //      fprintf(stderr, "Couldn't create DNM for paragraph %d in document %s\n",para_index, filename);
 //      exit(1);
 //    }
-//    freeDNM(paragraph_dnm);
+//    free_DNM(paragraph_dnm);
     // We have the paragraph text, tokenize and obtain words:
   }
   free(paragraphs_result->nodesetval->nodeTab);

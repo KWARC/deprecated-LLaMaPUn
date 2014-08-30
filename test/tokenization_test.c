@@ -14,7 +14,7 @@ int main(void) {
   if (doc == NULL) { return 1;}
   unicode_normalize_dom(doc);
   //Create DNM, with normalized math tags, and ignoring cite tags
-  dnmPtr mydnm = createDNM(doc, DNM_NORMALIZE_TAGS);
+  dnmPtr mydnm = create_DNM(xmlDocGetRootElement(doc), DNM_NORMALIZE_TAGS);
   if (mydnm == NULL) { return 1;}
   char* text = mydnm->plaintext;
   dnmRanges sentences = tokenize_sentences(text);
@@ -23,7 +23,7 @@ int main(void) {
     //clean up
     free_tokenizer();
     free(sentences.range);
-    freeDNM(mydnm);
+    free_DNM(mydnm);
     xmlFreeDoc(doc);
     xmlCleanupParser();
     return 1;
@@ -33,7 +33,7 @@ int main(void) {
     //clean up
     free_tokenizer();
     free(sentences.range);
-    freeDNM(mydnm);
+    free_DNM(mydnm);
     xmlFreeDoc(doc);
     xmlCleanupParser();
     return 1;
@@ -47,7 +47,7 @@ int main(void) {
       //clean up
       free_tokenizer();
       free(sentences.range);
-      freeDNM(mydnm);
+      free_DNM(mydnm);
       xmlFreeDoc(doc);
       xmlCleanupParser();
       return 1;
@@ -63,7 +63,7 @@ int main(void) {
         free_tokenizer();
         free(sentences.range);
         free(words.range);
-        freeDNM(mydnm);
+        free_DNM(mydnm);
         xmlFreeDoc(doc);
         xmlCleanupParser();
         return 1;
@@ -74,7 +74,7 @@ int main(void) {
   //clean up
   free_tokenizer();
   free(sentences.range);
-  freeDNM(mydnm);
+  free_DNM(mydnm);
   xmlFreeDoc(doc);
   xmlCleanupParser();
 

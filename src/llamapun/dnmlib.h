@@ -33,7 +33,7 @@ struct hash_element_string {
 
 
 struct dnmStruct {
-  xmlDocPtr document;
+  xmlNode *root;
   long parameters;
   char *plaintext;
   size_t size_plaintext;
@@ -68,17 +68,17 @@ typedef struct _dnmRanges dnmRanges;
 /*! creates a DNM
 
     Memory has to be freed later using freeDNM
-  @see freeDNM
+  @see free_DNM
   @param doc a pointer to the DOM
   @param parameters the parameters
   @retval a pointer to the new DNM
 */
-dnmPtr createDNM(xmlDocPtr doc, long parameters);
+dnmPtr create_DNM(xmlNode *root, long parameters);
 
 /*! frees the DNM
     @param dnm pointer to the DNM to be freed
 */
-void freeDNM(dnmPtr dnm);
+void free_DNM(dnmPtr dnm);
 
 /*! get the node corresponding to an offset in the plaintext
   @param n the root node
