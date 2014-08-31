@@ -2,21 +2,51 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ftw.h>
+#include <uthash.h>
 #include <sys/stat.h>
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
 
 #include "llamapun/utils.h"
 #include "llamapun/dnmlib.h"
-#include "llamapun/tokenizer.h"
 #include "llamapun/unicode_normalizer.h"
+#include "llamapun/tokenizer.h"
+#include "llamapun/stemmer.h"
+
+/* Prepare count datastructures and variables */
+struct word_count_hash {
+      char *word; /* we'll use this field as the key */
+      int count;
+      UT_hash_handle hh; /* makes this structure hashable */
+};
+
+struct TF_hash {
+      char *word; /* we'll use this field as the key */
+      double TF;
+      UT_hash_handle hh; /* makes this structure hashable */
+};
+struct word_count_hash *w, *word_counts = NULL;
+struct TF_hash *w_TF, *TF = NULL;
+void record_word(struct word_count_hash **hash, char *word) {
+  struct word_count_hash *w;
+  HASH_FIND_STR(*hash, word, w);  /* word already in the hash? */
+  if (w==NULL) { // New word
+    w = (struct word_count_hash*)malloc(sizeof(struct word_count_hash));
+    w->word = strdup(word);
+    w->count = 1;
+    HASH_ADD_KEYPTR( hh, *hash, w->word, strlen(w->word), w ); }
+  else { // Already exists, just increment the counter:
+    w->count++; } }
+
+/* Core traversal and analysis */
 int file_counter=0;
 xmlChar *paragraph_xpath = (xmlChar*) "//*[local-name()='section' and @class='ltx_section']//*[local-name()='div' and @class='ltx_para']";
 xmlChar *relaxed_paragraph_xpath = (xmlChar*) "//*[local-name()='div' and @class='ltx_para']";
 
 int process_file(const char *filename, const struct stat *status, int type) {
-  if (file_counter > 99 ) { return 0; } // Limit for development
   if (type != FTW_F) return 0; //Not a file
+  file_counter++;
+  if (file_counter > 100) { return 0; } // Limit for development
   fprintf(stderr, " Loading %s\n",filename);
   xmlDoc *doc = read_document(filename);
   if (doc == NULL) return 0;   //error message printed by read_document
@@ -30,10 +60,24 @@ int process_file(const char *filename, const struct stat *status, int type) {
     exit(1); }
   xmlXPathObjectPtr paragraphs_result = xmlXPathEvalExpression(paragraph_xpath,xpath_context);
   if ((paragraphs_result == NULL) || (paragraphs_result->nodesetval == NULL) || (paragraphs_result->nodesetval->nodeNr == 0)) { // Nothing to do if there's no math in the document
+    // Clean up this try, before making a second one:
+    if (paragraphs_result != NULL) {
+      if (paragraphs_result->nodesetval != NULL) {
+        free(paragraphs_result->nodesetval->nodeTab);
+        free(paragraphs_result->nodesetval); }
+      xmlFree(paragraphs_result); }
+
     // Try the relaxed version: document isn't using LaTeX's \section{}s, maybe it's TeX.
     paragraphs_result = xmlXPathEvalExpression(relaxed_paragraph_xpath,xpath_context);
     if ((paragraphs_result == NULL) || (paragraphs_result->nodesetval == NULL) || (paragraphs_result->nodesetval->nodeNr == 0)) {
       // We're really giving up here, probably empty document
+      if (paragraphs_result != NULL) {
+        if (paragraphs_result->nodesetval != NULL) {
+          free(paragraphs_result->nodesetval->nodeTab);
+          free(paragraphs_result->nodesetval); }
+        xmlFree(paragraphs_result); }
+      xmlXPathFreeContext(xpath_context);
+      xmlFreeDoc(doc);
       return 0; } }
   xmlNodeSetPtr paragraph_nodeset = paragraphs_result->nodesetval;
   int para_index;
@@ -50,27 +94,31 @@ int process_file(const char *filename, const struct stat *status, int type) {
     /* 3. For every paragraph, tokenize sentences: */
     char* paragraph_text = paragraph_dnm->plaintext;
     dnmRanges sentences = tokenize_sentences(paragraph_text);
-    if (sentences.length == 0) {
-      continue; // No sentences, next paragraph.
-    }
-    //display_ranges(sentences,paragraph_text);
     /* 4. For every sentence, tokenize words */
     int sentence_index = 0;
     for (sentence_index = 0; sentence_index < sentences.length; sentence_index++) {
-      dnmRanges words = tokenize_words(sentences.range[sentence_index], paragraph_text);
-      //display_ranges(words,paragraph_text);
+      // Obtaining only the content words here, disregard stopwords and punctuation
+      dnmRanges words = tokenize_words(paragraph_text, sentences.range[sentence_index],
+                                       TOKENIZER_ALPHANUM_ONLY | TOKENIZER_FILTER_STOPWORDS);
+      int word_index;
+      for(word_index=0; word_index<words.length; word_index++) {
+        char* word_string = plain_range_to_string(paragraph_text, words.range[word_index]);
+        char* word_stem;
+        morpha_stem(word_string, &word_stem);
+        free(word_string);
+        free(word_stem);
+      }
       free(words.range);
     }
-
     free(sentences.range);
     free_DNM(paragraph_dnm);
-    // We have the paragraph text, tokenize and obtain words:
   }
   free(paragraphs_result->nodesetval->nodeTab);
   free(paragraphs_result->nodesetval);
   xmlFree(paragraphs_result);
+  xmlXPathFreeContext(xpath_context);
   xmlFreeDoc(doc);
-  fprintf(stderr,"Completed document #%d\n",file_counter++);
+  fprintf(stderr,"Completed document #%d\n",file_counter);
   return 0;
 }
 
@@ -95,9 +143,11 @@ int main(int argc, char *argv[]) {
   }
 
   initialize_tokenizer("../../../third-party/senna/");
+  init_stemmer();
 
   ftw(source_directory, process_file, 1);
 
+  close_stemmer();
   free_tokenizer();
   xmlCleanupParser();
   return 0;
