@@ -432,3 +432,20 @@ void free_DNM(dnmPtr dnm) {
   //free level lists
   free(dnm);
 }
+
+//=======================================================
+//Section: Conversion Utilities
+//=======================================================
+char* plain_range_to_string(char* text, dnmRange range) {
+  unsigned int start = range.start;
+  unsigned int end = range.end;
+  unsigned int length = end-start+1;
+  char* string = malloc(sizeof(char) * (end-start+2));
+  memcpy( string, &text[start], length);
+  string[length] = '\0';
+  return string;
+}
+
+char* dnm_range_to_string(dnmPtr mydnm, dnmRange range) {
+  return plain_range_to_string(mydnm->plaintext, range);
+}

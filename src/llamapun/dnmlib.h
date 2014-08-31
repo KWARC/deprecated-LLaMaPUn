@@ -101,5 +101,6 @@ int mark_sentence(dnmPtr dnm, dnmRange range);
   @retval a string containing the plaintext (has to be free'd manually)
 */
 char* dnm_node_plaintext(dnmPtr mydnm, xmlNodePtr mynode);
-
+char* dnm_range_to_string(dnmPtr mydnm, dnmRange range);
+char* plain_range_to_string(char* text, dnmRange range);
 #endif
