@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <pcre.h>
+#include "tokenizer.h"
 #include "stopwords.h"
 #include "dnmlib.h"
 // Senna POS tagger
@@ -39,7 +40,9 @@ void initialize_tokenizer(const char *opt_path) {
   tokenizer_passive = SENNA_Tokenizer_new(word_hash, caps_hash, suff_hash, gazt_hash, gazl_hash, gazm_hash, gazo_hash, gazp_hash, 1);
 }
 void free_tokenizer() {
-  //clean up senna stuff
+  // Release the stopwords
+  free_stopwords();
+  // Release SENNA structures
   SENNA_Tokenizer_free(tokenizer_active);
   SENNA_Tokenizer_free(tokenizer_passive);
 
@@ -54,7 +57,7 @@ void free_tokenizer() {
   SENNA_Hash_free(gazp_hash);
 }
 
-void display_ranges(dnmRanges ranges, char* text) {
+void display_ranges(char* text, dnmRanges ranges) {
   int i;
   for (i=0; i<ranges.length; i++) {
     int start = ranges.range[i].start;
@@ -63,7 +66,7 @@ void display_ranges(dnmRanges ranges, char* text) {
   }
 }
 
-dnmRange trim_range(dnmRange range, char* text) {
+dnmRange trim_range(char* text, dnmRange range) {
   while(isspace(text[range.start])) {
     range.start++;
   }
@@ -73,7 +76,7 @@ dnmRange trim_range(dnmRange range, char* text) {
   return range;
 }
 
-bool has_alnum(dnmRange range, char* text) {
+bool has_alnum(char* text, dnmRange range) {
   unsigned int index;
   bool alnum_found = false;
   for (index=range.start; index<=range.end; index++) {
@@ -83,6 +86,12 @@ bool has_alnum(dnmRange range, char* text) {
     }
   }
   return alnum_found;
+}
+bool is_range_stopword(char* text, dnmRange range) {
+  char* word = plain_range_to_string(text, range);
+  int stopword_check = is_stopword(word);
+  free(word);
+  return (bool) stopword_check;
 }
 
 dnmRanges tokenize_sentences(char* text) {
@@ -238,22 +247,17 @@ dnmRanges tokenize_sentences(char* text) {
   // Trim all sentences:
   int index;
   for (index=0; index<sentence_ranges.length; index++) {
-    sentence_ranges.range[index] = trim_range(sentence_ranges.range[index], text);
+    sentence_ranges.range[index] = trim_range(text, sentence_ranges.range[index]);
   }
   //Developer demo:
   //   display_ranges(sentence_ranges, text);
   pcre_free(abbreviation_regex);
   pcre_free(math_formula_regex);
-  free_stopwords(); // Release the stopwords
   return sentence_ranges;
 }
 
-dnmRanges tokenize_words(dnmRange sentence_range, char* text) {
-  int start = sentence_range.start;
-  int end = sentence_range.end;
-  char* sentence = malloc(sizeof(char) * (end-start+2));
-  memcpy( sentence, &text[start], (end-start+1) );
-  sentence[(end-start+1)] = '\0';
+dnmRanges tokenize_words(char* text, dnmRange sentence_range, long parameters) {
+  char* sentence = plain_range_to_string(text, sentence_range);
 
   // Tokenize with SENNA:
   if (tokenizer_active == NULL) {
@@ -268,13 +272,24 @@ dnmRanges tokenize_words(dnmRange sentence_range, char* text) {
   int token_index;
   for(token_index = 0; token_index < tokens->n; token_index++) {
     dnmRange current_word;
-    current_word.start = start + tokens->start_offset[token_index];
-    current_word.end = start + tokens->end_offset[token_index] - 1;
-    current_word = trim_range(current_word, text);
-    // TODO: Add parameter that controls whether we want alnum words or not
-    // TODO: Maybe also a parameter for filtering out stopwords?
-    if (has_alnum(current_word, text)) {
-      word_ranges.range[word_ranges.length++] = current_word; }
+    current_word.start = sentence_range.start + tokens->start_offset[token_index];
+    current_word.end = sentence_range.start + tokens->end_offset[token_index] - 1;
+    current_word = trim_range(text, current_word);
+
+    bool word_accepted = true; // Accept all by default
+    if ((!parameters) || (parameters&TOKENIZER_ACCEPT_ALL)) {
+      word_accepted = true; }
+    else {
+      if (word_accepted && (parameters&TOKENIZER_ALPHANUM_ONLY) && !(has_alnum(text, current_word))) {
+        // Not alphanumeric, negative filter triggered:
+          word_accepted = false; }
+      if (word_accepted && (parameters&TOKENIZER_FILTER_STOPWORDS) && is_range_stopword(text,current_word)) {
+          // Filtering stopwords AND stopword found -- negative filter triggered:
+          word_accepted = false; }
+     }
+    if (word_accepted) {
+      word_ranges.range[word_ranges.length++] = current_word;
+    }
   }
   free(sentence);
   return word_ranges;

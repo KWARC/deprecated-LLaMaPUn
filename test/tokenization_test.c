@@ -20,22 +20,10 @@ int main(void) {
   dnmRanges sentences = tokenize_sentences(text);
   if (sentences.length < 700) {   //something could have gone wrong...
     fprintf(stderr, "There were too few sentences tokenized!\n");
-    //clean up
-    free_tokenizer();
-    free(sentences.range);
-    free_DNM(mydnm);
-    xmlFreeDoc(doc);
-    xmlCleanupParser();
     return 1;
   }
   if (sentences.length > 800) {   //something could have gone wrong...
     fprintf(stderr, "There were too many sentences tokenized!\n");
-    //clean up
-    free_tokenizer();
-    free(sentences.range);
-    free_DNM(mydnm);
-    xmlFreeDoc(doc);
-    xmlCleanupParser();
     return 1;
   }
 
@@ -44,28 +32,15 @@ int main(void) {
   for (sentence_index=0; sentence_index < sentences.length; sentence_index++) {
     if (sentences.range[sentence_index].end < sentences.range[sentence_index].start) {
       fprintf(stderr, "Invalid sentence, start appears after end!\n");
-      //clean up
-      free_tokenizer();
-      free(sentences.range);
-      free_DNM(mydnm);
-      xmlFreeDoc(doc);
-      xmlCleanupParser();
       return 1;
     }
-    dnmRanges words = tokenize_words(sentences.range[sentence_index],text);
+    dnmRanges words = tokenize_words(text, sentences.range[sentence_index], TOKENIZER_ACCEPT_ALL);
 //    fprintf(stderr,"=====\n");
 //    fprintf(stderr,"%.*s\n",(sentences.range[sentence_index].end-sentences.range[sentence_index].start+1),(text+sentences.range[sentence_index].start));
 //    fprintf(stderr,"-----\n");
 //    display_ranges(words, mydnm->plaintext);
     if (words.length == 0) {
         fprintf(stderr, "Sentence had no words tokenized, aborting.\n");
-        //clean up
-        free_tokenizer();
-        free(sentences.range);
-        free(words.range);
-        free_DNM(mydnm);
-        xmlFreeDoc(doc);
-        xmlCleanupParser();
         return 1;
     }
     free(words.range);
