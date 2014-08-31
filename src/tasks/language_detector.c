@@ -6,6 +6,7 @@
 
 #include <textcat.h>
 
+#include "llamapun/language_detection.h"
 #include "llamapun/utils.h"
 #include "llamapun/dnmlib.h"
 
@@ -27,12 +28,8 @@ int parse(const char *filename, const struct stat *status, int type) {
     exit(1);
   }
 
-  if (my_tc == NULL) fprintf(stderr, "Fatal\n");
-
-  char *result = textcat_Classify(my_tc, dnm->plaintext, dnm->size_plaintext /*> 5000 ? 5000 : dnm->size_plaintext*/ );
-
-  if (strncmp(result, "[english]", strlen("[english]"))) {  //isn't primarily english
-    printf("%s\t%s\n", filename, result);
+  if (!text_is_english(my_tc, dnm->plaintext, dnm->size_plaintext)) {  //isn't primarily english
+    printf("%s\n", filename);
   }
 
   free_DNM(dnm);
@@ -42,9 +39,9 @@ int parse(const char *filename, const struct stat *status, int type) {
 
 
 int main(int argc, char *argv[]) {
-  my_tc = textcat_Init("../../../config/libtextcatconf.txt");
+  my_tc = textcat_Init("../../../config/libtextcatconf.txt");   //llamapun_textcat_Init();
   if (my_tc == NULL) {
-    fprintf(stderr, "Fatal: Couldn't load languages (make sure that the paths in ../../../config/libtextcatconf.txt are valid)\n");
+    fprintf(stderr, "Fatal: Couldn't load textcat handle\n");
     exit(1);
   }
 

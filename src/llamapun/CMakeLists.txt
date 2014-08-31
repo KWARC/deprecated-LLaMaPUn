@@ -9,6 +9,7 @@ add_library(unicode_normalizer unicode_normalizer.c)
 add_library(gt_estimate gt_estimate.c)
 add_library(tokenizer tokenizer.c)
 add_library(dnmlib dnmlib.c)
+add_library(language_detection language_detection.c)
 
 #special compiler settings:
 #morpha yields many warnings
@@ -28,6 +29,7 @@ target_link_libraries(gt_estimate ${JSON_LIBRARIES} ${uthash_LIBRARIES})
 target_link_libraries(dnmlib ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 target_link_libraries(unicode_normalizer ${ICONV_LIBRARIES} ${LIBXML2_LIBRARIES})
 target_link_libraries(tokenizer stopwords dnmlib pcre SENNA_utils SENNA_Hash SENNA_nn SENNA_Tokenizer)
+target_link_libraries(language_detection LIBTEXTCAT_textcat)
 
 #installation of all .c and .h files 
 file(GLOB llamapun_SOURCES *.c)
