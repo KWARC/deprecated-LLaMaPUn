@@ -22,6 +22,7 @@
 SENNA_Hash *word_hash, *caps_hash, *suff_hash, *gazt_hash, *gazl_hash, *gazm_hash, *gazo_hash, *gazp_hash;
 SENNA_Tokenizer *tokenizer_active, *tokenizer_passive;
 void initialize_tokenizer(const char *opt_path) {
+  load_stopwords(); // We need to filter against the stopwords
   /* Initialize SENNA toolkit components: */
   /* SENNA inputs */
   word_hash = SENNA_Hash_new(opt_path, "hash/words.lst");
@@ -40,7 +41,6 @@ void initialize_tokenizer(const char *opt_path) {
   tokenizer_passive = SENNA_Tokenizer_new(word_hash, caps_hash, suff_hash, gazt_hash, gazl_hash, gazm_hash, gazo_hash, gazp_hash, 1);
 }
 void free_tokenizer() {
-  // Release the stopwords
   free_stopwords();
   // Release SENNA structures
   SENNA_Tokenizer_free(tokenizer_active);
@@ -76,6 +76,17 @@ dnmRange trim_range(char* text, dnmRange range) {
   return range;
 }
 
+bool has_alpha(char* text, dnmRange range) {
+  unsigned int index;
+  bool alpha_found = false;
+  for (index=range.start; index<=range.end; index++) {
+    if (isalpha(*(text+index))) {
+      alpha_found = true;
+      break;
+    }
+  }
+  return alpha_found;
+}
 bool has_alnum(char* text, dnmRange range) {
   unsigned int index;
   bool alnum_found = false;
@@ -95,7 +106,6 @@ bool is_range_stopword(char* text, dnmRange range) {
 }
 
 dnmRanges tokenize_sentences(char* text) {
-  load_stopwords(); // We need to filter against the stopwords
   const char* error;
   int error_offset;
   pcre *abbreviation_regex, *math_formula_regex;
@@ -136,7 +146,10 @@ dnmRanges tokenize_sentences(char* text) {
           next_letter++;
         }
         next_word[next_word_length] = '\0';
-        if (!is_stopword(next_word)) { // Else case continues in the !? cases and will sentence break
+
+        bool next_is_stopword = is_stopword(next_word);
+
+        if (!next_is_stopword) { // Else case continues in the !? cases and will sentence break
           // Check for abbreviations:
           // Longest abbreviation is 6 characters, so take window of 8 chars to the left (allow for a space before dot)
           dnmRange prior_context_range;
@@ -287,7 +300,7 @@ dnmRanges tokenize_words(char* text, dnmRange sentence_range, long parameters) {
     if ((!parameters) || (parameters&TOKENIZER_ACCEPT_ALL)) {
       word_accepted = true; }
     else {
-      if (word_accepted && (parameters&TOKENIZER_ALPHANUM_ONLY) && !(has_alnum(text, current_word))) {
+      if (word_accepted && (parameters&TOKENIZER_ALPHA_ONLY) && !(has_alpha(text, current_word))) {
         // Not alphanumeric, negative filter triggered:
           word_accepted = false; }
       if (word_accepted && (parameters&TOKENIZER_FILTER_STOPWORDS) && is_range_stopword(text,current_word)) {

@@ -10,7 +10,7 @@
 /*! Accept all word tokens that SENNA detects (default) */
 #define TOKENIZER_ACCEPT_ALL (1 << 0)
 /*! Only accept word tokens that have some alphanumeric content */
-#define TOKENIZER_ALPHANUM_ONLY (1 << 1)
+#define TOKENIZER_ALPHA_ONLY (1 << 1)
 /*! Only accept non-stopwords as word tokens */
 #define TOKENIZER_FILTER_STOPWORDS (1 << 2)
 
@@ -38,6 +38,7 @@ void free_tokenizer();
 
 // Utility function:
 bool has_alnum(char* text, dnmRange range);
+bool has_alpha(char* text, dnmRange range);
 dnmRange trim_range(char* text, dnmRange range);
 void display_ranges(char* text, dnmRanges ranges);
 bool is_range_stopword(char* text, dnmRange range);
