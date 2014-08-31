@@ -284,22 +284,22 @@ struct tmpParseData {
   size_t plaintext_index;
 };
 
-void wrap_text_into_spans(xmlNode *n) {
+void wrap_text_into_spans(xmlNode *node) {
   /* puts text which has sibling nodes into a span (simplifies the offset stuff a lot) */
-  xmlNode *node;
-  xmlNode *newNode;
-  for (node=n; node!=NULL; node=node->next) {
-    if (xmlStrEqual(node->name, BAD_CAST "text")) {
-      if (node->next != NULL || node->prev != NULL) {  //if node has siblings
-        newNode = xmlNewNode(NULL, BAD_CAST "span");
-        xmlAddNextSibling(node, newNode);
-        xmlUnlinkNode(node);
-        xmlAddChild(newNode, node);
-        xmlNewProp(newNode, BAD_CAST "class", BAD_CAST "dnm_wrapper");
-        node = newNode;  //continue from the span
-      }
+  if (xmlStrEqual(node->name, BAD_CAST "text")) {
+    if (node->next != NULL || node->prev != NULL) {  //if node has siblings
+      xmlNode *newNode  = xmlNewNode(NULL, BAD_CAST "span");
+      xmlAddNextSibling(node, newNode);
+      xmlUnlinkNode(node);
+      xmlAddChild(newNode, node);
+      xmlNewProp(newNode, BAD_CAST "class", BAD_CAST "dnm_wrapper");
+      node = newNode;  //continue from the span
     }
-    wrap_text_into_spans(node->children);
+  }
+
+  xmlNode *n;
+  for (n=node->children; n!=NULL; n=n->next) {
+    wrap_text_into_spans(n);
   }
 }
 
@@ -314,55 +314,53 @@ void copy_into_plaintext(const char *string, dnmPtr dnm, struct tmpParseData *dc
 }
 
 
-void parse_dom_into_dnm(xmlNode *n, dnmPtr dnm, struct tmpParseData *dcs, long parameters) { 
+void parse_dom_into_dnm(xmlNode *node, dnmPtr dnm, struct tmpParseData *dcs, long parameters) {
   /* the core function which (recursively) parses the DOM into the DNM */
 
   //declaring a lot of variables required later on...
-  xmlNode *node;
   xmlChar *tmpxmlstr;
   char offsetstring[32];
 
-  //iterate over nodes
-  for (node = n; node!=NULL; node = node->next) {
+  //write start offset into DOM
+  snprintf(offsetstring, sizeof(offsetstring), "%ld", dcs->plaintext_index);
+  xmlNewProp(node, BAD_CAST "dnm_from", BAD_CAST offsetstring);
 
-//write start offset into DOM
-    snprintf(offsetstring, sizeof(offsetstring), "%ld", dcs->plaintext_index);
-    xmlNewProp(node, BAD_CAST "dnm_from", BAD_CAST offsetstring);
-
-//DEAL WITH TAG
-    //possibly normalize math tags
-    if ((parameters&DNM_NORMALIZE_TAGS) && xmlStrEqual(node->name, BAD_CAST "math")) {
-      copy_into_plaintext("MathFormula", dnm, dcs);
-    } else if ((parameters&DNM_SKIP_TAGS) && xmlStrEqual(node->name, BAD_CAST "math")) {
-      //just don't do anything
-    }
-    //possibly normalize cite tags
-    else if ((parameters&DNM_NORMALIZE_TAGS) && xmlStrEqual(node->name, BAD_CAST "cite")) {
-      copy_into_plaintext("CiteExpression", dnm, dcs);
-    } else if ((parameters&DNM_SKIP_TAGS) && xmlStrEqual(node->name, BAD_CAST "cite")) {
-      //just don't do anything
-    }
-    //skip head
-    else if (xmlStrEqual(node->name, BAD_CAST "head")) {
-      //don't to anything
-    }
-    //copy contents of text nodes into plaintext
-    else if (xmlStrEqual(node->name, BAD_CAST "text")) {
-      tmpxmlstr = xmlNodeGetContent(node);
-      CHECK_ALLOC(tmpxmlstr);
-      copy_into_plaintext((char*)tmpxmlstr, dnm, dcs);
-      xmlFree(tmpxmlstr);
-    }
-    //otherwise, parse children recursively
-    else {
-      parse_dom_into_dnm(node->children, dnm, dcs, parameters);
-    }
-
-//write end offset into DOM
-    snprintf(offsetstring, sizeof(offsetstring), "%ld", dcs->plaintext_index);
-    xmlNewProp(node, BAD_CAST "dnm_to", BAD_CAST offsetstring);
-
+  //DEAL WITH TAG
+  //possibly normalize math tags
+  if ((parameters&DNM_NORMALIZE_TAGS) && xmlStrEqual(node->name, BAD_CAST "math")) {
+    copy_into_plaintext("MathFormula", dnm, dcs);
+  } else if ((parameters&DNM_SKIP_TAGS) && xmlStrEqual(node->name, BAD_CAST "math")) {
+    //just don't do anything
   }
+  //possibly normalize cite tags
+  else if ((parameters&DNM_NORMALIZE_TAGS) && xmlStrEqual(node->name, BAD_CAST "cite")) {
+    copy_into_plaintext("CiteExpression", dnm, dcs);
+  } else if ((parameters&DNM_SKIP_TAGS) && xmlStrEqual(node->name, BAD_CAST "cite")) {
+    //just don't do anything
+  }
+  //skip head
+  else if (xmlStrEqual(node->name, BAD_CAST "head")) {
+    //don't to anything
+  }
+  //copy contents of text nodes into plaintext
+  else if (xmlStrEqual(node->name, BAD_CAST "text")) {
+    tmpxmlstr = xmlNodeGetContent(node);
+    CHECK_ALLOC(tmpxmlstr);
+    copy_into_plaintext((char*)tmpxmlstr, dnm, dcs);
+    xmlFree(tmpxmlstr);
+  }
+  //otherwise, parse children recursively
+  else {
+    //iterate over nodes
+    xmlNode *n;
+    for (n = node->children; n!=NULL; n = n->next) {
+      parse_dom_into_dnm(n, dnm, dcs, parameters); }
+  }
+
+  //write end offset into DOM
+  snprintf(offsetstring, sizeof(offsetstring), "%ld", dcs->plaintext_index);
+  xmlNewProp(node, BAD_CAST "dnm_to", BAD_CAST offsetstring);
+
 }
 
 dnmPtr create_DNM(xmlNode *root, long parameters) {
