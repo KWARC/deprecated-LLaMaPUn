@@ -19,13 +19,12 @@ struct word_count_hash {
       int count;
       UT_hash_handle hh; /* makes this structure hashable */
 };
-
-struct TF_hash {
-      char *word; /* we'll use this field as the key */
-      double TF;
-      UT_hash_handle hh; /* makes this structure hashable */
+struct corpus_frequencies {
+  char* document;
+  struct word_count_hash *F;
+  UT_hash_handle hh; /* makes this structure hashable */
 };
-struct word_count_hash *w, *word_counts = NULL;
+
 struct TF_hash *w_TF, *TF = NULL;
 void record_word(struct word_count_hash **hash, char *word) {
   struct word_count_hash *w;
@@ -99,13 +98,17 @@ int process_file(const char *filename, const struct stat *status, int type) {
     for (sentence_index = 0; sentence_index < sentences.length; sentence_index++) {
       // Obtaining only the content words here, disregard stopwords and punctuation
       dnmRanges words = tokenize_words(paragraph_text, sentences.range[sentence_index],
-                                       TOKENIZER_ALPHANUM_ONLY | TOKENIZER_FILTER_STOPWORDS);
+                                       TOKENIZER_ALPHA_ONLY | TOKENIZER_FILTER_STOPWORDS);
       int word_index;
       for(word_index=0; word_index<words.length; word_index++) {
         char* word_string = plain_range_to_string(paragraph_text, words.range[word_index]);
         char* word_stem;
         morpha_stem(word_string, &word_stem);
         free(word_string);
+        // Note: SENNA's tokenization has some features to keep in mind:
+        //  multi-symplectic --> "multi-" and "symplectic"
+        //  Birkhoff's       --> "birkhoff" and "'s"
+        // Add to the document frequency
         free(word_stem);
       }
       free(words.range);
