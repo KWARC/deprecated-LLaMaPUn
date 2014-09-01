@@ -210,12 +210,20 @@ int main(int argc, char *argv[]) {
   sprintf(frequency_filename, "%s/corpus_frequencies.json", destination_directory);
   sprintf(tf_idf_filename, "%s/tf_idf.json", destination_directory);
 
+  #ifndef JSON_OBJECT_OBJECT_GET_EX_DEFINED
+  json_object_to_file(frequency_filename, CF_json);
+  #else
   json_object_to_file_ext(frequency_filename, CF_json, JSON_C_TO_STRING_PRETTY);
+  #endif
   json_object_put(CF_json);
 
   struct corpus_scores_hash* corpus_scores = compute_tf_idf(CF);
   json_object* corpus_scores_json = corpus_scores_hash_to_json(corpus_scores);
+  #ifndef JSON_OBJECT_OBJECT_GET_EX_DEFINED
+  json_object_to_file(tf_idf_filename, corpus_scores_json);
+  #else
   json_object_to_file_ext(tf_idf_filename, corpus_scores_json,JSON_C_TO_STRING_PRETTY);
+  #endif
   json_object_put(corpus_scores_json);
   free_corpus_scores_hash(corpus_scores);
   free_corpus_frequencies_hash(CF);
