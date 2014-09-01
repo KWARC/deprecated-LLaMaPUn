@@ -10,6 +10,11 @@ SET(COMMON_FLAGS
 SET(CMAKE_C_FLAGS
     "${CMAKE_C_FLAGS} ${COMMON_FLAGS}")
 
+#configuration
+
+execute_process(COMMAND sh config.sh WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/src/scripts)
+
+
 #find the required libraries
 find_library(uthash uthash)
 find_library(pcre pcre)
