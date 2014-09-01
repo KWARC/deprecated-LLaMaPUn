@@ -3,7 +3,9 @@
 #include <string.h>
 #include <ftw.h>
 #include <uthash.h>
+#include <math.h>
 #include <sys/stat.h>
+#include "llamapun/jsoninclude.h"
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
 
@@ -12,6 +14,8 @@
 #include "llamapun/unicode_normalizer.h"
 #include "llamapun/tokenizer.h"
 #include "llamapun/stemmer.h"
+
+#define FILENAME_BUFF_SIZE 2048
 
 // Global frequencies hash:
 struct corpus_frequencies_hash* CF;
@@ -24,7 +28,7 @@ xmlChar *relaxed_paragraph_xpath = (xmlChar*) "//*[local-name()='div' and @class
 int process_file(const char *filename, const struct stat *status, int type) {
   if (type != FTW_F) return 0; //Not a file
   file_counter++;
-  if (file_counter > 100) { return 0; } // Limit for development
+  //if (file_counter > 100) { return 0; } // Limit for development
   fprintf(stderr, " Loading %s\n",filename);
   xmlDoc *doc = read_document(filename);
   if (doc == NULL) return 0;   //error message printed by read_document
@@ -111,6 +115,7 @@ int process_file(const char *filename, const struct stat *status, int type) {
   xmlFreeDoc(doc);
 
   /* The document has content, make an entry in Corpus Frequencies hash: */
+  HASH_SORT(DF, descending_count_sort);
   struct corpus_frequencies_hash* doc_entry = (struct corpus_frequencies_hash*)malloc(sizeof(struct corpus_frequencies_hash));
   doc_entry->document = strdup(filename);
   doc_entry->F = DF;
@@ -118,6 +123,53 @@ int process_file(const char *filename, const struct stat *status, int type) {
 
   fprintf(stderr,"Completed document #%d\n",file_counter);
   return 0;
+}
+
+struct corpus_scores_hash* compute_tf_idf(struct corpus_frequencies_hash* corpus_frequencies) {
+  /* Compute IDF hash: */
+  struct corpus_scores_hash *corpus_scores = NULL;
+  struct document_frequencies_hash *idf = NULL;
+  /* We make one pass over the corpus frequencies and compute TF and IDF at the same time */
+  struct corpus_frequencies_hash *d;
+  int document_count = 0; // Number of documents in the corpus
+  /* Compute global variables first: */
+  for(d=corpus_frequencies; d != NULL; d = d->hh.next) {
+    struct document_frequencies_hash *w;
+    document_count++;
+    for(w=d->F; w != NULL; w = w->hh.next) {
+      record_word(&idf,w->word);
+    }
+  }
+  for(d=corpus_frequencies; d != NULL; d = d->hh.next) {
+    struct document_frequencies_hash *w;
+    int doc_max_count = 0;
+    // dpc_max_count = Max word frequency in document
+    for(w=d->F; w != NULL; w = w->hh.next) {
+      if (doc_max_count < w->count) {
+        doc_max_count = w->count;
+      }
+    }
+    // Now that we have the doc_max_count, compute the TFxIDF scores:
+    struct score_hash *doc_tf_idf = NULL;
+    for(w=d->F; w != NULL; w = w->hh.next) {
+      double w_tf = 0.5 + (0.5 * w->count)/doc_max_count;
+      struct document_frequencies_hash* w_idf_hash;
+      HASH_FIND_STR(idf, w->word, w_idf_hash);
+      double w_idf = log2(document_count / (1.0+w_idf_hash->count));
+      struct score_hash *this_score = (struct score_hash*) malloc(sizeof(struct score_hash));
+      this_score->word = strdup(w->word);
+      this_score->score = w_tf * w_idf;
+      HASH_ADD_KEYPTR( hh, doc_tf_idf, this_score->word, strlen(this_score->word), this_score );
+    }
+    HASH_SORT(doc_tf_idf, descending_score_sort);
+    struct corpus_scores_hash *doc_scores = (struct corpus_scores_hash*) malloc(sizeof(struct corpus_scores_hash));
+    doc_scores->document = strdup(d->document);
+    doc_scores->scores = doc_tf_idf;
+    HASH_ADD_KEYPTR( hh, corpus_scores, doc_scores->document, strlen(doc_scores->document), doc_scores );
+  }
+  free_document_frequencies_hash(idf);
+
+  return corpus_scores;
 }
 
 int main(int argc, char *argv[]) {
@@ -149,19 +201,24 @@ int main(int argc, char *argv[]) {
   free_tokenizer();
   xmlCleanupParser();
 
-  /* What have we collected? */
+  /* What have we collected? Write frequencies to file: */
+  HASH_SORT(CF, document_key_sort);
   json_object* CF_json = corpus_frequencies_hash_to_json(CF);
 
-  char* base_frequency_filename = "/frequencies.json";
-  int filename_length = strlen(destination_directory)+strlen(base_frequency_filename);
-  char* frequency_filename = malloc(sizeof(char) * filename_length);
-  strcpy(frequency_filename, destination_directory);
-  strcat(frequency_filename, base_frequency_filename);
+  char frequency_filename[FILENAME_BUFF_SIZE];
+  char tf_idf_filename[FILENAME_BUFF_SIZE];
+  sprintf(frequency_filename, "%s/corpus_frequencies.json", destination_directory);
+  sprintf(tf_idf_filename, "%s/tf_idf.json", destination_directory);
 
-  json_object_to_file(frequency_filename, CF_json);
+  json_object_to_file_ext(frequency_filename, CF_json, JSON_C_TO_STRING_PRETTY);
+  json_object_put(CF_json);
 
-  free(frequency_filename);
-  free(CF_json);
+  struct corpus_scores_hash* corpus_scores = compute_tf_idf(CF);
+  json_object* corpus_scores_json = corpus_scores_hash_to_json(corpus_scores);
+  json_object_to_file_ext(tf_idf_filename, corpus_scores_json,JSON_C_TO_STRING_PRETTY);
+  json_object_put(corpus_scores_json);
+  free_corpus_scores_hash(corpus_scores);
   free_corpus_frequencies_hash(CF);
+
   return 0;
 }
