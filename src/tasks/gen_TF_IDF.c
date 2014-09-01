@@ -13,29 +13,8 @@
 #include "llamapun/tokenizer.h"
 #include "llamapun/stemmer.h"
 
-/* Prepare count datastructures and variables */
-struct word_count_hash {
-      char *word; /* we'll use this field as the key */
-      int count;
-      UT_hash_handle hh; /* makes this structure hashable */
-};
-struct corpus_frequencies {
-  char* document;
-  struct word_count_hash *F;
-  UT_hash_handle hh; /* makes this structure hashable */
-};
-
-struct TF_hash *w_TF, *TF = NULL;
-void record_word(struct word_count_hash **hash, char *word) {
-  struct word_count_hash *w;
-  HASH_FIND_STR(*hash, word, w);  /* word already in the hash? */
-  if (w==NULL) { // New word
-    w = (struct word_count_hash*)malloc(sizeof(struct word_count_hash));
-    w->word = strdup(word);
-    w->count = 1;
-    HASH_ADD_KEYPTR( hh, *hash, w->word, strlen(w->word), w ); }
-  else { // Already exists, just increment the counter:
-    w->count++; } }
+// Global frequencies hash:
+struct corpus_frequencies_hash* CF;
 
 /* Core traversal and analysis */
 int file_counter=0;
@@ -80,6 +59,8 @@ int process_file(const char *filename, const struct stat *status, int type) {
       return 0; } }
   xmlNodeSetPtr paragraph_nodeset = paragraphs_result->nodesetval;
   int para_index;
+
+  struct document_frequencies_hash* DF = NULL;
   /* Iterate over each paragraph: */
   for (para_index=0; para_index < paragraph_nodeset->nodeNr; para_index++) {
     xmlNodePtr paragraph_node = paragraph_nodeset->nodeTab[para_index];
@@ -104,11 +85,18 @@ int process_file(const char *filename, const struct stat *status, int type) {
         char* word_string = plain_range_to_string(paragraph_text, words.range[word_index]);
         char* word_stem;
         morpha_stem(word_string, &word_stem);
+        /* Ensure stemming is an invariant (tilings -> tiling -> tile -> tile) */
+        while (strcmp(word_string, word_stem) != 0) {
+          free(word_string);
+          word_string = word_stem;
+          morpha_stem(word_string, &word_stem);
+        }
         free(word_string);
         // Note: SENNA's tokenization has some features to keep in mind:
         //  multi-symplectic --> "multi-" and "symplectic"
         //  Birkhoff's       --> "birkhoff" and "'s"
         // Add to the document frequency
+        record_word(&DF, word_stem);
         free(word_stem);
       }
       free(words.range);
@@ -121,6 +109,13 @@ int process_file(const char *filename, const struct stat *status, int type) {
   xmlFree(paragraphs_result);
   xmlXPathFreeContext(xpath_context);
   xmlFreeDoc(doc);
+
+  /* The document has content, make an entry in Corpus Frequencies hash: */
+  struct corpus_frequencies_hash* doc_entry = (struct corpus_frequencies_hash*)malloc(sizeof(struct corpus_frequencies_hash));
+  doc_entry->document = strdup(filename);
+  doc_entry->F = DF;
+  HASH_ADD_KEYPTR( hh, CF, doc_entry->document, strlen(doc_entry->document), doc_entry );
+
   fprintf(stderr,"Completed document #%d\n",file_counter);
   return 0;
 }
@@ -153,5 +148,20 @@ int main(int argc, char *argv[]) {
   close_stemmer();
   free_tokenizer();
   xmlCleanupParser();
+
+  /* What have we collected? */
+  json_object* CF_json = corpus_frequencies_hash_to_json(CF);
+
+  char* base_frequency_filename = "/frequencies.json";
+  int filename_length = strlen(destination_directory)+strlen(base_frequency_filename);
+  char* frequency_filename = malloc(sizeof(char) * filename_length);
+  strcpy(frequency_filename, destination_directory);
+  strcat(frequency_filename, base_frequency_filename);
+
+  json_object_to_file(frequency_filename, CF_json);
+
+  free(frequency_filename);
+  free(CF_json);
+  free_corpus_frequencies_hash(CF);
   return 0;
 }
