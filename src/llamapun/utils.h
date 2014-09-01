@@ -4,6 +4,7 @@
 #ifndef LLAMAPUN_UTILS_H
 #define LLAMAPUN_UTILS_H
 
+#include <uthash.h>
 #include "jsoninclude.h"
 #include <libxml/parser.h>
 #include <libxml/HTMLparser.h>
@@ -20,4 +21,23 @@ json_object* cortex_response_json(char *annotations, char *message, int status);
 */
 xmlDocPtr read_document(const char* filename);
 
+/* Common datastructures for frequency methods */
+struct document_frequencies_hash {
+      char *word; /* we'll use this field as the key */
+      int count;
+      UT_hash_handle hh; /* makes this structure hashable */
+};
+struct corpus_frequencies_hash {
+  char* document;
+  struct document_frequencies_hash *F;
+  UT_hash_handle hh; /* makes this structure hashable */
+};
+
+void record_word(struct document_frequencies_hash **hash, char *word);
+int word_key_sort(struct document_frequencies_hash *a, struct document_frequencies_hash *b);
+int document_key_sort(struct corpus_frequencies_hash *a, struct corpus_frequencies_hash *b);
+json_object* document_frequencies_hash_to_json(struct document_frequencies_hash *DF);
+json_object* corpus_frequencies_hash_to_json(struct corpus_frequencies_hash *CF);
+void free_document_frequencies_hash(struct document_frequencies_hash *DF);
+void free_corpus_frequencies_hash(struct corpus_frequencies_hash *CF);
 #endif

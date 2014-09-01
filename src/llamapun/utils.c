@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "utils.h"
-
+#include "jsoninclude.h"
 
 char* cortex_stringify_response(json_object* response, size_t *size) {
   const char* string_response = json_object_to_json_string(response);
@@ -63,4 +63,60 @@ xmlDocPtr read_document(const char* filename) {
   //if nothing works
   fprintf(stderr, "Couldn't parse %s\n", filename);
   return NULL;
+}
+
+/* Frequency-count utilities */
+void record_word(struct document_frequencies_hash **hash, char *word) {
+  struct document_frequencies_hash *w;
+  HASH_FIND_STR(*hash, word, w);  /* word already in the hash? */
+  if (w==NULL) { // New word
+    w = (struct document_frequencies_hash*)malloc(sizeof(struct document_frequencies_hash));
+    w->word = strdup(word);
+    w->count = 1;
+    HASH_ADD_KEYPTR( hh, *hash, w->word, strlen(w->word), w ); }
+  else { // Already exists, just increment the counter:
+    w->count++; }
+  return;}
+
+int word_key_sort(struct document_frequencies_hash *a, struct document_frequencies_hash *b) {
+    return strcmp(a->word,b->word);
+}
+int document_key_sort(struct corpus_frequencies_hash *a, struct corpus_frequencies_hash *b) {
+    return strcmp(a->document,b->document);
+}
+
+json_object* document_frequencies_hash_to_json(struct document_frequencies_hash *DF) {
+  json_object *DF_json = json_object_new_object();
+  struct document_frequencies_hash *d;
+  for(d=DF; d != NULL; d = d->hh.next) {
+    json_object_object_add(DF_json, d->word, json_object_new_int(d->count));
+  }
+  return DF_json;
+}
+json_object* corpus_frequencies_hash_to_json(struct corpus_frequencies_hash *CF) {
+  json_object *CF_json = json_object_new_object();
+  struct corpus_frequencies_hash *c;
+  for(c=CF; c != NULL; c = c->hh.next) {
+    json_object* DF_json = document_frequencies_hash_to_json(c->F);
+    json_object_object_add(CF_json, c->document, DF_json);
+  }
+  return CF_json;
+}
+void free_document_frequencies_hash(struct document_frequencies_hash *DF) {
+  struct document_frequencies_hash *s, *tmp;
+  HASH_ITER(hh, DF, s, tmp) {
+    HASH_DEL(DF, s);
+    free(s->word);
+    free(s);
+  }
+  free(DF);
+}
+void free_corpus_frequencies_hash(struct corpus_frequencies_hash *CF) {
+  struct corpus_frequencies_hash *s, *tmp;
+  HASH_ITER(hh, CF, s, tmp) {
+    HASH_DEL(CF, s);
+    free_document_frequencies_hash(s->F);
+    free(s);
+  }
+  free(CF);
 }
