@@ -93,9 +93,6 @@ char *word_replace(char *orig, char *rep, char *with) {
 }
 
 void morpha_stem(const char *sentence, char **stemmed) {
-  FILE *l = fopen("LOG.txt", "a");
-  fprintf(l, "C: %s\n", sentence);
-  fclose(l);
   char *tmp;
   size_t insize, outsize;   //we're not interested in the size
   morpha_instream = open_memstream(&morpha_instream_buff_ptr, &insize);
