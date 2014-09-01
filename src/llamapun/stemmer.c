@@ -135,7 +135,7 @@ void morpha_stem(const char *sentence, char **stemmed) {
   free(morpha_instream_buff_ptr);
 }
 
-void morpha_multiple_stems(const char *input, char **stemmed) {
+void full_morpha_stem(const char *input, char **stemmed) {
   morpha_stem(input, stemmed);
   if (strcmp(input, *stemmed)) {
     input = *stemmed;

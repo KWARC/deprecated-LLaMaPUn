@@ -35,7 +35,7 @@ int main(void) {
   free(stemmed);
 
   test = strdup("tilings");
-  morpha_multiple_stems(test, &stemmed);
+  full_morpha_stem(test, &stemmed);
   free(test);
 
   if (strcmp(stemmed, "tile")) {

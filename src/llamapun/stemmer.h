@@ -31,6 +31,6 @@ void morpha_stem(const char *input, char **output);
 /*! stems input until it doesn't change anymore
     @see morpha_stem
 */
-void morpha_multiple_stems(const char *input, char **stemmed);
+void full_morpha_stem(const char *input, char **stemmed);
 
 #endif
