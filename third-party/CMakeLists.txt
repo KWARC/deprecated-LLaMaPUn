@@ -19,3 +19,9 @@ add_library(LIBTEXTCAT_textcat libtextcat-2.2/src/textcat.c)
 target_link_libraries(LIBTEXTCAT_textcat LIBTEXTCAT_common LIBTEXTCAT_createfp LIBTEXTCAT_fingerprint LIBTEXTCAT_wg_mempool)
 
 add_library(MORPHA morpha/morpha.yy.c)
+include(ExternalProject)
+ExternalProject_Add(crfsuite_project
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/crfsuite-0.12
+    CONFIGURE_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/crfsuite-0.12/configure --prefix=<INSTALL_DIR>
+    BUILD_COMMAND ${MAKE})
+

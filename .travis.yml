@@ -2,7 +2,7 @@ env:
 
 before_install:
  - lsb_release -a
- - sudo apt-get update
+ - sudo apt-get update -qq
 install:
  - sudo apt-get install cmake
  - sudo apt-get install make
@@ -27,7 +27,15 @@ install:
  - make
  - sudo make install
  - cd ..
-
+#LBFGS (for CRFsuite):
+ - wget https://github.com/chokkan/liblbfgs/archive/v1.10.tar.gz
+ - tar -xzvf v1.10.tar.gz
+ - cd liblbfgs-1.10
+ - ./autogen.sh
+ - ./configure
+ - make 
+ - sudo make install
+ - cd ..
 language: c
 compiler:
  - gcc
