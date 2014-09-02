@@ -22,18 +22,19 @@ target_link_libraries(TestCombined dnmlib unicode_normalizer utils tokenizer ${L
 
 
 
-add_test(SENNA_POS_Test TestSENNA WORKING_DIRECTORY "test")
-add_test(STOPWORDS_Test TestSTOPWORDS WORKING_DIRECTORY "test")
-add_test(STEMMER_Test TestSTEMMER WORKING_DIRECTORY "test")
-add_test(NGRAMS_Test TestNGRAMS WORKING_DIRECTORY "test")
-add_test(UNICODE_NORMALIZER_Test TestUnicodeNormalizer WORKING_DIRECTORY "test")
-add_test(TOKENIZATION_Test TestTokenization WORKING_DIRECTORY "test")
-add_test(COMBINED_Test TestCombined WORKING_DIRECTORY "test")
+add_test(NAME SENNA_POS_Test COMMAND ${CMAKE_CURRENT_BINARY_DIR}/./TestSENNA WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/test_working_directory)
+add_test(NAME STOPWORDS_Test COMMAND ${CMAKE_CURRENT_BINARY_DIR}/./TestSTOPWORDS WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/test_working_directory)
+add_test(NAME STEMMER_Test COMMAND ${CMAKE_CURRENT_BINARY_DIR}/./TestSTEMMER WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/test_working_directory)
+add_test(NAME NGRAMS_Test COMMAND ${CMAKE_CURRENT_BINARY_DIR}/./TestNGRAMS WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/test_working_directory)
+add_test(NAME UNICODE_NORMALIZER_Test COMMAND ${CMAKE_CURRENT_BINARY_DIR}/./TestUnicodeNormalizer WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/test_working_directory)
+add_test(NAME TOKENIZATION_Test COMMAND ${CMAKE_CURRENT_BINARY_DIR}/./TestTokenization WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/test_working_directory)
+add_test(NAME COMBINED_Test COMMAND ${CMAKE_CURRENT_BINARY_DIR}/./TestCombined WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/test_working_directory)
 
-ADD_TEST(NAME TestSENNA_leaks COMMAND sh ../../src/scripts/leak_check.sh ./TestSENNA)
-ADD_TEST(NAME TestSTOPWORDS_leaks COMMAND sh ../../src/scripts/leak_check.sh ./TestSTOPWORDS)
-ADD_TEST(NAME TestSTEMMER_leaks COMMAND sh ../../src/scripts/leak_check.sh ./TestSTEMMER)
-ADD_TEST(NAME TestNGRAMS_leaks COMMAND sh ../../src/scripts/leak_check.sh ./TestNGRAMS)
-ADD_TEST(NAME TestUnicodeNormalizer_leaks COMMAND sh ../../src/scripts/leak_check.sh ./TestUnicodeNormalizer)
-ADD_TEST(NAME TestTokenization_leaks COMMAND sh ../../src/scripts/leak_check.sh ./TestTokenization)
-ADD_TEST(NAME TestCombined_leaks COMMAND sh ../../src/scripts/leak_check.sh ./TestCombined)
+
+ADD_TEST(NAME TestSENNA_leaks COMMAND sh ${CMAKE_CURRENT_LIST_DIR}/../src/scripts/leak_check.sh ${CMAKE_CURRENT_BINARY_DIR}/./TestSENNA WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/test_working_directory)
+ADD_TEST(NAME TestSTOPWORDS_leaks COMMAND sh ${CMAKE_CURRENT_LIST_DIR}/../src/scripts/leak_check.sh ${CMAKE_CURRENT_BINARY_DIR}/./TestSTOPWORDS WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/test_working_directory)
+ADD_TEST(NAME TestSTEMMER_leaks COMMAND sh ${CMAKE_CURRENT_LIST_DIR}/../src/scripts/leak_check.sh ${CMAKE_CURRENT_BINARY_DIR}/./TestSTEMMER WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/test_working_directory)
+ADD_TEST(NAME TestNGRAMS_leaks COMMAND sh ${CMAKE_CURRENT_LIST_DIR}/../src/scripts/leak_check.sh ${CMAKE_CURRENT_BINARY_DIR}/./TestNGRAMS WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/test_working_directory)
+ADD_TEST(NAME TestUnicodeNormalizer_leaks COMMAND sh ${CMAKE_CURRENT_LIST_DIR}/../src/scripts/leak_check.sh ${CMAKE_CURRENT_BINARY_DIR}/./TestUnicodeNormalizer WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/test_working_directory)
+ADD_TEST(NAME TestTokenization_leaks COMMAND sh ${CMAKE_CURRENT_LIST_DIR}/../src/scripts/leak_check.sh ${CMAKE_CURRENT_BINARY_DIR}/./TestTokenization WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/test_working_directory)
+ADD_TEST(NAME TestCombined_leaks COMMAND sh ${CMAKE_CURRENT_LIST_DIR}/../src/scripts/leak_check.sh ${CMAKE_CURRENT_BINARY_DIR}/./TestCombined WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/test_working_directory)
