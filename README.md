@@ -29,7 +29,8 @@ and provide an outlook for a number of fixes and features to be added to the lib
    * Part-of-speech tagging (via [SENNA](http://ml.nec-labs.com/senna/)),
    * Named Entity recognition (via [SENNA](http://ml.nec-labs.com/senna/)),
    * Chunking and shallow parsing (via [SENNA](http://ml.nec-labs.com/senna/)),
-   * [TODO] Definition Discovery -- paragraph discrimination task (training CRF models via [CRFsuite](http://www.chokkan.org/software/crfsuite/)).
+   * [TODO] "Definition" paragraph discrimination task (training SVM classifiers, based on TF/IDF and Ngram BoW features, via [libsvm](https://github.com/cjlin1/libsvm))
+   * [TODO] "Declaration" sentence discrimination task (training CRF models via [CRFsuite](http://www.chokkan.org/software/crfsuite/)).
  
  * **Representation Toolkit**
    * Document Narrative Model (DNM) addition to the XML DOM
