@@ -12,6 +12,7 @@
 #include <uthash.h>
 // JSON
 #include <llamapun/json_include.h>
+#include <llamapun/local_paths.h>
 // XML DOM and XPath
 #include <libxml/tree.h>
 #include <libxml/parser.h>
@@ -19,6 +20,9 @@
 #include <libxml/xpathInternals.h>
 // LLaMaPUn Utils
 #include "llamapun/utils.h"
+
+#define FILE_BUFFER_SIZE 2048
+
 
 json_object* dom_to_pos_annotations (xmlDocPtr doc) {
   xmlChar *tmpxmlstr;    //will be needed a lot
@@ -95,7 +99,9 @@ json_object* dom_to_pos_annotations (xmlDocPtr doc) {
 
   /* Initialize SENNA toolkit components: */
   int *pos_labels = NULL;
-  char *opt_path = "../../third-party/senna/";
+  //char *opt_path = "../../third-party/senna/";
+  char opt_path[FILE_BUFFER_SIZE];
+  snprintf(opt_path, FILE_BUFFER_SIZE, "%sthird-party/senna/", LLAMAPUN_ROOT_PATH);
   /* SENNA inputs */
   SENNA_Hash *word_hash = SENNA_Hash_new(opt_path, "hash/words.lst");
   SENNA_Hash *caps_hash = SENNA_Hash_new(opt_path, "hash/caps.lst");
