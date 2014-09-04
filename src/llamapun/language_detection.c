@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "file_paths.h"
 
 //a bit hacked, but it works:
 #include <textcat.c>
@@ -26,86 +27,85 @@ int text_is_english(void *tc, const char *text, size_t text_size) {
 
 void *llamapun_textcat_Init()
 /*  the code from the textcat library, slightly adapted, to avoid external config files. */
-/*  DOESN'T WORK YET!!!   */
 {
   textcat_t *h;
   char line[1024];
-  char *config = "\n\nLM/english.lm\t\t\tenglish\n\
-LM/afrikaans.lm\t\t\tafrikaans\n\
-LM/albanian.lm\t\t\talbanian\n\
-LM/amharic-utf.lm\t\tamharic-utf\n\
-LM/arabic-iso8859_6.lm\t\tarabic-iso8859_6\n\
-LM/arabic-windows1256.lm\tarabic-windows1256\n\
-LM/armenian.lm\t\t\tarmenian\n\
-LM/basque.lm\t\t\tbasque\n\
-LM/belarus-windows1251.lm\tbelarus-windows1251\n\
-LM/bosnian.lm\t\t\tbosnian\n\
-LM/breton.lm\t\t\tbreton\n\
-LM/bulgarian-iso8859_5.lm\tbulgarian-iso8859_5\n\
-LM/catalan.lm\t\t\tcatalan\n\
-LM/chinese-big5.lm\t\tchinese-big5\n\
-LM/chinese-gb2312.lm\t\tchinese-gb2312\n\
-LM/croatian-ascii.lm\t\tcroatian-ascii\n\
-LM/czech-iso8859_2.lm\t\tczech-iso8859_2\n\
-LM/danish.lm\t\t\tdanish\n\
-LM/drents.lm\t\t\tdrents   # Dutch dialect\n\
-LM/dutch.lm\t\t\tdutch\n\
-LM/esperanto.lm\t\t\tesperanto\n\
-LM/estonian.lm\t\t\testonian\n\
-LM/finnish.lm\t\t\tfinnish\n\
-LM/french.lm\t\t\tfrench\n\
-LM/frisian.lm\t\t\tfrisian\n\
-LM/georgian.lm\t\t\tgeorgian\n\
-LM/german.lm\t\t\tgerman\n\
-LM/greek-iso8859-7.lm\t\tgreek-iso8859-7\n\
-LM/hebrew-iso8859_8.lm\t\thebrew-iso8859_8\n\
-LM/hindi.lm\t\t\thindi\n\
-LM/hungarian.lm\t\t\thungarian\n\
-LM/icelandic.lm\t\t\ticelandic\n\
-LM/indonesian.lm\t\tindonesian\n\
-LM/irish.lm\t\t\tirish\n\
-LM/italian.lm\t\t\titalian\n\
-LM/japanese-euc_jp.lm\t\tjapanese-euc_jp\n\
-LM/japanese-shift_jis.lm\tjapanese-shift_jis\n\
-LM/korean.lm\t\t\tkorean\n\
-LM/latin.lm\t\t\tlatin\n\
-LM/latvian.lm\t\t\tlatvian\n\
-LM/lithuanian.lm\t\tlithuanian\n\
-LM/malay.lm\t\t\tmalay\n\
-LM/manx.lm\t\t\tmanx\n\
-LM/marathi.lm\t\t\tmarathi\n\
-LM/middle_frisian.lm\t\tmiddle_frisian\n\
-LM/mingo.lm\t\t\tmingo\n\
-LM/nepali.lm\t\t\tnepali\n\
-LM/norwegian.lm\t\t\tnorwegian\n\
-LM/persian.lm\t\t\tpersian\n\
-LM/polish.lm\t\t\tpolish\n\
-LM/portuguese.lm\t\tportuguese\n\
-LM/quechua.lm\t\t\tquechua\n\
-LM/romanian.lm\t\t\tromanian\n\
-LM/rumantsch.lm\t\t\trumantsch\n\
-LM/russian-iso8859_5.lm\t\trussian-iso8859_5\n\
-LM/russian-koi8_r.lm\t\trussian-koi8_r\n\
-LM/russian-windows1251.lm\trussian-windows1251\n\
-LM/sanskrit.lm\t\t\tsanskrit\n\
-LM/scots.lm\t\t\tscots\n\
-LM/scots_gaelic.lm\t\tscots_gaelic\n\
-LM/serbian-ascii.lm\t\tserbian-ascii\n\
-LM/slovak-ascii.lm\t\tslovak-ascii\n\
-LM/slovak-windows1250.lm\tslovak-windows1250\n\
-LM/slovenian-ascii.lm\t\tslovenian-ascii\n\
-LM/slovenian-iso8859_2.lm\tslovenian-iso8859_2\n\
-LM/spanish.lm\t\t\tspanish\n\
-LM/swahili.lm\t\t\tswahili\n\
-LM/swedish.lm\t\t\tswedish\n\
-LM/tagalog.lm\t\t\ttagalog\n\
-LM/tamil.lm\t\t\ttamil\n\
-LM/thai.lm\t\t\tthai\n\
-LM/turkish.lm\t\t\tturkish\n\
-LM/ukrainian-koi8_r.lm\t\tukrainian-koi8_r\n\
-LM/vietnamese.lm\t\tvietnamese\n\
-LM/welsh.lm\t\t\twelsh\n\
-LM/yiddish-utf.lm\t\tyiddish-utf\n\n";
+  char *config = "\n\nenglish.lm\t\t\tenglish\n\
+afrikaans.lm\t\t\tafrikaans\n\
+albanian.lm\t\t\talbanian\n\
+amharic-utf.lm\t\tamharic-utf\n\
+arabic-iso8859_6.lm\t\tarabic-iso8859_6\n\
+arabic-windows1256.lm\tarabic-windows1256\n\
+armenian.lm\t\t\tarmenian\n\
+basque.lm\t\t\tbasque\n\
+belarus-windows1251.lm\tbelarus-windows1251\n\
+bosnian.lm\t\t\tbosnian\n\
+breton.lm\t\t\tbreton\n\
+bulgarian-iso8859_5.lm\tbulgarian-iso8859_5\n\
+catalan.lm\t\t\tcatalan\n\
+chinese-big5.lm\t\tchinese-big5\n\
+chinese-gb2312.lm\t\tchinese-gb2312\n\
+croatian-ascii.lm\t\tcroatian-ascii\n\
+czech-iso8859_2.lm\t\tczech-iso8859_2\n\
+danish.lm\t\t\tdanish\n\
+drents.lm\t\t\tdrents   # Dutch dialect\n\
+dutch.lm\t\t\tdutch\n\
+esperanto.lm\t\t\tesperanto\n\
+estonian.lm\t\t\testonian\n\
+finnish.lm\t\t\tfinnish\n\
+french.lm\t\t\tfrench\n\
+frisian.lm\t\t\tfrisian\n\
+georgian.lm\t\t\tgeorgian\n\
+german.lm\t\t\tgerman\n\
+greek-iso8859-7.lm\t\tgreek-iso8859-7\n\
+hebrew-iso8859_8.lm\t\thebrew-iso8859_8\n\
+hindi.lm\t\t\thindi\n\
+hungarian.lm\t\t\thungarian\n\
+icelandic.lm\t\t\ticelandic\n\
+indonesian.lm\t\tindonesian\n\
+irish.lm\t\t\tirish\n\
+italian.lm\t\t\titalian\n\
+japanese-euc_jp.lm\t\tjapanese-euc_jp\n\
+japanese-shift_jis.lm\tjapanese-shift_jis\n\
+korean.lm\t\t\tkorean\n\
+latin.lm\t\t\tlatin\n\
+latvian.lm\t\t\tlatvian\n\
+lithuanian.lm\t\tlithuanian\n\
+malay.lm\t\t\tmalay\n\
+manx.lm\t\t\tmanx\n\
+marathi.lm\t\t\tmarathi\n\
+middle_frisian.lm\t\tmiddle_frisian\n\
+mingo.lm\t\t\tmingo\n\
+nepali.lm\t\t\tnepali\n\
+norwegian.lm\t\t\tnorwegian\n\
+persian.lm\t\t\tpersian\n\
+polish.lm\t\t\tpolish\n\
+portuguese.lm\t\tportuguese\n\
+quechua.lm\t\t\tquechua\n\
+romanian.lm\t\t\tromanian\n\
+rumantsch.lm\t\t\trumantsch\n\
+russian-iso8859_5.lm\t\trussian-iso8859_5\n\
+russian-koi8_r.lm\t\trussian-koi8_r\n\
+russian-windows1251.lm\trussian-windows1251\n\
+sanskrit.lm\t\t\tsanskrit\n\
+scots.lm\t\t\tscots\n\
+scots_gaelic.lm\t\tscots_gaelic\n\
+serbian-ascii.lm\t\tserbian-ascii\n\
+slovak-ascii.lm\t\tslovak-ascii\n\
+slovak-windows1250.lm\tslovak-windows1250\n\
+slovenian-ascii.lm\t\tslovenian-ascii\n\
+slovenian-iso8859_2.lm\tslovenian-iso8859_2\n\
+spanish.lm\t\t\tspanish\n\
+swahili.lm\t\t\tswahili\n\
+swedish.lm\t\t\tswedish\n\
+tagalog.lm\t\t\ttagalog\n\
+tamil.lm\t\t\ttamil\n\
+thai.lm\t\t\tthai\n\
+turkish.lm\t\t\tturkish\n\
+ukrainian-koi8_r.lm\t\tukrainian-koi8_r\n\
+vietnamese.lm\t\tvietnamese\n\
+welsh.lm\t\t\twelsh\n\
+yiddish-utf.lm\t\tyiddish-utf\n\n";
 
   FILE *fp = fmemopen(config, strlen(config), "r");
 
@@ -142,11 +142,17 @@ LM/yiddish-utf.lm\t\tyiddish-utf\n\n";
     if ((h->fprint[ h->size ] = fp_Init( segment[1] ))==NULL) {
       goto ERROR;
     }
-    if ( fp_Read( h->fprint[h->size], segment[0], 400 ) == 0 ) {
+    char *newpath;
+    size_t tmp;
+    FILE *tmpstream = open_memstream(&newpath, &tmp);
+    fprintf(tmpstream, "%s%s", LIBTEXT_LANGUAGES_PATH, segment[0]);
+    fclose(tmpstream);
+    if ( fp_Read( h->fprint[h->size], newpath, 400 ) == 0 ) {
+      free(newpath);
       textcat_Done(h);
-      fprintf(stderr, "e2");
       goto ERROR;
-    }   
+    }
+    free(newpath);
     h->size++;
   }
 
@@ -154,6 +160,7 @@ LM/yiddish-utf.lm\t\tyiddish-utf\n\n";
   return h;
 
  ERROR:
+ 
   fclose(fp);
   return NULL;
 

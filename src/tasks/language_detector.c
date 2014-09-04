@@ -39,7 +39,7 @@ int parse(const char *filename, const struct stat *status, int type) {
 
 
 int main(int argc, char *argv[]) {
-  my_tc = textcat_Init("../../../config/libtextcatconf.txt");   //llamapun_textcat_Init();
+  my_tc = llamapun_textcat_Init();
   if (my_tc == NULL) {
     fprintf(stderr, "Fatal: Couldn't load textcat handle\n");
     exit(1);
