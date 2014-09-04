@@ -1,6 +1,6 @@
 #include <stdio.h>
-#include "llamapun/jsoninclude.h"
-#include "llamapun/stopwords.h"
+#include <llamapun/json_include.h>
+#include <llamapun/stopwords.h>
 #include <unistd.h>
 
 

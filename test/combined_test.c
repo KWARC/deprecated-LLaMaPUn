@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include "string.h"
-#include "llamapun/jsoninclude.h"
-#include "llamapun/dnmlib.h"
-#include "llamapun/unicode_normalizer.h"
-#include "llamapun/utils.h"
-#include "llamapun/tokenizer.h"
+#include <llamapun/json_include.h>
+#include <llamapun/dnmlib.h>
+#include <llamapun/unicode_normalizer.h>
+#include <llamapun/utils.h>
+#include <llamapun/tokenizer.h>
 
 const char TEST_XHTML_DOCUMENT[] = "../../t/documents/1311.0066.xhtml";
 

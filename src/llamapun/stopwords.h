@@ -6,9 +6,13 @@
 
 #ifndef STOPWORDS_H_INCLUDED
 #define STOPWORDS_H_INCLUDED
-
-//#include <json-c/json.h>
-#include "jsoninclude.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#include <uthash.h>
+#include <llamapun/json_include.h>
+#include <llamapun/stopwords.h>
 
 /*! loads the stopwords from a JSON array */
 void read_stopwords_from_json(json_object *);

@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <string.h>
-//#include <json-c/json.h>
-#include "llamapun/jsoninclude.h"
 // XML DOM and XPath
 #include <libxml/tree.h>
 #include <libxml/parser.h>
-
-#include "llamapun/ngrams.h"
+// JSON
+#include <llamapun/json_include.h>
+// Ngrams
+#include <llamapun/ngrams.h>
 
 const char TEST_XHTML_DOCUMENT[] = "../../t/documents/1311.6767.xhtml";
 

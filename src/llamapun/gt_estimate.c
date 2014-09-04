@@ -4,8 +4,7 @@
 #include <stdlib.h>
 
 #include <uthash.h>
-//#include <json-c/json.h>
-#include "jsoninclude.h"
+#include <llamapun/json_include.h>
 
 
 //'Pure' Good-Turing smoothing doesn't work for the more frequent words

@@ -3,11 +3,8 @@
 #include <string.h>
 #include <ctype.h>
 #include <uthash.h>
-//#include <json-c/json.h>
-#include "jsoninclude.h"
-
-#include "stopwords.h"
-
+#include <llamapun/json_include.h>
+#include <llamapun/stopwords.h>
 
 struct stopword_element *STOPWORDS = NULL;
 

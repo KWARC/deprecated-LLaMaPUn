@@ -5,7 +5,7 @@
 #define LLAMAPUN_UTILS_H
 
 #include <uthash.h>
-#include "jsoninclude.h"
+#include <llamapun/json_include.h>
 #include <libxml/parser.h>
 #include <libxml/HTMLparser.h>
 

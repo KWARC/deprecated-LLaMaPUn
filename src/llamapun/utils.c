@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "utils.h"
-#include "jsoninclude.h"
+#include <llamapun/utils.h>
+#include <llamapun/json_include.h>
 
 char* cortex_stringify_response(json_object* response, size_t *size) {
   const char* string_response = json_object_to_json_string(response);

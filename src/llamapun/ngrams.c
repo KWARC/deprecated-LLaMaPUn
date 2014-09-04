@@ -8,19 +8,19 @@
 #include <uthash.h>
 // JSON
 //#include <json-c/json.h>
-#include "jsoninclude.h"
+#include <llamapun/json_include.h>
 // XML DOM and XPath
 #include <libxml/tree.h>
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
 // LLaMaPUn Utils
-#include "utils.h"
-#include "stopwords.h"
-#include "stemmer.h"
-#include "ngrams.h"
-#include "unicode_normalizer.h"
-
+#include <llamapun/json_include.h>
+#include <llamapun/utils.h>
+#include <llamapun/stopwords.h>
+#include <llamapun/stemmer.h>
+#include <llamapun/ngrams.h>
+#include <llamapun/unicode_normalizer.h>
 
 struct stringcount {
   char *string;

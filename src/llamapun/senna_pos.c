@@ -11,8 +11,7 @@
 // Hashes
 #include <uthash.h>
 // JSON
-//#include <json-c/json.h>
-#include "jsoninclude.h"
+#include <llamapun/json_include.h>
 // XML DOM and XPath
 #include <libxml/tree.h>
 #include <libxml/parser.h>
