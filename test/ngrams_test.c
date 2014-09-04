@@ -7,12 +7,14 @@
 #include <llamapun/json_include.h>
 // Ngrams
 #include <llamapun/ngrams.h>
+#include <llamapun/local_paths.h>
 
-const char TEST_XHTML_DOCUMENT[] = "../../t/documents/1311.6767.xhtml";
+#define FILE_BUFFER_SIZE 2048
+char test_xhtml_doc[FILE_BUFFER_SIZE];
 
 int main() {
-
-  xmlDoc* doc = xmlReadFile(TEST_XHTML_DOCUMENT, NULL, 0);
+  sprintf(test_xhtml_doc,"%s/t/documents/1311.6767.xhtml", LLAMAPUN_ROOT_PATH);
+  xmlDoc* doc = xmlReadFile(test_xhtml_doc, NULL, 0);
   if (doc == NULL) {
     fprintf(stderr,"Test XHTML document could not be parsed, failing");
     return 1; }
