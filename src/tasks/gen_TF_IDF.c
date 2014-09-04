@@ -9,11 +9,12 @@
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
 
-#include "llamapun/utils.h"
-#include "llamapun/dnmlib.h"
-#include "llamapun/unicode_normalizer.h"
-#include "llamapun/tokenizer.h"
-#include "llamapun/stemmer.h"
+#include <llamapun/local_paths.h>
+#include <llamapun/utils.h>
+#include <llamapun/dnmlib.h>
+#include <llamapun/unicode_normalizer.h>
+#include <llamapun/tokenizer.h>
+#include <llamapun/stemmer.h>
 
 #define FILENAME_BUFF_SIZE 2048
 
@@ -192,7 +193,9 @@ int main(int argc, char *argv[]) {
       exit(1);
   }
 
-  initialize_tokenizer("../../../third-party/senna/");
+  char senna_opt_path[FILENAME_BUFF_SIZE];
+  sprintf(senna_opt_path, "%s/third-party/senna/",LLAMAPUN_ROOT_PATH);
+  initialize_tokenizer(senna_opt_path);
   init_stemmer();
 
   ftw(source_directory, process_file, 1);

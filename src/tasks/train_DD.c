@@ -139,8 +139,8 @@ int main(int argc, char *argv[]) {
       exit(1);
   }
 
-  char senna_opt_path[FILENAME_BUFF_SIZE] = LLAMAPUN_ROOT_PATH;
-  sprintf(senna_opt_path, "/third-party/senna/");
+  char senna_opt_path[FILENAME_BUFF_SIZE];
+  sprintf(senna_opt_path, "%s/third-party/senna/",LLAMAPUN_ROOT_PATH);
   initialize_tokenizer(senna_opt_path);
   init_stemmer();
 
