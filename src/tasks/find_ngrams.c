@@ -2,9 +2,11 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ftw.h>
+#include <ctype.h>
 
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
+#include <uthash.h>
 
 
 #include "llamapun/tokenizer.h"
@@ -14,16 +16,57 @@
 #include <llamapun/stemmer.h>
 #include <llamapun/dnmlib.h>
 #include <llamapun/local_paths.h>
+#include <llamapun/stopwords.h>
 
+
+#define FILE_BUFFER_SIZE 2048
 
 struct tmpstuff {
   void *textcat_handle;
   FILE *logfile;
-
+  struct wordcount *unigramhash;
 };
 
 struct tmpstuff *stuff = NULL;
 
+
+struct wordcount {
+  char *string;
+  long long counter;
+  UT_hash_handle hh;
+};
+
+
+struct bigram {
+  char *first;
+  char *second;
+};
+
+struct bigramcount {
+  struct bigram bigram;
+  long long counter;
+  UT_hash_handle hh;
+};
+
+struct trigram {
+  char *first;
+  char *second;
+  char *third;
+};
+
+struct trigramcount {
+  struct trigram trigram;
+  long long counter;
+  UT_hash_handle hh;
+};
+
+
+
+/* not sure why, but these can't be passed via tmpstuff (causes segfaults in macros :/ ) */
+struct bigramcount *BIGRAM_HASH = NULL;
+struct trigramcount *TRIGRAM_HASH = NULL;
+
+int FILE_COUNTER = 0;
 
 /* Copied from gen_TF_IDF.c */
 xmlChar *paragraph_xpath = (xmlChar*) "//*[local-name()='section' and @class='ltx_section']//*[local-name()='div' and @class='ltx_para']";
@@ -31,6 +74,7 @@ xmlChar *relaxed_paragraph_xpath = (xmlChar*) "//*[local-name()='div' and @class
 
 int ngramparse(const char *filename, const struct stat *status, int type) {
   if (type != FTW_F) return 0;  //not a file
+  if (FILE_COUNTER++ > 100) return 0;   //temporarily treat only a subset
 
   printf("File: %s\n", filename);
 
@@ -40,7 +84,7 @@ int ngramparse(const char *filename, const struct stat *status, int type) {
 
   if (document == NULL) {
     printf("Dismissing document\n");
-    fprintf(stuff->logfile, "Dismissing %s\n", filename);
+    fprintf(stuff->logfile, "Dismissing %s (couldn't parse it)\n", filename);
     return 0;
   }
 
@@ -55,6 +99,9 @@ int ngramparse(const char *filename, const struct stat *status, int type) {
     xmlFreeDoc(document);
     return 0;
   }
+
+
+
   /* The following is copied (and slightly adapted) from gen_TF_IDF.c */
   xmlXPathObjectPtr paragraphs_result = xmlXPathEvalExpression(paragraph_xpath,xpath_context);
   if ((paragraphs_result == NULL) || (paragraphs_result->nodesetval == NULL) || (paragraphs_result->nodesetval->nodeNr == 0)) { // Nothing to do if there's no math in the document
@@ -82,46 +129,107 @@ int ngramparse(const char *filename, const struct stat *status, int type) {
   xmlNodeSetPtr paragraph_nodeset = paragraphs_result->nodesetval;
   int para_index;
 
+  //stuff for ngrams:
+  struct wordcount* tmp_wordcount;
+  char *penultimate_word;
+  char *last_word;
+  struct bigram tmpbigram;
+  struct bigramcount* tmp_bigramcount;
+  struct trigram tmptrigram;
+  struct trigramcount* tmp_trigramcount;
 
   /* Iterate over each paragraph: */
   for (para_index=0; para_index < paragraph_nodeset->nodeNr; para_index++) {
     xmlNodePtr paragraph_node = paragraph_nodeset->nodeTab[para_index];
     // Obtain NLP-friendly plain-text of the paragraph:
     // -- We want to skip tags, as we only are interested in word counts for terms in TF-IDF
-    dnmPtr paragraph_dnm = create_DNM(paragraph_node, DNM_SKIP_TAGS);
+    dnmPtr paragraph_dnm = create_DNM(paragraph_node, DNM_NORMALIZE_TAGS);
     if (paragraph_dnm == NULL) {
       fprintf(stderr, "Couldn't create DNM for paragraph %d in document %s\n",para_index, filename);
       exit(1);
     }
     /* 3. For every paragraph, tokenize sentences: */
     char* paragraph_text = paragraph_dnm->plaintext;
+    if (strlen(paragraph_text) < 2) {   //not a real sentence, additionally it would cause errors in tokenizer
+      free_DNM(paragraph_dnm);
+      continue;
+    }
     dnmRanges sentences = tokenize_sentences(paragraph_text);
     /* 4. For every sentence, tokenize words */
     int sentence_index = 0;
     for (sentence_index = 0; sentence_index < sentences.length; sentence_index++) {
       // Obtaining only the content words here
       dnmRanges words = tokenize_words(paragraph_text, sentences.range[sentence_index], 0);
+      penultimate_word = NULL;   //start all over again, after sentence boundary
+      last_word = NULL;
       int word_index;
       for(word_index=0; word_index<words.length; word_index++) {
         char* word_string = plain_range_to_string(paragraph_text, words.range[word_index]);
         char* word_stem;
-        morpha_stem(word_string, &word_stem);
-        /* Ensure stemming is an invariant (tilings -> tiling -> tile -> tile) */
-        while (strcmp(word_string, word_stem) != 0) {
-          free(word_string);
-          word_string = word_stem;
-          morpha_stem(word_string, &word_stem);
-        }
+        full_morpha_stem(word_string, &word_stem);
         free(word_string);
         // Note: SENNA's tokenization has some features to keep in mind:
         //  multi-symplectic --> "multi-" and "symplectic"
         //  Birkhoff's       --> "birkhoff" and "'s"
         // Add to the document frequency
         //record_word(&DF, word_stem);
-        printf("%s\n", word_stem);
-        free(word_stem);
+
+        if (is_stopword(word_stem) || (!isalnum(*word_stem))) {
+          penultimate_word = NULL;
+          last_word = NULL;
+          free(word_stem);
+          continue;
+        }
+
+//THE ACTUAL NGRAM GATHERING
+        HASH_FIND_STR(stuff->unigramhash, word_stem, tmp_wordcount);
+        if (tmp_wordcount == NULL) { //word hasn't occured yet
+          tmp_wordcount = (struct wordcount*) malloc(sizeof(struct wordcount));
+          tmp_wordcount->string = word_stem;
+          tmp_wordcount->counter = 1;
+          HASH_ADD_KEYPTR(hh, stuff->unigramhash, tmp_wordcount->string, strlen(tmp_wordcount->string), tmp_wordcount);
+        } else {
+          free(word_stem);
+          word_stem = tmp_wordcount->string;
+          tmp_wordcount->counter++;
+        }
+
+        if (last_word) {
+          //do the bigram stuff
+          tmpbigram.first = last_word;
+          tmpbigram.second = word_stem;
+          HASH_FIND(hh, BIGRAM_HASH, (&tmpbigram), sizeof(struct bigram), tmp_bigramcount);
+          if (tmp_bigramcount==NULL) {
+            tmp_bigramcount = (struct bigramcount*) malloc(sizeof(struct bigramcount));
+            tmp_bigramcount->bigram = tmpbigram;
+            tmp_bigramcount->counter = 1;
+            HASH_ADD(hh, BIGRAM_HASH, bigram, sizeof(struct bigram), tmp_bigramcount);
+          } else {
+            tmp_bigramcount->counter++;
+          }
+        }
+
+        if (penultimate_word) {
+          //do the trigram stuff
+          tmptrigram.first = penultimate_word;
+          tmptrigram.second = last_word;
+          tmptrigram.third = word_stem;
+          HASH_FIND(hh, TRIGRAM_HASH, (&tmptrigram), sizeof(struct trigram), tmp_trigramcount);
+          if (tmp_trigramcount == NULL) {
+            tmp_trigramcount = (struct trigramcount*) malloc(sizeof(struct trigramcount));
+            tmp_trigramcount->trigram = tmptrigram;
+            tmp_trigramcount->counter = 1;
+            HASH_ADD(hh, TRIGRAM_HASH, trigram, sizeof(struct trigram), tmp_trigramcount);
+          } else {
+            tmp_trigramcount->counter++;
+          }
+        }
+
+        //shift words
+        penultimate_word = last_word;
+        last_word = word_stem;
+
       }
-      printf("=================\n");
       free(words.range);
     }
     free(sentences.range);
@@ -134,13 +242,15 @@ int ngramparse(const char *filename, const struct stat *status, int type) {
 
   xmlFreeDoc(document);
 
-
+  return 0;
 }
 
 
 
 
 int main(int argc, char *argv[]) {
+  load_stopwords();
+  init_stemmer();
   stuff = (struct tmpstuff*) malloc(sizeof(struct tmpstuff));
   stuff->textcat_handle = llamapun_textcat_Init();
   if (!stuff->textcat_handle) {
@@ -148,9 +258,11 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
   stuff->logfile = fopen("logfile.txt", "w");
+  stuff->unigramhash = NULL;
+  /*for bigrams and trigrams global variables are needed :/ */
 
-  char senna_opt_path[512];
-  snprintf(senna_opt_path, strlen(senna_opt_path), "%s/third-party/senna/", LLAMAPUN_ROOT_PATH);
+  char senna_opt_path[FILE_BUFFER_SIZE];
+  snprintf(senna_opt_path, FILE_BUFFER_SIZE, "%sthird-party/senna/", LLAMAPUN_ROOT_PATH);
   initialize_tokenizer(senna_opt_path);
 
   if (argc == 1) {
@@ -159,12 +271,87 @@ int main(int argc, char *argv[]) {
     ftw(argv[1], ngramparse, 1);  //parse directory given by first argument
   }
 
-
+  free_tokenizer();
+  free_stopwords();
+  xmlCleanupParser();
+  close_stemmer();
   textcat_Done(stuff->textcat_handle);
+
+
+  printf("\nSAVE RESULTS\n============\n");
+  struct wordcount *current_w, *tmp_w;
+  struct bigramcount *current_b, *tmp_b;
+  struct trigramcount *current_t, *tmp_t;
+  char key[4096]; //don't be stingy here
+
+  printf(" - bigrams\n");    //do bigrams before trigrams, expecting that the JSON stuff will require less memory, so we have more for trigrams left
+                             //(unigrams have to be last, cause they point to the actual strings)
+
+  json_object* bigrams = json_object_new_object();
+
+  HASH_ITER(hh, BIGRAM_HASH, current_b, tmp_b) {
+    //printf("%s:   %d\n", current_b->string, current_b->counter);
+    snprintf(key, sizeof(key), "%s %s", current_b->bigram.first, current_b->bigram.second);
+    json_object_object_add(bigrams, key,
+      json_object_new_int(current_b->counter));
+    HASH_DEL(BIGRAM_HASH, current_b);
+    free(current_b);
+  }
+
+  FILE *f = fopen("bigrams.txt", "w");
+  fprintf(f, "%s", json_object_to_json_string(bigrams));
+  fclose(f);
+
+  json_object_put(bigrams);  //free memory
+
+
+
+  printf(" - trigrams\n");
+
+  json_object* trigrams = json_object_new_object();
+
+  HASH_ITER(hh, TRIGRAM_HASH, current_t, tmp_t) {
+    //printf("%s:   %d\n", current_t->string, current_t->counter);
+    snprintf(key, sizeof(key), "%s %s %s", current_t->trigram.first, current_t->trigram.second, current_t->trigram.third);
+    json_object_object_add(trigrams, key,
+      json_object_new_int(current_t->counter));
+    HASH_DEL(TRIGRAM_HASH, current_t);
+    free(current_t);
+  }
+
+  f = fopen("trigrams.txt", "w");
+  fprintf(f, "%s", json_object_to_json_string(trigrams));
+  fclose(f);
+
+  json_object_put(trigrams);
+
+
+
+
+  printf(" - unigrams\n");
+
+  json_object* unigrams = json_object_new_object();
+
+  HASH_ITER(hh, stuff->unigramhash, current_w, tmp_w) {
+    //printf("%s:   %d\n", current_w->string, current_w->counter);
+    json_object_object_add(unigrams, current_w->string,
+      json_object_new_int(current_w->counter));
+    HASH_DEL(stuff->unigramhash, current_w);
+    free(current_w->string);
+    free(current_w);
+  }
+
+  f = fopen("unigrams.txt", "w");
+  fprintf(f, "%s", json_object_to_json_string(unigrams));
+  fclose(f); 
+
+  json_object_put(unigrams);
+
   fclose(stuff->logfile);
 
-  free_tokenizer();
-  xmlCleanupParser();
+  free(stuff);
+
+  printf("Done :)\n");
 
   return 0;
 }
