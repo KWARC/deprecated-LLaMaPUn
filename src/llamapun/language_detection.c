@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "file_paths.h"
+#include "local_paths.h"
 
 //a bit hacked, but it works:
 #include <textcat.c>
