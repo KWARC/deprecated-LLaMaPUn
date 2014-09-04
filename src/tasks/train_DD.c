@@ -5,34 +5,17 @@
 #include <uthash.h>
 #include <math.h>
 #include <sys/stat.h>
-#include "llamapun/jsoninclude.h"
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
 
-#include "llamapun/utils.h"
-#include "llamapun/dnmlib.h"
-#include "llamapun/unicode_normalizer.h"
-#include "llamapun/tokenizer.h"
-#include "llamapun/stemmer.h"
-
-#include <crfsuite.h>
-typedef struct {
-    char *type;
-    char *algorithm;
-    char *model;
-    char *logbase;
-
-    int split;
-    int cross_validation;
-    int holdout;
-    int logfile;
-
-    int help;
-    int help_params;
-
-    int num_params;
-    char **params;
-} learn_option_t;
+#include <llamapun/local_paths.h>
+#include <llamapun/json_include.h>
+#include <llamapun/utils.h>
+#include <llamapun/dnmlib.h>
+#include <llamapun/unicode_normalizer.h>
+#include <llamapun/tokenizer.h>
+#include <llamapun/stemmer.h>
+#include <llamapun/crf.h>
 
 #define FILENAME_BUFF_SIZE 2048
 
@@ -156,15 +139,10 @@ int main(int argc, char *argv[]) {
       exit(1);
   }
 
-  initialize_tokenizer("../../../third-party/senna/");
+  char senna_opt_path[FILENAME_BUFF_SIZE] = LLAMAPUN_ROOT_PATH;
+  sprintf(senna_opt_path, "/third-party/senna/");
+  initialize_tokenizer(senna_opt_path);
   init_stemmer();
-
-  crfsuite_data_t data;
-  crfsuite_trainer_t *trainer = NULL;
-  crfsuite_dictionary_t *attrs = NULL, *labels = NULL;
-
-  /* Initializations. */
-  crfsuite_data_init(&data);
 
   ftw(source_directory, process_file, 1);
 

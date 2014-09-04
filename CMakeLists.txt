@@ -27,13 +27,12 @@ include_directories("third-party/libtextcat-2.2/src")
 include_directories("third-party/morpha")
 include_directories("third-party/senna")
 include_directories("src")
+add_subdirectory("third-party")
 set(crfsuite_libpath ${CMAKE_CURRENT_BINARY_DIR}/third-party/crfsuite_project-prefix/lib)
 set(crfsuite_includepath ${CMAKE_CURRENT_BINARY_DIR}/third-party/crfsuite_project-prefix/include)
 
-add_subdirectory("third-party")
 add_subdirectory("src/llamapun")
 add_subdirectory("src/tasks")
-
 
 enable_testing()
 add_subdirectory("test")

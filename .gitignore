@@ -1,3 +1,4 @@
+MYMETA.json
 blib/
 build/
 .build/
@@ -22,4 +23,7 @@ CMakeLists.txt.user
 clib/CMakeFiles/
 doc/clib_documentation/latex
 !doc/clib_documentation/latex/*.pdf
+src/llamapun/json_include.h
+src/llamapun/local_paths.h
+test/test_working_directory/ngrams.txt
 
