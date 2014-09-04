@@ -1,5 +1,9 @@
+#define FILENAME_BUFF_SIZE 2048
 // Standard C includes
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 // JSON
 #include <llamapun/json_include.h>
 // XML DOM and XPath
@@ -9,12 +13,13 @@
 #include <libxml/xpathInternals.h>
 
 #include <llamapun/senna_pos.h>
-
-const char TEST_XHTML_DOCUMENT[] = "../../t/documents/1311.6767.xhtml";
+#include <llamapun/local_paths.h>
 
 int main() {
+  char test_xhtml_doc[FILENAME_BUFF_SIZE];
+  sprintf(test_xhtml_doc, "%s/t/documents/1311.6767.xhtml", LLAMAPUN_ROOT_PATH);
 
-  xmlDoc* doc = xmlReadFile(TEST_XHTML_DOCUMENT, NULL, 0);
+  xmlDoc* doc = xmlReadFile(test_xhtml_doc, NULL, 0);
   if (doc == NULL) {
     fprintf(stderr,"Test XHTML document could not be parsed, failing");
     return 1; }
