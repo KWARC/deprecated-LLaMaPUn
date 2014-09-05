@@ -7,7 +7,7 @@
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
 #include <uthash.h>
-
+#include <pcre.h>
 
 #include "llamapun/tokenizer.h"
 #include "llamapun/language_detection.h"
@@ -74,9 +74,18 @@ xmlChar *relaxed_paragraph_xpath = (xmlChar*) "//*[local-name()='div' and @class
 
 int ngramparse(const char *filename, const struct stat *status, int type) {
   if (type != FTW_F) return 0;  //not a file
-  if (FILE_COUNTER++ > 100) return 0;   //temporarily treat only a subset
+  if (FILE_COUNTER++ > 1000) return 0;   //temporarily treat only a subset
+  const char *regexerror;
+  int regexerroroffset;
+  pcre *numberregex = pcre_compile("^(\\d+([\\.-]?\\d*[a-zA-Z]*)?)|([a-zA-Z]\\.\\d+)$", 0, &regexerror, &regexerroroffset, NULL);
+  if (numberregex==NULL) {
+    fprintf(stderr, "regex doesn't work (%s) (very fatal)\n", regexerror);
+    exit(1);
+  }
+  pcre_extra *numberregexextra = pcre_study(numberregex, 0, &regexerror);
 
-  printf("File: %s\n", filename);
+
+  printf("%5d - %s\n", FILE_COUNTER, filename);
 
 
 /* STEP 1: Load document */
@@ -174,7 +183,13 @@ int ngramparse(const char *filename, const struct stat *status, int type) {
         // Add to the document frequency
         //record_word(&DF, word_stem);
 
-        if (is_stopword(word_stem) || (!isalnum(*word_stem))) {
+        if (!pcre_exec(numberregex, numberregexextra, word_stem, strlen(word_stem), 0, 0, NULL, 0)) {
+          free(word_stem);
+          word_stem = strdup("numberexpression");
+        }
+
+        if (is_stopword(word_stem) || (!isalnum(*word_stem) && *word_stem != '\'' && *word_stem != '-')) {
+          /* we might want to keep dashes - need to take a closer look at results */
           penultimate_word = NULL;
           last_word = NULL;
           free(word_stem);
@@ -239,6 +254,10 @@ int ngramparse(const char *filename, const struct stat *status, int type) {
   free(paragraphs_result->nodesetval);
   xmlFree(paragraphs_result);
   xmlXPathFreeContext(xpath_context);
+  pcre_free(numberregex);
+  if (numberregexextra) {
+    pcre_free(numberregexextra);
+  }
 
   xmlFreeDoc(document);
 
