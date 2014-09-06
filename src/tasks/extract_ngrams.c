@@ -24,6 +24,7 @@
 struct tmpstuff {
   void *textcat_handle;
   FILE *logfile;
+  FILE *statistics;
   struct wordcount *unigramhash;
 };
 
@@ -75,14 +76,21 @@ xmlChar *relaxed_paragraph_xpath = (xmlChar*) "//*[local-name()='div' and @class
 int ngramparse(const char *filename, const struct stat *status, int type) {
   if (type != FTW_F) return 0;  //not a file
   if (FILE_COUNTER++ > 1000) return 0;   //temporarily treat only a subset
+  int NEW_UNIGRAMS_COUNTER = 0;
+
   const char *regexerror;
   int regexerroroffset;
-  pcre *numberregex = pcre_compile("^(\\d+([\\.-]?\\d*[a-zA-Z]*)?)|([a-zA-Z]\\.\\d+)$", 0, &regexerror, &regexerroroffset, NULL);
+  pcre *numberregex = pcre_compile("^(('|-|#|\\.)?\\d+[\\d\\.\\)]*[a-z]?[\\d\\.\\)]*)|([a-z]\\.?\\d+[-\\d\\.]*\\)?)$", 0, &regexerror, &regexerroroffset, NULL);
+      /* need to catch things like   1.4   12   .004    '65    5.a    1.4.3     a.4    p.5-7   c2   -1  #3    */
+      //old (hackier) regex:
+     //pcre_compile("^(\\d+([\\.-]?\\d*[a-zA-Z]*)?)|([a-zA-Z]\\.\\d+)$", 0, &regexerror, &regexerroroffset, NULL);
   if (numberregex==NULL) {
     fprintf(stderr, "regex doesn't work (%s) (very fatal)\n", regexerror);
     exit(1);
   }
   pcre_extra *numberregexextra = pcre_study(numberregex, 0, &regexerror);
+
+//  pcre *tmpregex = pcre_compile("\\d", 0, &regexerror, &regexerroroffset, NULL);
 
 
   printf("%5d - %s\n", FILE_COUNTER, filename);
@@ -152,7 +160,7 @@ int ngramparse(const char *filename, const struct stat *status, int type) {
     xmlNodePtr paragraph_node = paragraph_nodeset->nodeTab[para_index];
     // Obtain NLP-friendly plain-text of the paragraph:
     // -- We want to skip tags, as we only are interested in word counts for terms in TF-IDF
-    dnmPtr paragraph_dnm = create_DNM(paragraph_node, DNM_NORMALIZE_TAGS);
+    dnmPtr paragraph_dnm = create_DNM(paragraph_node, DNM_NORMALIZE_TAGS | DNM_NO_OFFSETS | DNM_IGNORE_LATEX_NOTES);
     if (paragraph_dnm == NULL) {
       fprintf(stderr, "Couldn't create DNM for paragraph %d in document %s\n",para_index, filename);
       exit(1);
@@ -188,17 +196,22 @@ int ngramparse(const char *filename, const struct stat *status, int type) {
           word_stem = strdup("numberexpression");
         }
 
-        if (is_stopword(word_stem) || (!isalnum(*word_stem) && *word_stem != '\'' && *word_stem != '-')) {
-          /* we might want to keep dashes - need to take a closer look at results */
+//        if (!pcre_exec(tmpregex, NULL, word_stem, strlen(word_stem), 0, 0, NULL, 0)) {
+//          printf("Found: %s\n", word_stem);
+//        }
+
+        if (is_stopword(word_stem) || (!isalnum(*word_stem) && *word_stem != '\'')) {
           penultimate_word = NULL;
           last_word = NULL;
           free(word_stem);
           continue;
         }
 
+
 //THE ACTUAL NGRAM GATHERING
         HASH_FIND_STR(stuff->unigramhash, word_stem, tmp_wordcount);
         if (tmp_wordcount == NULL) { //word hasn't occured yet
+          NEW_UNIGRAMS_COUNTER++;
           tmp_wordcount = (struct wordcount*) malloc(sizeof(struct wordcount));
           tmp_wordcount->string = word_stem;
           tmp_wordcount->counter = 1;
@@ -259,6 +272,8 @@ int ngramparse(const char *filename, const struct stat *status, int type) {
     pcre_free(numberregexextra);
   }
 
+  fprintf(stuff->statistics, "%s\t%d\n", filename, NEW_UNIGRAMS_COUNTER);
+
   xmlFreeDoc(document);
 
   return 0;
@@ -277,6 +292,7 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
   stuff->logfile = fopen("logfile.txt", "w");
+  stuff->statistics = fopen("statistics.txt", "w");
   stuff->unigramhash = NULL;
   /*for bigrams and trigrams global variables are needed :/ */
 
@@ -367,6 +383,7 @@ int main(int argc, char *argv[]) {
   json_object_put(unigrams);
 
   fclose(stuff->logfile);
+  fclose(stuff->statistics);
 
   free(stuff);
 
