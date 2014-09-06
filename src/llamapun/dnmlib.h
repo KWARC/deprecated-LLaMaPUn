@@ -18,7 +18,11 @@
 #define DNM_NORMALIZE_TAGS (1 << 0)
 /*! skip tags such as math */
 #define DNM_SKIP_TAGS (1 << 1)
-
+/*! don't write offsets into DOM (faster) */
+#define DNM_NO_OFFSETS (1 << 2)
+/*! latex notes are written "inline", so they might interrupt the text flow, and they cause problems,
+    because there are no spaces between latex_note_mark and latex_note_outer */
+#define DNM_IGNORE_LATEX_NOTES (1 << 3)
 
 /*! string element for uthash */
 struct hash_element_string {

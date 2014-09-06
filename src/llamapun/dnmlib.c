@@ -313,6 +313,20 @@ void copy_into_plaintext(const char *string, dnmPtr dnm, struct tmpParseData *dc
   }
 }
 
+int has_class_value(xmlNode* node, char *val) {
+  xmlChar* tmpxmlstr;
+  xmlAttr* attr;
+  for (attr=node->properties; attr!=NULL; attr=attr->next) {
+    if (xmlStrEqual(attr->name, BAD_CAST "class")) {
+      tmpxmlstr = xmlNodeGetContent(attr->children);
+      int retval = xmlStrEqual(tmpxmlstr, BAD_CAST val);
+      xmlFree(tmpxmlstr);
+      return retval;
+    }
+  }
+  return 0;   //doesn't have attribute => doesn't have value (somehow)
+}
+
 
 void parse_dom_into_dnm(xmlNode *node, dnmPtr dnm, struct tmpParseData *dcs, long parameters) {
   /* the core function which (recursively) parses the DOM into the DNM */
@@ -322,21 +336,29 @@ void parse_dom_into_dnm(xmlNode *node, dnmPtr dnm, struct tmpParseData *dcs, lon
   char offsetstring[32];
 
   //write start offset into DOM
-  snprintf(offsetstring, sizeof(offsetstring), "%ld", dcs->plaintext_index);
-  xmlNewProp(node, BAD_CAST "dnm_from", BAD_CAST offsetstring);
+  if (!(parameters & DNM_NO_OFFSETS)) {
+    snprintf(offsetstring, sizeof(offsetstring), "%ld", dcs->plaintext_index);
+    xmlNewProp(node, BAD_CAST "dnm_from", BAD_CAST offsetstring);
+  }
 
   //DEAL WITH TAG
   //possibly normalize math tags
   if ((parameters&DNM_NORMALIZE_TAGS) && xmlStrEqual(node->name, BAD_CAST "math")) {
-    copy_into_plaintext("MathFormula", dnm, dcs);
+    copy_into_plaintext(" MathFormula ", dnm, dcs);
   } else if ((parameters&DNM_SKIP_TAGS) && xmlStrEqual(node->name, BAD_CAST "math")) {
     //just don't do anything
   }
   //possibly normalize cite tags
   else if ((parameters&DNM_NORMALIZE_TAGS) && xmlStrEqual(node->name, BAD_CAST "cite")) {
-    copy_into_plaintext("CiteExpression", dnm, dcs);
+    copy_into_plaintext(" CiteExpression ", dnm, dcs);
   } else if ((parameters&DNM_SKIP_TAGS) && xmlStrEqual(node->name, BAD_CAST "cite")) {
     //just don't do anything
+  }
+  //possibly normalize tables
+  else if ((parameters&DNM_NORMALIZE_TAGS) && xmlStrEqual(node->name, BAD_CAST "table")) {
+    copy_into_plaintext(" TableStructure ", dnm, dcs);
+  } else if ((parameters&DNM_SKIP_TAGS) && xmlStrEqual(node->name, BAD_CAST "table")) {
+    //don't do anything
   }
   //skip head
   else if (xmlStrEqual(node->name, BAD_CAST "head")) {
@@ -349,18 +371,24 @@ void parse_dom_into_dnm(xmlNode *node, dnmPtr dnm, struct tmpParseData *dcs, lon
     copy_into_plaintext((char*)tmpxmlstr, dnm, dcs);
     xmlFree(tmpxmlstr);
   }
+  //possibly ignore note
+  else if ((parameters&DNM_IGNORE_LATEX_NOTES) && (has_class_value(node, "ltx_note_mark") || has_class_value(node, "ltx_note_outer"))) {
+    //don't do anything
+  }
   //otherwise, parse children recursively
   else {
     //iterate over nodes
     xmlNode *n;
+
     for (n = node->children; n!=NULL; n = n->next) {
       parse_dom_into_dnm(n, dnm, dcs, parameters); }
   }
 
   //write end offset into DOM
-  snprintf(offsetstring, sizeof(offsetstring), "%ld", dcs->plaintext_index);
-  xmlNewProp(node, BAD_CAST "dnm_to", BAD_CAST offsetstring);
-
+  if (!(parameters & DNM_NO_OFFSETS)) {
+    snprintf(offsetstring, sizeof(offsetstring), "%ld", dcs->plaintext_index);
+    xmlNewProp(node, BAD_CAST "dnm_to", BAD_CAST offsetstring);
+  }
 }
 
 dnmPtr create_DNM(xmlNode *root, long parameters) {
@@ -396,7 +424,9 @@ dnmPtr create_DNM(xmlNode *root, long parameters) {
   dnm->sentenceCount = 1;   //in the old preprocessor, the first sentence had id="sentence.1"
 
   //do the actual parsing
-  wrap_text_into_spans(root);
+  if (!(parameters & DNM_NO_OFFSETS)) {
+    wrap_text_into_spans(root);   //only needed for writing offsets into DOM
+  }
   parse_dom_into_dnm(root, dnm, dcs, parameters);
 
 
