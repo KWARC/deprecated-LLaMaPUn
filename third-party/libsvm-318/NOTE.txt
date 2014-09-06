@@ -1,0 +1,2 @@
+The LLaMaPUn copy of libsvm has all non-C and non-core components stripped out, for a full copy of libsvm see:
+https://github.com/cjlin1/libsvm/
