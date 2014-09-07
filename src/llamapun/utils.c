@@ -110,7 +110,12 @@ int descending_score_sort(struct score_hash *a, struct score_hash *b) {
 
 struct score_hash* json_to_score_hash(json_object* json) {
   struct score_hash* scores = NULL;
-  json_object_object_foreach(json, key, val) {
+  char *key;
+  struct json_object *val;
+  struct lh_entry *entry;
+  for(entry = json_object_get_object(json)->head;
+      ({ if(entry) { key = (char*)entry->k; val = (struct json_object*)entry->v; } ; entry; });
+      entry = entry->next ) {
     // Record the corpus size:
     struct score_hash* entry = (struct score_hash*)malloc(sizeof(struct score_hash));
     entry->word = strdup(key);
