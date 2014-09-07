@@ -90,13 +90,8 @@ int process_file(const char *filename, const struct stat *status, int type) {
       for(word_index=0; word_index<words.length; word_index++) {
         char* word_string = plain_range_to_string(paragraph_text, words.range[word_index]);
         char* word_stem;
-        morpha_stem(word_string, &word_stem);
+        full_morpha_stem(word_string, &word_stem);
         /* Ensure stemming is an invariant (tilings -> tiling -> tile -> tile) */
-        while (strcmp(word_string, word_stem) != 0) {
-          free(word_string);
-          word_string = word_stem;
-          morpha_stem(word_string, &word_stem);
-        }
         free(word_string);
         // Note: SENNA's tokenization has some features to keep in mind:
         //  multi-symplectic --> "multi-" and "symplectic"
