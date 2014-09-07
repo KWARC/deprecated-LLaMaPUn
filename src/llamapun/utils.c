@@ -22,11 +22,10 @@ json_object* cortex_response_json(char *annotations, char *message, int status) 
   return response; }
 
 
-xmlDocPtr read_document(const char* filename) {
-  //read file
-  char *content;
-  size_t size;
-  FILE *file = fopen(filename, "rb");
+char* file_contents(const char* filename) {
+  char* content;
+  size_t size, size_read;
+  FILE* file = fopen(filename,"rb");
   if (file == NULL) {
     fprintf(stderr, "Couldn't open %s\n", filename);
     return NULL;
@@ -35,10 +34,28 @@ xmlDocPtr read_document(const char* filename) {
   size = ftell(file);
   fseek(file, 0, SEEK_SET);
   content = (char *) malloc(sizeof(char) * (size + 1));
-  fread(content, sizeof(char), size, file);
+  size_read = fread(content, sizeof(char), size, file);
+  UNUSED(size_read);
   fclose(file);
   content[size] = '\0';
-  
+  return content;
+}
+
+json_object* read_json(const char* filename) {
+  char* content = file_contents(filename);
+  if (content == NULL) {
+    fprintf(stderr, "No content at %s\n",filename);
+    return NULL;
+  }
+  json_object* json_content = json_tokener_parse(content);
+  free(content);
+  return json_content;
+}
+
+xmlDocPtr read_document(const char* filename) {
+  //read file
+  char *content = file_contents(filename);
+  size_t size = strlen(content);
   /* the following is copied and adapted from
    https://github.com/KWARC/mws/blob/master/src/crawler/parser/XmlParser.cpp#L65 */
   xmlDocPtr doc;
@@ -89,6 +106,18 @@ int descending_count_sort(struct document_frequencies_hash *a, struct document_f
 }
 int descending_score_sort(struct score_hash *a, struct score_hash *b) {
   return a->score < b->score;
+}
+
+struct score_hash* json_to_score_hash(json_object* json) {
+  struct score_hash* scores = NULL;
+  json_object_object_foreach(json, key, val) {
+    // Record the corpus size:
+    struct score_hash* entry = (struct score_hash*)malloc(sizeof(struct score_hash));
+    entry->word = strdup(key);
+    entry->score = json_object_get_double(val);
+    HASH_ADD_KEYPTR( hh, scores, entry->word, strlen(entry->word), entry );
+  }
+  return scores;
 }
 
 json_object* document_frequencies_hash_to_json(struct document_frequencies_hash *DF) {
