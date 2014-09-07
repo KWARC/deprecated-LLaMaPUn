@@ -5,9 +5,12 @@ target_link_libraries(language_detector utils language_detection LIBTEXTCAT_text
 add_executable(gen_TF_IDF gen_TF_IDF.c)
 target_link_libraries(gen_TF_IDF m utils unicode_normalizer stemmer tokenizer dnmlib ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 
+add_executable(gen_IDF gen_IDF.c)
+target_link_libraries(gen_IDF m utils unicode_normalizer stemmer tokenizer dnmlib ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
+
 include_directories(${crfsuite_includepath})
-add_executable(train_DD train_DD.c)
-target_link_libraries(train_DD m utils unicode_normalizer stemmer tokenizer dnmlib crf ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
+add_executable(gen_libsvm_input gen_libsvm_input.c)
+target_link_libraries(gen_libsvm_input m utils unicode_normalizer stemmer tokenizer dnmlib ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 
 add_executable(extract_ngrams extract_ngrams.c)
 target_link_libraries(extract_ngrams m utils unicode_normalizer stemmer tokenizer language_detection dnmlib ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
