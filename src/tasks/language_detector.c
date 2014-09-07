@@ -14,6 +14,7 @@ void *my_tc = NULL;
 
 int parse(const char *filename, const struct stat *status, int type) {
   if (type != FTW_F) return 0; //Not a file
+  UNUSED(status);
 
   fprintf(stderr, "%s\n", filename);
 

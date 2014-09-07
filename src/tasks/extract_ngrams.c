@@ -74,6 +74,7 @@ xmlChar *paragraph_xpath = (xmlChar*) "//*[local-name()='section' and @class='lt
 xmlChar *relaxed_paragraph_xpath = (xmlChar*) "//*[local-name()='div' and @class='ltx_para']";
 
 int ngramparse(const char *filename, const struct stat *status, int type) {
+  UNUSED(status);
   if (type != FTW_F) return 0;  //not a file
   if (FILE_COUNTER++ > 1000) return 0;   //temporarily treat only a subset
   int NEW_UNIGRAMS_COUNTER = 0;
