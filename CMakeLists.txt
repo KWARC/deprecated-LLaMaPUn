@@ -6,7 +6,7 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/src/scripts)
 
 # Compiler flags (fPIC required for packaging)
 SET(COMMON_FLAGS
-    "-Wall -W -Wextra -fPIC")
+    "-O3 -Wall -W -Wextra -fPIC")
 SET(CMAKE_C_FLAGS
     "${CMAKE_C_FLAGS} ${COMMON_FLAGS}")
 
