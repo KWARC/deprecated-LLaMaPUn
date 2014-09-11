@@ -64,6 +64,7 @@ int document_key_sort(struct corpus_frequencies_hash *a, struct corpus_frequenci
 int descending_count_sort(struct document_frequencies_hash *a, struct document_frequencies_hash *b);
 int descending_tf_idf_sort(struct score_hash *a, struct score_hash *b);
 int descending_score_sort(struct score_hash *a, struct score_hash *b);
+int ascending_score_sort(struct score_hash *a, struct score_hash *b);
 
 struct score_hash* json_to_score_hash(json_object* json);
 json_object* document_frequencies_hash_to_json(struct document_frequencies_hash *DF);

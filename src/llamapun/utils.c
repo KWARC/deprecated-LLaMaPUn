@@ -107,6 +107,9 @@ int descending_count_sort(struct document_frequencies_hash *a, struct document_f
 int descending_score_sort(struct score_hash *a, struct score_hash *b) {
   return a->score < b->score;
 }
+int ascending_score_sort(struct score_hash *a, struct score_hash *b) {
+  return a->score > b->score;
+}
 
 struct score_hash* json_to_score_hash(json_object* json) {
   struct score_hash* scores = NULL;
