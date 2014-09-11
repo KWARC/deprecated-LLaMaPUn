@@ -195,14 +195,13 @@ int process_file(const char *filename, const struct stat *status, int type) {
     free(sentences.range);
     free_DNM(paragraph_dnm);
     if (recorded_bin) {// Some paras have no content words, skip.
-      // MAYBE: We also need to normalize on the basis of paragraph length -- divide by total number of words in paragraph
-      //    -- namely: bins[i]/paragraph_word_count
       // We have the paragraph vector, now map it into a TF/IDF vector and write down a labeled training instance:
       int label = is_definition(paragraph_node->parent) ? 1 : -1;
       fprintf(svm_input_file, "%d ",label);
       for (i=0; i<20000; i++) {
         if(bins[i] > 0.001) {
-          fprintf(svm_input_file, "%d:%f ",i,bins[i]);
+          // We also need to normalize on the basis of paragraph length -- divide by total number of words in paragraph
+          fprintf(svm_input_file, "%d:%f ",i,bins[i]/paragraph_word_count);
         }}
       fprintf(svm_input_file,"\n");
     }
@@ -228,7 +227,7 @@ struct document_frequencies_hash* frequencies_hash_to_bins(struct score_hash *sc
     if (s->score >= 11.509115) { break; } // Filter >4 frequent words
     tmp = (struct document_frequencies_hash*)malloc(sizeof(struct document_frequencies_hash));
     tmp->word = strdup(s->word);
-    tmp->count = bin_index++;
+    tmp->count = ++bin_index;
     HASH_ADD_KEYPTR( hh, bins_hash, tmp->word, strlen(tmp->word), tmp );
   }
   fprintf(stderr, "Total bins: %d\n",bin_index);
@@ -236,22 +235,30 @@ struct document_frequencies_hash* frequencies_hash_to_bins(struct score_hash *sc
 }
 
 int main(int argc, char *argv[]) {
-  char *source_directory, *destination_directory;
+  char *source_directory, *destination_directory, *destination_filename;
   switch (argc) {
     case 0:
     case 1:
       source_directory = destination_directory = ".";
+      destination_filename = "libsvm_input.txt";
       break;
     case 2:
       source_directory = argv[1];
       destination_directory = ".";
+      destination_filename = "libsvm_input.txt";
       break;
     case 3:
       source_directory = argv[1];
       destination_directory = argv[2];
+      destination_filename = "libsvm_input.txt";
+      break;
+    case 4:
+      source_directory = argv[1];
+      destination_directory = argv[2];
+      destination_filename = argv[3];
       break;
     default:
-      fprintf(stderr, "Too many arguments: %d\nUsage: ./gen_TF_IDF source_dir/ destination_dir/\n",argc);
+      fprintf(stderr, "Too many arguments: %d\nUsage: ./gen_TF_IDF source_dir/ destination_dir/ destination_file\n",argc);
       exit(1);
   }
 
@@ -270,7 +277,7 @@ int main(int argc, char *argv[]) {
   init_stemmer();
   /* Open the SVM input file for writing: */
   char svm_input_filename[FILENAME_BUFF_SIZE];
-  sprintf(svm_input_filename, "%s/svm_test_file.txt", destination_directory);
+  sprintf(svm_input_filename, "%s/%s", destination_directory,destination_filename);
   svm_input_file = fopen(svm_input_filename,"w");
 
   ftw(source_directory, process_file, 1);
