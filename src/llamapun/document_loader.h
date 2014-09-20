@@ -12,6 +12,7 @@
 void init_document_loader();
 void close_document_loader();
 
-void traverse_docs_in_dir(char *dir, void (*function)(xmlDocPtr, const char *), long parameters, FILE *logfile);
+//note: if return value of function is non-zero, traversal will be interrupted
+void traverse_docs_in_dir(char *dir, int (*function)(xmlDocPtr, const char *), long parameters, FILE *logfile);
 
 #endif

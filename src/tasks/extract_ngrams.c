@@ -10,19 +10,18 @@
 #include <pcre.h>
 
 #include "llamapun/tokenizer.h"
-#include "llamapun/language_detection.h"
 #include "llamapun/utils.h"
 #include "llamapun/unicode_normalizer.h"
 #include <llamapun/stemmer.h>
 #include <llamapun/dnmlib.h>
 #include <llamapun/local_paths.h>
 #include <llamapun/stopwords.h>
+#include "llamapun/document_loader.h"
 
 
 #define FILE_BUFFER_SIZE 2048
 
 struct tmpstuff {
-  void *textcat_handle;
   FILE *logfile;
   FILE *statistics;
   struct wordcount *unigramhash;
@@ -73,11 +72,8 @@ int FILE_COUNTER = 0;
 xmlChar *paragraph_xpath = (xmlChar*) "//*[local-name()='section' and @class='ltx_section']//*[local-name()='div' and @class='ltx_para']";
 xmlChar *relaxed_paragraph_xpath = (xmlChar*) "//*[local-name()='div' and @class='ltx_para']";
 
-int ngramparse(const char *filename, const struct stat *status, int type) {
-  UNUSED(status);
-  if (type != FTW_F) return 0;  //not a file
-  FILE_COUNTER++;
-  //if (FILE_COUNTER++ > 1000) return 0;   //temporarily treat only a subset
+int ngramparse(xmlDocPtr document, const char *filename) {
+  if (FILE_COUNTER++ > 9) return 1;   //temporarily treat only a subset
   int NEW_UNIGRAMS_COUNTER = 0;
 
   const char *regexerror;
@@ -97,18 +93,6 @@ int ngramparse(const char *filename, const struct stat *status, int type) {
 
   printf("%5d - %s\n", FILE_COUNTER, filename);
 
-
-/* STEP 1: Load document */
-  xmlDoc *document = read_document(filename);
-
-  if (document == NULL) {
-    printf("Dismissing document\n");
-    fprintf(stuff->logfile, "Dismissing %s (couldn't parse it)\n", filename);
-    return 0;
-  }
-
-/* STEP 2: Normalize unicode */
-  unicode_normalize_dom(document);
 
 /* STEP 3: Get sentences */
   xmlXPathContextPtr xpath_context = xmlXPathNewContext(document);
@@ -276,8 +260,7 @@ int ngramparse(const char *filename, const struct stat *status, int type) {
 
   fprintf(stuff->statistics, "%s\t%d\n", filename, NEW_UNIGRAMS_COUNTER);
 
-  xmlFreeDoc(document);
-
+  //xmlFreeDoc(document);   //done by caller
   return 0;
 }
 
@@ -288,11 +271,6 @@ int main(int argc, char *argv[]) {
   load_stopwords();
   init_stemmer();
   stuff = (struct tmpstuff*) malloc(sizeof(struct tmpstuff));
-  stuff->textcat_handle = llamapun_textcat_Init();
-  if (!stuff->textcat_handle) {
-    fprintf(stderr, "Couldn't load textcat handle (fatal)\n");
-    exit(1);
-  }
   stuff->logfile = fopen("logfile.txt", "w");
   stuff->statistics = fopen("statistics.txt", "w");
   stuff->unigramhash = NULL;
@@ -303,16 +281,17 @@ int main(int argc, char *argv[]) {
   initialize_tokenizer(senna_opt_path);
 
   if (argc == 1) {
-    ftw(".", ngramparse, 1);  //parse working directory
+    //ftw(".", ngramparse, 1);  //parse working directory
+    traverse_docs_in_dir(".", ngramparse, DOC_NORMALIZE_UNICODE, stuff->logfile);
   } else {
-    ftw(argv[1], ngramparse, 1);  //parse directory given by first argument
+    //ftw(argv[1], ngramparse, 1);  //parse directory given by first argument
+    traverse_docs_in_dir(argv[1], ngramparse, DOC_NORMALIZE_UNICODE, stuff->logfile);
   }
 
   free_tokenizer();
   free_stopwords();
   xmlCleanupParser();
   close_stemmer();
-  textcat_Done(stuff->textcat_handle);
 
 
   printf("\nSAVE RESULTS\n============\n");

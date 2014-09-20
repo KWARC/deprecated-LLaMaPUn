@@ -21,11 +21,10 @@
 
 #include "llamapun/document_loader.h"
 
-void *__TEXT_CAT_HANDLE;
-
-void (*FUNCTION_FOR_DOCS)(xmlDocPtr, const char *);
-long TRAVERSAL_PARAMETERS;
-FILE *TRAVERSAL_LOG_FILE;
+static void *TEXT_CAT_HANDLE;
+static int (*FUNCTION_FOR_DOCS)(xmlDocPtr, const char *);
+static long TRAVERSAL_PARAMETERS;
+static FILE *TRAVERSAL_LOG_FILE;
 
 
 #define CHECK_ALLOC(ptr) {if (ptr==NULL) {fprintf(stderr, "Couldn't allocate memory, exiting\n"); exit(1);}}
@@ -35,22 +34,16 @@ FILE *TRAVERSAL_LOG_FILE;
       ptr = (type*)realloc(ptr, newsize); *oldsizeptr=newsize; CHECK_ALLOC(ptr); }}
 
 void init_document_loader() {
-  __TEXT_CAT_HANDLE = llamapun_textcat_Init();
-  if (!__TEXT_CAT_HANDLE) {
+  TEXT_CAT_HANDLE = llamapun_textcat_Init();
+  if (!TEXT_CAT_HANDLE) {
     fprintf(stderr, "Couldn't load textcat handle (fatal)\n");
     exit(1);
   }
-  init_stemmer();
-  char senna_opt_path[2048];
-  snprintf(senna_opt_path, sizeof(senna_opt_path), "%sthird-party/senna/", LLAMAPUN_ROOT_PATH);
-  initialize_tokenizer(senna_opt_path);
 }
 
 void close_document_loader() {
-  textcat_Done(__TEXT_CAT_HANDLE);
-  free_tokenizer();
+  textcat_Done(TEXT_CAT_HANDLE);
   xmlCleanupParser();
-  close_stemmer();
 }
 
 int read_doc_and_call_function(const char *filename, const struct stat *status, int type) {
@@ -65,7 +58,7 @@ int read_doc_and_call_function(const char *filename, const struct stat *status, 
       fprintf(stderr, "Couldn't create DNM of %s (fatal)\n", filename);
       exit(1);
     }
-    if (!text_is_english(__TEXT_CAT_HANDLE, dnm->plaintext, dnm->size_plaintext)) {  //if it isn't primarily english
+    if (!text_is_english(TEXT_CAT_HANDLE, dnm->plaintext, dnm->size_plaintext)) {  //if it isn't primarily english
       fprintf(TRAVERSAL_LOG_FILE, "Dismissing %s (appears not to be in English)\n", filename);
       xmlFreeDoc(document);
       return 0;
@@ -76,13 +69,13 @@ int read_doc_and_call_function(const char *filename, const struct stat *status, 
     unicode_normalize_dom(document);
 
   //call the function passed by the user
-  FUNCTION_FOR_DOCS(document, filename);
+  int ret_val = FUNCTION_FOR_DOCS(document, filename);
 
   xmlFreeDoc(document);
-  return 0;
+  return ret_val;
 }
 
-void traverse_docs_in_dir(char *dir, void (*function)(xmlDocPtr, const char *), long parameters, FILE *logfile) {
+void traverse_docs_in_dir(char *dir, int (*function)(xmlDocPtr, const char *), long parameters, FILE *logfile) {
   FUNCTION_FOR_DOCS = function;
   TRAVERSAL_LOG_FILE = logfile;
   TRAVERSAL_PARAMETERS = parameters;

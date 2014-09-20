@@ -10,6 +10,7 @@ add_library(gt_estimate gt_estimate.c)
 add_library(tokenizer tokenizer.c)
 add_library(dnmlib dnmlib.c)
 add_library(language_detection language_detection.c)
+add_library(document_loader document_loader.c)
 add_library(crf crf.c)
 
 #special compiler settings:
@@ -37,6 +38,8 @@ target_link_libraries(dnmlib ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 target_link_libraries(unicode_normalizer ${ICONV_LIBRARIES} ${LIBXML2_LIBRARIES})
 target_link_libraries(tokenizer stopwords dnmlib pcre SENNA_utils SENNA_Hash SENNA_nn SENNA_Tokenizer)
 target_link_libraries(language_detection LIBTEXTCAT_textcat)
+target_link_libraries(document_loader utils pcre dnmlib SENNA_utils SENNA_Hash SENNA_nn SENNA_Tokenizer ${LIBXML2_LIBRARIES}
+										${uthash_LIBRARIES} tokenizer language_detection)
 target_link_libraries(crf crfsuite)
 
 #installation of all .c and .h files 
