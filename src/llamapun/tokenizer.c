@@ -57,12 +57,16 @@ void free_tokenizer() {
   SENNA_Hash_free(gazp_hash);
 }
 
+void display_range(char* text, dnmRange range) {
+  int start = range.start;
+  int end = range.end;
+  fprintf(stderr,"%.*s\n",end-start+1,text+start);
+}
 void display_ranges(char* text, dnmRanges ranges) {
   int i;
   for (i=0; i<ranges.length; i++) {
-    int start = ranges.range[i].start;
-    int end = ranges.range[i].end;
-    fprintf(stderr,"%d. %.*s\n",i,end-start+1,text+start);
+    fprintf(stderr,"%d. ",i);
+    display_range(text, ranges.range[i]);
   }
 }
 

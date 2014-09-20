@@ -40,6 +40,7 @@ void free_tokenizer();
 bool has_alnum(char* text, dnmRange range);
 bool has_alpha(char* text, dnmRange range);
 dnmRange trim_range(char* text, dnmRange range);
+void display_range(char* text, dnmRange range);
 void display_ranges(char* text, dnmRanges ranges);
 bool is_range_stopword(char* text, dnmRange range);
 #endif
