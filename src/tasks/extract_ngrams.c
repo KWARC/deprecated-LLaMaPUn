@@ -80,8 +80,6 @@ int ngramparse(xmlDocPtr document, const char *filename) {
   int regexerroroffset;
   pcre *numberregex = pcre_compile("^(('|-|#|\\.)?\\d+[\\d\\.\\)]*[a-z]?[\\d\\.\\)]*)|([a-z]\\.?\\d+[-\\d\\.]*\\)?)$", 0, &regexerror, &regexerroroffset, NULL);
       /* need to catch things like   1.4   12   .004    '65    5.a    1.4.3     a.4    p.5-7   c2   -1  #3    */
-      //old (hackier) regex:
-     //pcre_compile("^(\\d+([\\.-]?\\d*[a-zA-Z]*)?)|([a-zA-Z]\\.\\d+)$", 0, &regexerror, &regexerroroffset, NULL);
   if (numberregex==NULL) {
     fprintf(stderr, "regex doesn't work (%s) (very fatal)\n", regexerror);
     exit(1);
@@ -282,10 +280,10 @@ int main(int argc, char *argv[]) {
 
   if (argc == 1) {
     //ftw(".", ngramparse, 1);  //parse working directory
-    traverse_docs_in_dir(".", ngramparse, DOC_NORMALIZE_UNICODE, stuff->logfile);
+    traverse_docs_in_dir(".", ngramparse, LOADER_NORMALIZE_UNICODE, stuff->logfile);
   } else {
     //ftw(argv[1], ngramparse, 1);  //parse directory given by first argument
-    traverse_docs_in_dir(argv[1], ngramparse, DOC_NORMALIZE_UNICODE, stuff->logfile);
+    traverse_docs_in_dir(argv[1], ngramparse, LOADER_NORMALIZE_UNICODE, stuff->logfile);
   }
 
   free_tokenizer();
