@@ -45,6 +45,6 @@ file(GLOB llamapun_HEADERS *.h)
 add_library(llamapun SHARED ${llamapun_SOURCES} ${llamapun_HEADERS})
 
 target_link_libraries(llamapun SENNA_utils SENNA_Hash SENNA_nn SENNA_Tokenizer SENNA_POS
-  ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES} pcre)
+  ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES} pcre language_detection unicode_normalizer)
 install(TARGETS llamapun DESTINATION /usr/lib)
 install(FILES ${llamapun_HEADERS} DESTINATION /usr/include/llamapun)
