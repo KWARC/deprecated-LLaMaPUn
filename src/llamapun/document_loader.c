@@ -39,11 +39,17 @@ void init_document_loader() {
     fprintf(stderr, "Couldn't load textcat handle (fatal)\n");
     exit(1);
   }
+  init_stemmer();
+  char senna_opt_path[2048];
+  snprintf(senna_opt_path, sizeof(senna_opt_path), "%sthird-party/senna/", LLAMAPUN_ROOT_PATH);
+  initialize_tokenizer(senna_opt_path);
 }
 
 void close_document_loader() {
   textcat_Done(TEXT_CAT_HANDLE);
   xmlCleanupParser();
+  free_tokenizer();
+  close_stemmer();
 }
 
 int read_doc_and_call_function(const char *filename, const struct stat *status, int type) {
@@ -171,6 +177,10 @@ void get_words_of_xpath(xmlDocPtr document, const char * xpath, void (*function)
         word_array[word_array_index++] = word_string;
       }
       free(words.range);
+      if (parameters&WORDS_MARK_END_OF_SENTENCE) {
+        POSSIBLE_RESIZE(word_array, word_array_index, &word_array_allocated, word_array_allocated*2, char *);
+        word_array[word_array_index++] = strdup("endofsentence");
+      }
     }
     free(sentences.range);
     free_DNM(current_dnm);
@@ -179,8 +189,9 @@ void get_words_of_xpath(xmlDocPtr document, const char * xpath, void (*function)
     //free memory
     size_t i = 0;
     while (i < word_array_index) free(word_array[i++]);
-    free(word_array);
+    word_array_index = 0;
   }
+  free(word_array);
   //and clean up
   free(xpath_result->nodesetval->nodeTab);
   free(xpath_result->nodesetval);

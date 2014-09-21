@@ -10,6 +10,7 @@
 
 #define WORDS_NORMALIZE_NUMBERS 1 << 0
 #define WORDS_STEM_WORDS 1 << 1
+#define WORDS_MARK_END_OF_SENTENCE 1 << 2
 
 void init_document_loader();
 void close_document_loader();
