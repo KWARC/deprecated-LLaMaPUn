@@ -3,6 +3,7 @@
 
 #include <libxml/parser.h>
 #include <libxml/HTMLparser.h>
+#include "llamapun/dnmlib.h"
 
 
 #define LOADER_NORMALIZE_UNICODE 1 << 0

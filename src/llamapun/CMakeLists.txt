@@ -39,7 +39,7 @@ target_link_libraries(unicode_normalizer ${ICONV_LIBRARIES} ${LIBXML2_LIBRARIES}
 target_link_libraries(tokenizer stopwords dnmlib pcre SENNA_utils SENNA_Hash SENNA_nn SENNA_Tokenizer)
 target_link_libraries(language_detection LIBTEXTCAT_textcat)
 target_link_libraries(document_loader utils pcre dnmlib SENNA_utils SENNA_Hash SENNA_nn SENNA_Tokenizer ${LIBXML2_LIBRARIES}
-										${uthash_LIBRARIES} tokenizer language_detection)
+										${uthash_LIBRARIES} tokenizer unicode_normalizer language_detection stemmer)
 target_link_libraries(crf crfsuite)
 
 #installation of all .c and .h files 

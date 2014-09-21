@@ -151,6 +151,7 @@ void get_words_of_xpath(xmlDocPtr document, const char * xpath, void (*function)
       free_DNM(current_dnm);
       continue;
     }
+
     dnmRanges sentences = tokenize_sentences(plaintext);
 
     // tokenize words

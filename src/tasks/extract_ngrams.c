@@ -1,21 +1,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <ftw.h>
-#include <ctype.h>
 
-#include <libxml/xpath.h>
-#include <libxml/xpathInternals.h>
-#include <uthash.h>
-#include <pcre.h>
 
-#include "llamapun/tokenizer.h"
-#include "llamapun/utils.h"
-#include "llamapun/unicode_normalizer.h"
-#include <llamapun/stemmer.h>
-#include <llamapun/dnmlib.h>
-#include <llamapun/local_paths.h>
-#include <llamapun/stopwords.h>
+#include "llamapun/stopwords.h"
 #include "llamapun/document_loader.h"
 
 
