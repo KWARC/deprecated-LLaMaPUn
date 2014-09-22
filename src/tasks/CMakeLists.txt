@@ -6,7 +6,7 @@ add_executable(gen_TF_IDF gen_TF_IDF.c)
 target_link_libraries(gen_TF_IDF m utils unicode_normalizer stemmer tokenizer dnmlib ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 
 add_executable(gen_IDF gen_IDF.c)
-target_link_libraries(gen_IDF m utils unicode_normalizer stemmer tokenizer dnmlib ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
+target_link_libraries(gen_IDF m utils unicode_normalizer word_normalizer stemmer tokenizer dnmlib ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 
 include_directories(${crfsuite_includepath})
 add_executable(gen_libsvm_input gen_libsvm_input.c)

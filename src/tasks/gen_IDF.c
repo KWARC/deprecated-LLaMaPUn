@@ -13,6 +13,7 @@
 #include <llamapun/utils.h>
 #include <llamapun/dnmlib.h>
 #include <llamapun/unicode_normalizer.h>
+#include <llamapun/word_normalizer.h>
 #include <llamapun/tokenizer.h>
 #include <llamapun/stemmer.h>
 
@@ -73,7 +74,7 @@ int process_file(const char *filename, const struct stat *status, int type) {
     xmlNodePtr paragraph_node = paragraph_nodeset->nodeTab[para_index];
     // Obtain NLP-friendly plain-text of the paragraph:
     // -- We want to skip tags, as we only are interested in word counts for terms in TF-IDF
-    dnmPtr paragraph_dnm = create_DNM(paragraph_node, DNM_SKIP_TAGS);
+    dnmPtr paragraph_dnm = create_DNM(paragraph_node, DNM_NORMALIZE_TAGS | DNM_IGNORE_LATEX_NOTES);
     if (paragraph_dnm == NULL) {
       fprintf(stderr, "Couldn't create DNM for paragraph %d in document %s\n",para_index, filename);
       exit(1);
@@ -85,18 +86,21 @@ int process_file(const char *filename, const struct stat *status, int type) {
     int sentence_index = 0;
     for (sentence_index = 0; sentence_index < sentences.length; sentence_index++) {
       // Obtaining only the content words here, disregard stopwords and punctuation
-      dnmRanges words = tokenize_words(paragraph_text, sentences.range[sentence_index],
-                                       TOKENIZER_ALPHA_ONLY | TOKENIZER_FILTER_STOPWORDS);
+      dnmRanges words = tokenize_words(paragraph_text, sentences.range[sentence_index],TOKENIZER_ACCEPT_ALL);
+      // N  ote: SENNA's tokenization has some features to keep in mind:
+      //  multi-symplectic --> "multi-" and "symplectic"
+      //  Birkhoff's       --> "birkhoff" and "'s"
       int word_index;
       for(word_index=0; word_index<words.length; word_index++) {
         char* word_string = plain_range_to_string(paragraph_text, words.range[word_index]);
+        //fprintf(stderr,"%s -> ",word_string);
         char* word_stem;
         /* Ensure stemming is an invariant (tilings -> tiling -> tile -> tile) */
         full_morpha_stem(word_string, &word_stem);
         free(word_string);
-        // N  ote: SENNA's tokenization has some features to keep in mind:
-        //  multi-symplectic --> "multi-" and "symplectic"
-        //  Birkhoff's       --> "birkhoff" and "'s"
+        /* Normalize word (numbers go to NNUMBER, so do numeric labels) */
+        normalize_word(&word_stem);
+        //fprintf(stderr,"%s\n",word_stem);
         // Add to the document frequency
         record_word(&DF, word_stem);
         free(word_stem);
@@ -161,11 +165,13 @@ int main(int argc, char *argv[]) {
   sprintf(senna_opt_path, "%s/third-party/senna/",LLAMAPUN_ROOT_PATH);
   initialize_tokenizer(senna_opt_path);
   init_stemmer();
+  initialize_word_normalizer();
 
   corpus_size = 0;
   ftw(source_directory, process_file, 1);
   fprintf(stderr,"Analyzed corpus of %lu documents -- complete.\n",corpus_size);
 
+  close_word_normalizer();
   close_stemmer();
   free_tokenizer();
   xmlCleanupParser();
