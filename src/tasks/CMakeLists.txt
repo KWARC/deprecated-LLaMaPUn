@@ -12,6 +12,9 @@ include_directories(${crfsuite_includepath})
 add_executable(gen_libsvm_input gen_libsvm_input.c)
 target_link_libraries(gen_libsvm_input utils unicode_normalizer stemmer tokenizer dnmlib ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 
+add_executable(gen_rnnlm_input gen_rnnlm_input.c)
+target_link_libraries(gen_rnnlm_input utils unicode_normalizer stemmer tokenizer dnmlib ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
+
 add_executable(extract_ngrams extract_ngrams.c)
 target_link_libraries(extract_ngrams utils document_loader dnmlib ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 
