@@ -72,7 +72,7 @@ int process_file(const char *filename, const struct stat *status, int type) {
     xmlNodePtr paragraph_node = paragraph_nodeset->nodeTab[para_index];
     // Obtain NLP-friendly plain-text of the paragraph:
     // -- We want to skip tags, as we only are interested in word counts for terms in TF-IDF
-    dnmPtr paragraph_dnm = create_DNM(paragraph_node, DNM_SKIP_TAGS);
+    dnmPtr paragraph_dnm = create_DNM(paragraph_node, DNM_SKIP_TAGS | DNM_IGNORE_LATEX_NOTES);
     if (paragraph_dnm == NULL) {
       fprintf(stderr, "Couldn't create DNM for paragraph %d in document %s\n",para_index, filename);
       exit(1);
