@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define numeric_word_pattern "^([\\+\\=0-9][0-9\\+\\=\\.\\-\\/\\,\\(\\)\\']*)|([vix]+\\.)$"
+#define numeric_word_pattern "^(?:[0-9])|(?:[ivx\\+\\=0-9][ivx0-9\\+\\=\\.\\-\\/\\,\\(\\)\\']+)$"
 #define OVECCOUNT 30    /* should be a multiple of 3 */
 pcre *numeric_regex;
 
