@@ -44,7 +44,8 @@ FILE* svm_input_file;
 
 /* Core traversal and analysis */
 int file_counter=0;
-xmlChar *paragraph_xpath = (xmlChar*) "//*[local-name()='section' and @class='ltx_section']//*[local-name()='div' and @class='ltx_para']";
+xmlChar *paragraph_xpath = (xmlChar*)
+    "//*[local-name()='section' and @class='ltx_section' and not(descendant::*[local-name() = 'span' and @class='ltx_bibblock'])]//*[local-name()='div' and @class='ltx_para']";
 xmlChar *relaxed_paragraph_xpath = (xmlChar*) "//*[local-name()='div' and @class='ltx_para']";
 
 int process_file(const char *filename, const struct stat *status, int type) {
@@ -95,7 +96,7 @@ int process_file(const char *filename, const struct stat *status, int type) {
     xmlNodePtr paragraph_node = paragraph_nodeset->nodeTab[para_index];
     // Obtain NLP-friendly plain-text of the paragraph:
     // -- We want to skip tags, as we only are interested in word counts for terms in TF-IDF
-    dnmPtr paragraph_dnm = create_DNM(paragraph_node, DNM_SKIP_TAGS);
+    dnmPtr paragraph_dnm = create_DNM(paragraph_node, DNM_SKIP_TAGS | DNM_IGNORE_LATEX_NOTES);
     if (paragraph_dnm == NULL) {
       fprintf(stderr, "Couldn't create DNM for paragraph %d in document %s\n",para_index, filename);
       exit(1);
@@ -106,6 +107,8 @@ int process_file(const char *filename, const struct stat *status, int type) {
     /* For every sentence, tokenize words */
     int sentence_index = 0;
     for (sentence_index = 0; sentence_index < sentences.length; sentence_index++) {
+      //fprintf(stderr,"---------\n");
+      //display_range(paragraph_text, sentences.range[sentence_index]);
       // Obtaining only the content words here, disregard stopwords and punctuation
       dnmRanges words = tokenize_words(paragraph_text, sentences.range[sentence_index],
                                        TOKENIZER_ALPHA_ONLY | TOKENIZER_FILTER_STOPWORDS);
@@ -114,6 +117,7 @@ int process_file(const char *filename, const struct stat *status, int type) {
         char* word_string = plain_range_to_string(paragraph_text, words.range[word_index]);
         char* word_stem;
         full_morpha_stem(word_string, &word_stem);
+        //fprintf(stderr,"%s --> %s\n",word_string,word_stem);
         free(word_string);
         record_word(&DF,word_stem);
         free(word_stem);
@@ -143,7 +147,7 @@ int process_file(const char *filename, const struct stat *status, int type) {
     xmlNodePtr paragraph_node = paragraph_nodeset->nodeTab[para_index];
     // Obtain NLP-friendly plain-text of the paragraph:
     // -- We want to skip tags, as we only are interested in word counts for terms in TF-IDF
-    dnmPtr paragraph_dnm = create_DNM(paragraph_node, DNM_SKIP_TAGS);
+    dnmPtr paragraph_dnm = create_DNM(paragraph_node, DNM_SKIP_TAGS | DNM_IGNORE_LATEX_NOTES);
     if (paragraph_dnm == NULL) {
       fprintf(stderr, "Couldn't create DNM for paragraph %d in document %s\n",para_index, filename);
     }
@@ -239,9 +243,8 @@ int main(int argc, char *argv[]) {
   switch (argc) {
     case 0:
     case 1:
-      source_directory = destination_directory = ".";
-      destination_filename = "libsvm_input.txt";
-      break;
+      fprintf(stderr, "Too few arguments: %d\nUsage: ./gen_libsvm_input source_dir/ [destination_dir/] [destination_file]\n",argc-1);
+      exit(1);
     case 2:
       source_directory = argv[1];
       destination_directory = ".";
@@ -258,10 +261,9 @@ int main(int argc, char *argv[]) {
       destination_filename = argv[3];
       break;
     default:
-      fprintf(stderr, "Too many arguments: %d\nUsage: ./gen_TF_IDF source_dir/ destination_dir/ destination_file\n",argc);
+      fprintf(stderr, "Too many arguments: %d\nUsage: ./gen_libsvm_input source_dir/ [destination_dir/] [destination_file]\n",argc-1);
       exit(1);
   }
-
   /* Load pre-computed corpus IDF scores */
   char idf_json_filename[FILENAME_BUFF_SIZE];
   sprintf(idf_json_filename, "%s/idf.json",destination_directory);
