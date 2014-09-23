@@ -33,6 +33,7 @@ set(crfsuite_includepath ${CMAKE_CURRENT_BINARY_DIR}/third-party/crfsuite_projec
 
 add_subdirectory("src/llamapun")
 add_subdirectory("src/tasks")
+add_subdirectory("src/scripts")
 
 enable_testing()
 add_subdirectory("test")
