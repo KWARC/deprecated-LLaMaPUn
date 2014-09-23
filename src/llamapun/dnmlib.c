@@ -373,7 +373,7 @@ void parse_dom_into_dnm(xmlNode *node, dnmPtr dnm, struct tmpParseData *dcs, lon
   else if ((parameters&DNM_NORMALIZE_TAGS) && xmlStrEqual(node->name, BAD_CAST "table")) {
     if (has_class_value(node, "ltx_equation") || has_class_value(node, "ltx_equationgroup"))   //display math is sometimes (always?) inside a table
       copy_into_plaintext(" MathFormula ", dnm, dcs);
-    else {
+    else if (parameters&DNM_INCLUDE_TABLE_TOKENS) {
       copy_into_plaintext(" TableStructure ", dnm, dcs);
     }
   } else if ((parameters&DNM_SKIP_TAGS) && xmlStrEqual(node->name, BAD_CAST "table")) {

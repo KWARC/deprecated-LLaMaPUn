@@ -23,6 +23,9 @@
 /*! latex notes are written "inline", so they might interrupt the text flow, and they cause problems,
     because there are no spaces between latex_note_mark and latex_note_outer */
 #define DNM_IGNORE_LATEX_NOTES (1 << 3)
+/*! when using DNM_NORMALIZE_TAGS, tables are ignored, unless they just wrap display math etc (then they normalized to MathFormula)
+    this option inserts TableStructure tokens for the ignored tables. Requires DNM_NORMALIZE_TAGS to be set */
+#define DNM_INCLUDE_TABLE_TOKENS (1 << 4)
 
 /*! string element for uthash */
 struct hash_element_string {
