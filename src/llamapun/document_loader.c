@@ -81,7 +81,7 @@ int read_doc_and_call_function(const char *filename, const struct stat *status, 
   return ret_val;
 }
 
-void traverse_docs_in_dir(char *dir, int (*function)(xmlDocPtr, const char *), long parameters, FILE *logfile) {
+void process_documents_in_directory(int (*function)(xmlDocPtr, const char *), char *dir, long parameters, FILE *logfile) {
   FUNCTION_FOR_DOCS = function;
   TRAVERSAL_LOG_FILE = logfile;
   TRAVERSAL_PARAMETERS = parameters;
@@ -91,7 +91,7 @@ void traverse_docs_in_dir(char *dir, int (*function)(xmlDocPtr, const char *), l
   TRAVERSAL_LOG_FILE = stderr;
 }
 
-void get_words_of_xpath(xmlDocPtr document, const char * xpath, void (*function)(char *[], size_t), long parameters, FILE *logfile, long dnm_parameters) {
+int with_words_at_xpath(void (*function)(char *[], size_t), xmlDocPtr document, const char * xpath, FILE *logfile, long parameters, long dnm_parameters) {
   //if desired, create regex for number expressions
   pcre *numberregex = NULL;
   pcre_extra *numberregexextra = NULL;
@@ -109,7 +109,7 @@ void get_words_of_xpath(xmlDocPtr document, const char * xpath, void (*function)
   if (xpath_context == NULL) {
     fprintf(logfile, "Unable to create xpath context\n");
     xmlFreeDoc(document);
-    return;
+    return 0;
   }
 
   //evaluate xpath
@@ -125,7 +125,7 @@ void get_words_of_xpath(xmlDocPtr document, const char * xpath, void (*function)
     }
     //function call should be done anyway
     function(NULL, 0);
-    return;
+    return 0;   //return false, stating that no nodes where found
   }
 
   //prepare array for words
@@ -204,4 +204,5 @@ void get_words_of_xpath(xmlDocPtr document, const char * xpath, void (*function)
       pcre_free(numberregexextra);
     }
   }
+  return 1;   //everything went well
 }
