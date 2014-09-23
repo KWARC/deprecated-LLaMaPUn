@@ -67,6 +67,7 @@ int descending_score_sort(struct score_hash *a, struct score_hash *b);
 int ascending_score_sort(struct score_hash *a, struct score_hash *b);
 
 struct score_hash* json_to_score_hash(json_object* json);
+struct document_frequencies_hash* json_to_document_frequencies_hash(json_object* json);
 json_object* document_frequencies_hash_to_json(struct document_frequencies_hash *DF);
 json_object* corpus_frequencies_hash_to_json(struct corpus_frequencies_hash *CF);
 json_object* score_hash_to_json(struct score_hash *hash);

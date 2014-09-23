@@ -128,6 +128,23 @@ struct score_hash* json_to_score_hash(json_object* json) {
   return scores;
 }
 
+struct document_frequencies_hash* json_to_document_frequencies_hash(json_object* json) {
+  struct document_frequencies_hash* frequencies = NULL;
+  char *key;
+  struct json_object *val;
+  struct lh_entry *entry;
+  for(entry = json_object_get_object(json)->head;
+      ({ if(entry) { key = (char*)entry->k; val = (struct json_object*)entry->v; } ; entry; });
+      entry = entry->next ) {
+    // Record the corpus size:
+    struct document_frequencies_hash* entry = (struct document_frequencies_hash*)malloc(sizeof(struct document_frequencies_hash));
+    entry->word = strdup(key);
+    entry->count = json_object_get_int(val);
+    HASH_ADD_KEYPTR( hh, frequencies, entry->word, strlen(entry->word), entry );
+  }
+  return frequencies;
+}
+
 json_object* document_frequencies_hash_to_json(struct document_frequencies_hash *DF) {
   json_object *DF_json = json_object_new_object();
   struct document_frequencies_hash *d;
