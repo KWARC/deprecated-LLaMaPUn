@@ -16,6 +16,7 @@
 #include <llamapun/tokenizer.h>
 #include <llamapun/stemmer.h>
 #include <llamapun/crf.h>
+#include <llamapun/word_normalizer.h>
 
 #define FILENAME_BUFF_SIZE 2048
 
@@ -37,21 +38,21 @@ int is_definition(xmlNode * n) {
 }
 
 // Global IDF:
-struct score_hash *idf;
-struct document_frequencies_hash* word_to_bin = NULL;
+struct document_frequencies_hash* corpus_frequencies;
 // File handle for the svm input
-FILE* svm_input_file;
+FILE *rnn_positive_file, *rnn_negative_file;
 
 /* Core traversal and analysis */
 int file_counter=0;
-xmlChar *paragraph_xpath = (xmlChar*) "//*[local-name()='section' and @class='ltx_section']//*[local-name()='div' and @class='ltx_para']";
+xmlChar *paragraph_xpath = (xmlChar*)
+    "//*[local-name()='section' and @class='ltx_section' and not(descendant::*[local-name() = 'span' and @class='ltx_bibblock'])]//*[local-name()='div' and @class='ltx_para']";
 xmlChar *relaxed_paragraph_xpath = (xmlChar*) "//*[local-name()='div' and @class='ltx_para']";
 
 int process_file(const char *filename, const struct stat *status, int type) {
   if (type != FTW_F) return 0; //Not a file
   UNUSED(status);
   file_counter++;
-  if (file_counter > 2) { return 0; } // Limit for development
+  //if (file_counter > 2) { return 0; } // Limit for development
   fprintf(stderr, " Loading %s\n",filename);
   xmlDoc *doc = read_document(filename);
   if (doc == NULL) return 0;   //error message printed by read_document
@@ -89,60 +90,10 @@ int process_file(const char *filename, const struct stat *status, int type) {
 
   /* ------------------------------------------------- */
   /* ------------------------------------------------- */
-  /* First iteration: compute TF frequencies           */
-  struct document_frequencies_hash *DF = NULL;
+  /* Emit RNNLM input for paragraph:                   */
   for (para_index=0; para_index < paragraph_nodeset->nodeNr; para_index++) {
     xmlNodePtr paragraph_node = paragraph_nodeset->nodeTab[para_index];
-    // Obtain NLP-friendly plain-text of the paragraph:
-    // -- We want to skip tags, as we only are interested in word counts for terms in TF-IDF
-    dnmPtr paragraph_dnm = create_DNM(paragraph_node, DNM_NORMALIZE_TAGS | DNM_IGNORE_LATEX_NOTES);
-    if (paragraph_dnm == NULL) {
-      fprintf(stderr, "Couldn't create DNM for paragraph %d in document %s\n",para_index, filename);
-      exit(1);
-    }
-    /* For every paragraph, tokenize sentences: */
-    char* paragraph_text = paragraph_dnm->plaintext;
-    dnmRanges sentences = tokenize_sentences(paragraph_text);
-    /* For every sentence, tokenize words */
-    int sentence_index = 0;
-    for (sentence_index = 0; sentence_index < sentences.length; sentence_index++) {
-      fprintf(stderr,"---------\n");
-      display_range(paragraph_text, sentences.range[sentence_index]);
-      // Obtaining only the content words here, disregard stopwords and punctuation
-      dnmRanges words = tokenize_words(paragraph_text, sentences.range[sentence_index],TOKENIZER_ACCEPT_ALL);
-      int word_index;
-      for(word_index=0; word_index<words.length; word_index++) {
-        char* word_string = plain_range_to_string(paragraph_text, words.range[word_index]);
-        char* word_stem;
-        full_morpha_stem(word_string, &word_stem);
-        fprintf(stderr,"%s --> %s\n",word_string,word_stem);
-        free(word_string);
-        record_word(&DF,word_stem);
-        free(word_stem);
-      }
-      free(words.range);
-    }
-    free(sentences.range);
-    free_DNM(paragraph_dnm);
-  }
-  struct document_frequencies_hash *word_entry;
-  int doc_max_count = 0;
-  for(word_entry=DF; word_entry != NULL; word_entry = word_entry->hh.next) {
-    if (doc_max_count < word_entry->count) {
-      doc_max_count = word_entry->count;
-    }
-  }
-
-  /* ------------------------------------------------- */
-  /* ------------------------------------------------- */
-  /* SECOND iteration compute scores and emit vectors: */
-  for (para_index=0; para_index < paragraph_nodeset->nodeNr; para_index++) {
-    // Every paragraph is mapped to a vector of bins:
-    double bins[20000] = { 0 };
-    int i=0;
-    bool recorded_bin = false;
-    for (i=0; i<200; i++) bins[i]=0;
-    xmlNodePtr paragraph_node = paragraph_nodeset->nodeTab[para_index];
+    bool definition_paragraph = is_definition(paragraph_node->parent);
     // Obtain NLP-friendly plain-text of the paragraph:
     // -- We want to skip tags, as we only are interested in word counts for terms in TF-IDF
     dnmPtr paragraph_dnm = create_DNM(paragraph_node, DNM_NORMALIZE_TAGS | DNM_IGNORE_LATEX_NOTES);
@@ -159,57 +110,47 @@ int process_file(const char *filename, const struct stat *status, int type) {
     for (sentence_index = 0; sentence_index < sentences.length; sentence_index++) {
       // Obtaining only the content words here, disregard stopwords and punctuation
       dnmRanges words = tokenize_words(paragraph_text, sentences.range[sentence_index],
-                                       TOKENIZER_ALPHA_ONLY | TOKENIZER_FILTER_STOPWORDS);
+                                       TOKENIZER_ACCEPT_ALL);
       int word_index;
       for(word_index=0; word_index<words.length; word_index++) {
-        paragraph_word_count++;
+
         char* word_string = plain_range_to_string(paragraph_text, words.range[word_index]);
         char* word_stem;
         full_morpha_stem(word_string, &word_stem);
         free(word_string);
+        normalize_word(&word_stem);
 
-        // Skip unless we have a bin (i.e. unless the word is common):
-        struct document_frequencies_hash* bin_entry;
-        HASH_FIND_STR(word_to_bin, word_stem, bin_entry);
-        if (bin_entry != NULL) {
-          int bin = bin_entry->count;
-          // We're using bins, numbered by the word stem and valued with the TFxIDF scores
-          // Compute the TF:
-          HASH_FIND_STR(DF, word_stem, word_entry);
-          double word_tf = 0.5 + (0.5 * word_entry->count)/doc_max_count;
-          // Lookup the IDF:
-          struct score_hash* idf_entry;
-          HASH_FIND_STR(idf, word_stem, idf_entry);
-          double word_idf = 13;
-          if(idf_entry!=NULL) {
-            word_idf = idf_entry->score; }
+        // Record word (if common), or "unk" if rare
+        paragraph_word_count++;
+        struct document_frequencies_hash *frequency_entry;
+        HASH_FIND_STR(corpus_frequencies, word_stem, frequency_entry);
+        if ((frequency_entry != NULL) && (frequency_entry->count > 4)) {
+          // Not a rare word -> print as-is.
+          if (definition_paragraph) {
+            fprintf(rnn_positive_file, "%s ", word_stem); }
           else {
-            // Hardcoding anything missing as a term (corpus-wise)
-            // that's what log2(8800 / 1) computes to anyway:
-            word_idf = 13; }
-          recorded_bin = true;
-          bins[bin] += (word_tf * word_idf);
-          free(word_stem);
+            fprintf(rnn_negative_file, "%s ", word_stem); }
+        } else {
+          // Rare word -> print "unk"
+          if (definition_paragraph) {
+            fprintf(rnn_positive_file, "unk "); }
+          else {
+            fprintf(rnn_negative_file, "unk "); }
         }
+        free(word_stem);
       }
       free(words.range);
     }
     free(sentences.range);
     free_DNM(paragraph_dnm);
-    if (recorded_bin) {// Some paras have no content words, skip.
-      // We have the paragraph vector, now map it into a TF/IDF vector and write down a labeled training instance:
-      int label = is_definition(paragraph_node->parent) ? 1 : -1;
-      fprintf(svm_input_file, "%d ",label);
-      for (i=0; i<20000; i++) {
-        if(bins[i] > 0.001) {
-          // We also need to normalize on the basis of paragraph length -- divide by total number of words in paragraph
-          fprintf(svm_input_file, "%d:%f ",i,bins[i]/paragraph_word_count);
-        }}
-      fprintf(svm_input_file,"\n");
+    if (paragraph_word_count > 0) {
+      if (definition_paragraph) {
+        fprintf(rnn_positive_file, "\n"); }
+      else {
+        fprintf(rnn_negative_file, "\n"); }
     }
   }
 
-  free_document_frequencies_hash(DF);
   free(paragraphs_result->nodesetval->nodeTab);
   free(paragraphs_result->nodesetval);
   xmlFree(paragraphs_result);
@@ -220,38 +161,22 @@ int process_file(const char *filename, const struct stat *status, int type) {
   return 0;
 }
 
-struct document_frequencies_hash* frequencies_hash_to_bins(struct score_hash *scores) {
-  struct score_hash *s;
-  struct document_frequencies_hash *tmp, *bins_hash = NULL;
-  int bin_index = 0;
-  HASH_SORT(scores, ascending_score_sort);
-  for(s=scores; s != NULL; s = s->hh.next) {
-    if (s->score >= 11.509115) { break; } // Filter >4 frequent words
-    tmp = (struct document_frequencies_hash*)malloc(sizeof(struct document_frequencies_hash));
-    tmp->word = strdup(s->word);
-    tmp->count = ++bin_index;
-    HASH_ADD_KEYPTR( hh, bins_hash, tmp->word, strlen(tmp->word), tmp );
-  }
-  fprintf(stderr, "Total bins: %d\n",bin_index);
-  return bins_hash;
-}
-
 int main(int argc, char *argv[]) {
   char *source_directory, *destination_directory, *destination_filename;
   switch (argc) {
     case 0:
     case 1:
-      fprintf(stderr, "Too few arguments: %d\nUsage: ./gen_libsvm_input source_dir/ [destination_dir/] [destination_file]\n",argc-1);
+      fprintf(stderr, "Too few arguments: %d\nUsage: ./gen_rnnlm_input source_dir/ [destination_dir/] [destination_file]\n",argc-1);
       exit(1);
     case 2:
       source_directory = argv[1];
       destination_directory = ".";
-      destination_filename = "libsvm_input.txt";
+      destination_filename = "rnnlm.input";
       break;
     case 3:
       source_directory = argv[1];
       destination_directory = argv[2];
-      destination_filename = "libsvm_input.txt";
+      destination_filename = "rnnlm.input";
       break;
     case 4:
       source_directory = argv[1];
@@ -259,7 +184,7 @@ int main(int argc, char *argv[]) {
       destination_filename = argv[3];
       break;
     default:
-      fprintf(stderr, "Too many arguments: %d\nUsage: ./gen_libsvm_input source_dir/ [destination_dir/] [destination_file]\n",argc-1);
+      fprintf(stderr, "Too many arguments: %d\nUsage: ./gen_rnnlm_input source_dir/ [destination_dir/] [destination_file]\n",argc-1);
       exit(1);
   }
 
@@ -268,18 +193,30 @@ int main(int argc, char *argv[]) {
   sprintf(senna_opt_path, "%s/third-party/senna/",LLAMAPUN_ROOT_PATH);
   initialize_tokenizer(senna_opt_path);
   init_stemmer();
-  /* Open the SVM input file for writing: */
-  char svm_input_filename[FILENAME_BUFF_SIZE];
-  sprintf(svm_input_filename, "%s/%s", destination_directory,destination_filename);
-  svm_input_file = fopen(svm_input_filename,"w");
+  initialize_word_normalizer();
+  /* Load the corpus frequencies: */
+  char frequencies_json_filename[FILENAME_BUFF_SIZE];
+  sprintf(frequencies_json_filename, "%s/corpus_frequencies.json",destination_directory);
+  json_object* corpus_frequencies_json = read_json(frequencies_json_filename);
+  corpus_frequencies = json_to_document_frequencies_hash(corpus_frequencies_json);
+  json_object_put(corpus_frequencies_json);
+
+  /* Open two RNN input file for writing: */
+  char rnn_positive_filename[FILENAME_BUFF_SIZE], rnn_negative_filename[FILENAME_BUFF_SIZE];
+  sprintf(rnn_positive_filename, "%s/%s.positive", destination_directory,destination_filename);
+  sprintf(rnn_negative_filename, "%s/%s.negative", destination_directory,destination_filename);
+  rnn_positive_file = fopen(rnn_positive_filename,"w");
+  rnn_negative_file = fopen(rnn_negative_filename,"w");
 
   ftw(source_directory, process_file, 1);
 
-  fclose(svm_input_file);
+  fclose(rnn_positive_file);
+  fclose(rnn_negative_file);
 
   close_stemmer();
+  close_word_normalizer();
   free_tokenizer();
   xmlCleanupParser();
-  free_score_hash(idf);
+  free_document_frequencies_hash(corpus_frequencies);
   return 0;
 }
