@@ -18,5 +18,3 @@ target_link_libraries(gen_rnnlm_input utils unicode_normalizer stemmer tokenizer
 add_executable(extract_ngrams extract_ngrams.c)
 target_link_libraries(extract_ngrams utils document_loader dnmlib ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 
-add_executable(evaluate_tokenization evaluate_tokenization.c)
-target_link_libraries(evaluate_tokenization utils document_loader ${LIBXML2_LIBRARIES})

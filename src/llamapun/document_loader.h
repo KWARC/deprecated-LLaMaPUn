@@ -9,7 +9,8 @@
 #define LOADER_NORMALIZE_UNICODE 1 << 0
 #define LOADER_CHECK_LANGUAGE 1 << 1
 
-#define WORDS_NORMALIZE_NUMBERS 1 << 0
+//not stemming, but numbers
+#define WORDS_NORMALIZE_WORDS 1 << 0
 #define WORDS_STEM_WORDS 1 << 1
 #define WORDS_MARK_END_OF_SENTENCE 1 << 2
 

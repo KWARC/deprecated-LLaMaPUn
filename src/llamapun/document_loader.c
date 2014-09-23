@@ -8,8 +8,8 @@
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
 #include <uthash.h>
-#include <pcre.h>
 
+#include "llamapun/word_normalizer.h"
 #include "llamapun/tokenizer.h"
 #include "llamapun/language_detection.h"
 #include "llamapun/utils.h"
@@ -92,18 +92,6 @@ void process_documents_in_directory(int (*function)(xmlDocPtr, const char *), ch
 }
 
 int with_words_at_xpath(void (*function)(char *[], size_t), xmlDocPtr document, const char * xpath, FILE *logfile, long parameters, long dnm_parameters) {
-  //if desired, create regex for number expressions
-  pcre *numberregex = NULL;
-  pcre_extra *numberregexextra = NULL;
-  const char *regexerror;
-  int regexerroroffset;
-  if (parameters & WORDS_NORMALIZE_NUMBERS) {
-    /* need to catch things like   1.4   12   .004    '65    5.a    1.4.3     a.4    p.5-7   c2   -1  #3    */
-    numberregex = pcre_compile("^(('|-|#|\\.)?\\d+[\\d\\.\\)]*[a-z]?[\\d\\.\\)]*)|([a-z]\\.?\\d+[-\\d\\.]*\\)?)$", 0, &regexerror, &regexerroroffset, NULL);
-    if (numberregex == NULL) fprintf(logfile, "regex for numbers doesn't work (%s)\n", regexerror);
-    numberregexextra = pcre_study(numberregex, 0, &regexerror);
-  }
-
   //create xpath context
   xmlXPathContextPtr xpath_context = xmlXPathNewContext(document);
   if (xpath_context == NULL) {
@@ -163,9 +151,8 @@ int with_words_at_xpath(void (*function)(char *[], size_t), xmlDocPtr document, 
       for(word_index=0; word_index<words.length; word_index++) {
         char* word_string = plain_range_to_string(plaintext, words.range[word_index]);
 
-        if (parameters & WORDS_NORMALIZE_NUMBERS && !pcre_exec(numberregex, numberregexextra, word_string, strlen(word_string), 0, 0, NULL, 0)) {
-          free(word_string);
-          word_string = strdup("numberexpression");
+        if (parameters & WORDS_NORMALIZE_WORDS) {
+          normalize_word(&word_string);
         }
 
         if (parameters & WORDS_STEM_WORDS) {
@@ -198,11 +185,5 @@ int with_words_at_xpath(void (*function)(char *[], size_t), xmlDocPtr document, 
   free(xpath_result->nodesetval);
   xmlFree(xpath_result);
   xmlXPathFreeContext(xpath_context);
-  if (parameters & WORDS_NORMALIZE_NUMBERS) {
-    pcre_free(numberregex);
-    if (numberregexextra) {
-      pcre_free(numberregexextra);
-    }
-  }
   return 1;   //everything went well
 }

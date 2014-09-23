@@ -141,11 +141,11 @@ int ngramparse(xmlDocPtr document, const char *filename) {
   printf("%5d - %s\n", FILE_COUNTER, filename);
 
   int b = with_words_at_xpath(ngram_parse2, document, paragraph_xpath, stuff->logfile,
-                WORDS_NORMALIZE_NUMBERS | WORDS_STEM_WORDS | WORDS_MARK_END_OF_SENTENCE,
+                WORDS_NORMALIZE_WORDS | WORDS_STEM_WORDS | WORDS_MARK_END_OF_SENTENCE,
                 DNM_NORMALIZE_TAGS | DNM_NO_OFFSETS | DNM_IGNORE_LATEX_NOTES);
   if (!b) {   //if xpath doesn't correspond to any node, try relaxed version
     b = with_words_at_xpath(ngram_parse2, document, relaxed_paragraph_xpath, stuff->logfile,
-              WORDS_NORMALIZE_NUMBERS | WORDS_STEM_WORDS | WORDS_MARK_END_OF_SENTENCE,
+              WORDS_NORMALIZE_WORDS | WORDS_STEM_WORDS | WORDS_MARK_END_OF_SENTENCE,
               DNM_NORMALIZE_TAGS | DNM_NO_OFFSETS | DNM_IGNORE_LATEX_NOTES);
     if (!b) {
       fprintf(stuff->logfile, "Found no paragraphs in %s\n", filename);
