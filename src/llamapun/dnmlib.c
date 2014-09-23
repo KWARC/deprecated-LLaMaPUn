@@ -320,6 +320,21 @@ int has_class_value(xmlNode* node, char *val) {
     if (xmlStrEqual(attr->name, BAD_CAST "class")) {
       tmpxmlstr = xmlNodeGetContent(attr->children);
       int retval = xmlStrEqual(tmpxmlstr, BAD_CAST val);
+      if (!retval) {
+        //split at spaces and try each segment
+        xmlChar *i0, *i1;
+        int havetostop = 0;
+        i0 = tmpxmlstr;
+        i1 = tmpxmlstr;
+        while (!retval && !havetostop) {
+          while (*i1 != ' ' && *i1) i1++;
+          havetostop = !(*i1);  //have to stop after \0
+          *i1 = '\0';
+          retval = xmlStrEqual(i0, BAD_CAST val);
+          *i1 = ' ';
+          i0 = ++i1;   //set indices to beginning of next work for next iteration
+        }
+      }
       xmlFree(tmpxmlstr);
       return retval;
     }
@@ -356,7 +371,11 @@ void parse_dom_into_dnm(xmlNode *node, dnmPtr dnm, struct tmpParseData *dcs, lon
   }
   //possibly normalize tables
   else if ((parameters&DNM_NORMALIZE_TAGS) && xmlStrEqual(node->name, BAD_CAST "table")) {
-    copy_into_plaintext(" TableStructure ", dnm, dcs);
+    if (has_class_value(node, "ltx_equation") || has_class_value(node, "ltx_equationgroup"))   //display math is sometimes (always?) inside a table
+      copy_into_plaintext(" MathFormula ", dnm, dcs);
+    else {
+      copy_into_plaintext(" TableStructure ", dnm, dcs);
+    }
   } else if ((parameters&DNM_SKIP_TAGS) && xmlStrEqual(node->name, BAD_CAST "table")) {
     //don't do anything
   }
