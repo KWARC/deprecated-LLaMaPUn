@@ -26,7 +26,7 @@ struct document_frequencies_hash* CF;
 unsigned long file_counter=0;
 unsigned long corpus_size=0;
 xmlChar *paragraph_xpath = (xmlChar*)
-    "//*[local-name()='section' and @class='ltx_section' and not(descendant::*[local-name() = 'span' and @class='ltx_bibblock'])]//*[local-name()='div' and @class='ltx_para']";
+    "//*[local-name()='section' and @class='ltx_section']//*[local-name()='div' and @class='ltx_para']";
 xmlChar *relaxed_paragraph_xpath = (xmlChar*) "//*[local-name()='div' and @class='ltx_para']";
 
 int process_file(const char *filename, const struct stat *status, int type) {
