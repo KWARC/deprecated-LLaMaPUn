@@ -10,8 +10,19 @@ int main(void) {
   normalize_unicode(input, &result);
   if (strcmp(result, "Poincare and ae")) {
     fprintf(stderr, "Error: Expected Poincare, got %s\n", result);
+	free(input);
     free(result);
     return 1;
+  }
+  free(input);
+  free(result);
+  input = strdup("rándôm");
+  normalize_unicode(input, &result);
+  if (strcmp(result, "random")) {
+    fprintf(stderr, "Error: Expected \"random\", got %s\n", result);
+	free(input);
+	free(result);
+	return 1;
   }
   free(input);
   free(result);
