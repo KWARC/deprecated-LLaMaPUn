@@ -93,7 +93,6 @@ char *word_replace(char *orig, char *rep, char *with) {
 }
 
 void morpha_stem(const char *sentence, char **stemmed) {
-  char *tmp;
   size_t insize, outsize;   //we're not interested in the size
   morpha_instream = open_memstream(&morpha_instream_buff_ptr, &insize);
   morpha_outstream = open_memstream(&morpha_outstream_buff_ptr, &outsize);
@@ -119,15 +118,14 @@ void morpha_stem(const char *sentence, char **stemmed) {
 
   fclose(morpha_outstream);
   //*stemmed = morpha_outstream_buff_ptr;
-  *stemmed = word_replace(morpha_outstream_buff_ptr, "formulum", "formula");
+  //*stemmed = word_replace(morpha_outstream_buff_ptr, "formulum", "formula");
 
-  free(morpha_outstream_buff_ptr);
-  tmp = word_replace(*stemmed, "vium", "via");
-  free(*stemmed);
-  *stemmed = tmp;
+  //free(morpha_outstream_buff_ptr);
+  //tmp = word_replace(*stemmed, "vium", "via");
+  //free(*stemmed);
+  //*stemmed = tmp;
+  *stemmed = morpha_outstream_buff_ptr;
 
-  //size_t outsize;
-  //morpha_outstream = open_memstream(&morpha_outstream_buff_ptr, &outsize);
   fclose(morpha_instream);
   free(morpha_instream_buff_ptr);
 }
