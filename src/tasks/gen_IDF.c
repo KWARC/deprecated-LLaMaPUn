@@ -95,12 +95,12 @@ int process_file(const char *filename, const struct stat *status, int type) {
       for(word_index=0; word_index<words.length; word_index++) {
         char* word_string = plain_range_to_string(paragraph_text, words.range[word_index]);
         //fprintf(stderr,"%s -> ",word_string);
+        /* Normalize word (numbers go to NNUMBER, so do numeric labels) */
+        normalize_word(&word_string);
         char* word_stem;
         /* Ensure stemming is an invariant (tilings -> tiling -> tile -> tile) */
         full_morpha_stem(word_string, &word_stem);
         free(word_string);
-        /* Normalize word (numbers go to NNUMBER, so do numeric labels) */
-        normalize_word(&word_stem);
         //fprintf(stderr,"%s\n",word_stem);
         // Add to the document frequency
         record_word(&DF, word_stem);

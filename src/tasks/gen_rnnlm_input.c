@@ -115,12 +115,13 @@ int process_file(const char *filename, const struct stat *status, int type) {
       for(word_index=0; word_index<words.length; word_index++) {
 
         char* word_string = plain_range_to_string(paragraph_text, words.range[word_index]);
+        normalize_word(&word_string);
+
         char* word_stem;
         full_morpha_stem(word_string, &word_stem);
         free(word_string);
-        normalize_word(&word_stem);
 
-        // Record word (if common), or "unk" if rare
+        // Record word (if common), or "<unk>" if rare
         paragraph_word_count++;
         struct document_frequencies_hash *frequency_entry;
         HASH_FIND_STR(corpus_frequencies, word_stem, frequency_entry);
@@ -133,9 +134,9 @@ int process_file(const char *filename, const struct stat *status, int type) {
         } else {
           // Rare word -> print "unk"
           if (definition_paragraph) {
-            fprintf(rnn_positive_file, "unk "); }
+            fprintf(rnn_positive_file, "<unk> "); }
           else {
-            fprintf(rnn_negative_file, "unk "); }
+            fprintf(rnn_negative_file, "<unk> "); }
         }
         free(word_stem);
       }

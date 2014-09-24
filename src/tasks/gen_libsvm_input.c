@@ -13,6 +13,7 @@
 #include <llamapun/utils.h>
 #include <llamapun/dnmlib.h>
 #include <llamapun/unicode_normalizer.h>
+#include <llamapun/word_normalizer.h>
 #include <llamapun/tokenizer.h>
 #include <llamapun/stemmer.h>
 #include <llamapun/crf.h>
@@ -116,6 +117,7 @@ int process_file(const char *filename, const struct stat *status, int type) {
       for(word_index=0; word_index<words.length; word_index++) {
         char* word_string = plain_range_to_string(paragraph_text, words.range[word_index]);
         char* word_stem;
+        normalize_word(&word_string);
         full_morpha_stem(word_string, &word_stem);
         //fprintf(stderr,"%s --> %s\n",word_string,word_stem);
         free(word_string);
