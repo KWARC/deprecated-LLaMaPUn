@@ -4,6 +4,8 @@ SET( ${PROJECT_NAME}_MAJOR_VERSION 0 )
 SET( ${PROJECT_NAME}_MINOR_VERSION 1 )
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/src/scripts)
 
+SET(CMAKE_C_COMPILER mpicc)
+
 # Compiler flags (fPIC required for packaging)
 SET(COMMON_FLAGS
     "-O3 -Wall -W -Wextra -fPIC")
