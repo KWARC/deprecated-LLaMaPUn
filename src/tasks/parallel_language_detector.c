@@ -7,7 +7,7 @@
 #include <textcat.h>
 
 #include "mpi.h"
-#include "mpc.h"
+//#include "mpc.h"
 
 #include "llamapun/language_detection.h"
 #include "llamapun/utils.h"
