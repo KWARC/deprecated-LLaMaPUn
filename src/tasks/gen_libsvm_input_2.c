@@ -157,7 +157,7 @@ int process_file(xmlDocPtr document, const char *filename) {
     dnmRanges sentences = tokenize_sentences(paragraph_text);
     /* For every sentence, tokenize words */
     int sentence_index = 0;
-    double tcf_normalization_divisor = 0.0;    //determine divisor for tf_idf normalization
+    double tfc_normalization_divisor = 0.0;    //determine divisor for tf_idf normalization
 
     for (sentence_index = 0; sentence_index < sentences.length; sentence_index++) {
       // Obtaining only the content words here, disregard stopwords and punctuation
@@ -194,14 +194,14 @@ int process_file(xmlDocPtr document, const char *filename) {
             word_idf = 13; }
           recorded_bin = true;
           bins[bin] += (word_tf * word_idf);
-          tcf_normalization_divisor += (word_tf * word_idf) * (word_tf * word_idf);
+          tfc_normalization_divisor += (word_tf * word_idf) * (word_tf * word_idf);
           free(word_stem);
         }
       }
       free(words.range);
     }
 
-    tcf_normalization_divisor = sqrt(tcf_normalization_divisor);
+    tfc_normalization_divisor = sqrt(tfc_normalization_divisor);
 
     free(sentences.range);
     free_DNM(paragraph_dnm);
@@ -213,8 +213,8 @@ int process_file(xmlDocPtr document, const char *filename) {
         if(bins[i] > 0.001) {
           //// We also need to normalize on the basis of paragraph length -- divide by total number of words in paragraph
           //fprintf(svm_input_file, "%d:%f ",i,bins[i]/paragraph_word_count);
-          //normalize by using tcf_normalization_divisor instead
-          fprintf(svm_input_file, "%d:%f", i, bins[i]/tcf_normalization_divisor);
+          //normalize by using tfc_normalization_divisor instead
+          fprintf(svm_input_file, "%d:%f", i, bins[i]/tfc_normalization_divisor);
         }}
       fprintf(svm_input_file,"\n");
     }
