@@ -63,7 +63,8 @@ char *relaxed_paragraph_xpath = "//*[local-name()='div' and @class='ltx_para']";
 
 
 
-void ngram_parse2(char *words[], size_t number) {
+void ngram_parse2(char *words[], size_t number, xmlNodePtr node) {
+  (void)node;
   struct wordcount* tmp_wordcount;
   char *penultimate_word = NULL;
   char *last_word = NULL;

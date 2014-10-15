@@ -12,7 +12,8 @@ char *paragraph_xpath = "//*[local-name()='section' and @class='ltx_section']//*
 char *relaxed_paragraph_xpath = "//*[local-name()='div' and @class='ltx_para']";
 
 
-void print_words_of_paragraph(char *words[], size_t number) {
+void print_words_of_paragraph(char *words[], size_t number, xmlNodePtr node) {
+	UNUSED(node);
 	size_t i;
 	for (i = 0; i < number; i++) {
 		printf("%s\n", words[i]);
