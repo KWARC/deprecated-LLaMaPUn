@@ -26,7 +26,7 @@ void process_documents_in_directory(int (*function)(xmlDocPtr, const char *), ch
 //parameters can be WORDS_NORMALIZE_NUMBERS or WORDS_STEM_WORDS
 //note: the memory for the word array will be cleaned up by this function, you don't need to take care of it
 //returns 1, if nodes were found, otherwise 0
-int with_words_at_xpath(void (*function)(char *[], size_t), xmlDocPtr document, const char * xpath, FILE *logfile, long parameters, long dnm_parameters);
+int with_words_at_xpath(void (*function)(char *[], size_t, xmlNodePtr), xmlDocPtr document, const char * xpath, FILE *logfile, long parameters, long dnm_parameters);
 
 
 #endif

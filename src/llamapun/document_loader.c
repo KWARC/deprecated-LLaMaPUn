@@ -91,7 +91,7 @@ void process_documents_in_directory(int (*function)(xmlDocPtr, const char *), ch
   TRAVERSAL_LOG_FILE = stderr;
 }
 
-int with_words_at_xpath(void (*function)(char *[], size_t), xmlDocPtr document, const char * xpath, FILE *logfile, long parameters, long dnm_parameters) {
+int with_words_at_xpath(void (*function)(char *[], size_t, xmlNodePtr), xmlDocPtr document, const char * xpath, FILE *logfile, long parameters, long dnm_parameters) {
   //create xpath context
   xmlXPathContextPtr xpath_context = xmlXPathNewContext(document);
   if (xpath_context == NULL) {
@@ -112,7 +112,7 @@ int with_words_at_xpath(void (*function)(char *[], size_t), xmlDocPtr document, 
       xmlFree(xpath_result);
     }
     //function call should be done anyway
-    function(NULL, 0);
+    function(NULL, 0, NULL);
     return 0;   //return false, stating that no nodes where found
   }
 
@@ -173,7 +173,7 @@ int with_words_at_xpath(void (*function)(char *[], size_t), xmlDocPtr document, 
     free(sentences.range);
     free_DNM(current_dnm);
 
-    function(word_array, word_array_index);
+    function(word_array, word_array_index, current_node);
     //free memory
     size_t i = 0;
     while (i < word_array_index) free(word_array[i++]);
