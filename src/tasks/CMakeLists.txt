@@ -6,6 +6,9 @@ set_source_files_properties(parallel_language_detector.c PROPERTIES COMPILE_FLAG
 add_executable(parallel_language_detector parallel_language_detector.c)
 target_link_libraries(parallel_language_detector utils language_detection LIBTEXTCAT_textcat dnmlib ${LIBXML2_LIBRARIES})
 
+add_executable(parallel_libsvm_input parallel_libsvm_input.c)
+target_link_libraries(parallel_libsvm_input utils document_loader dnmlib ${LIBXML2_LIBRARIES})
+
 add_executable(gen_TF_IDF gen_TF_IDF.c)
 target_link_libraries(gen_TF_IDF m utils unicode_normalizer word_normalizer stemmer tokenizer dnmlib ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
 
