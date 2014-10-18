@@ -31,7 +31,7 @@ static FILE *TRAVERSAL_LOG_FILE;
 
 #define POSSIBLE_RESIZE(ptr, index, oldsizeptr, newsize, type) \
     {if (index >= *oldsizeptr) {\
-      ptr = (type*)realloc(ptr, newsize); *oldsizeptr=newsize; CHECK_ALLOC(ptr); }}
+      ptr = (type*)realloc(ptr, newsize*sizeof(type)); *oldsizeptr=newsize; CHECK_ALLOC(ptr); }}
 
 void init_document_loader() {
   TEXT_CAT_HANDLE = llamapun_textcat_Init();
