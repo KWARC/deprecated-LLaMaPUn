@@ -195,7 +195,7 @@ dnmRanges tokenize_sentences(char* text) {
         // None of our special cases was matched, we have a
         // REAL SENTENCE BREAK:
         // Save sentence, if content is present:
-        if (has_content && (end_sentence-start_sentence>2)) {
+        if (has_content && (end_sentence > start_sentence)) {
           sentence_ranges.range[sentence_count].start = start_sentence;
           sentence_ranges.range[sentence_count].end = end_sentence;
           sentence_count++;
@@ -209,26 +209,48 @@ dnmRanges tokenize_sentences(char* text) {
 
       case '\n': // Multiple new lines are a paragraph break, UNLESS MathFormula is in between
         if (*(copy-1) == '\n') {
-          // Look ahead for MathFormula, end sentence if not found
+          // Look ahead for MathFormula, or lowercase stopword, end sentence if not found
+          // First, check for "MathFormula":
           int ovector[OVECCOUNT];
           int rc = pcre_exec(math_formula_regex, NULL, copy, strlen(copy), 0, 0, ovector, OVECCOUNT);
           if (rc < 0) {
-            // No match, sentence break here
-            // All follow-up whitespace should be taken as part of this sentence:
-            while (isspace(*(copy+1))) {
+            // No match for MathFormula, check for lower-case stopword next:
+            ; char* next_letter = copy+1;
+            // Get next non-space character and next word
+            while (isspace(*next_letter)) { next_letter++; }
+            bool next_is_lc_stopword = false;
+            if (islower(*next_letter)) {
+              int next_word_length = 0;
+              char next_word[20];
+              while(*next_letter && (isalpha(*next_letter)) && (next_word_length<20)) {
+                next_word[next_word_length++] = *next_letter;
+                next_letter++;
+              }
+              next_word[next_word_length] = '\0';
+              next_is_lc_stopword = is_stopword(next_word);
+            }
+            if (next_is_lc_stopword) {
+              // We have a lowercase stopword next, don't break the sentence:
               copy++;
               end_sentence++;
             }
-            // Save sentence, if content is present:
-            if (has_content && (end_sentence-start_sentence>2)) {
-              sentence_ranges.range[sentence_count].start = start_sentence;
-              sentence_ranges.range[sentence_count].end = end_sentence;
-              sentence_count++;
+            else { // None found, break:
+              // All follow-up whitespace should be taken as part of this sentence:
+              while (isspace(*(copy+1))) {
+                copy++;
+                end_sentence++;
+              }
+              // Save sentence, if content is present:
+              if (has_content && (end_sentence > start_sentence)) {
+                sentence_ranges.range[sentence_count].start = start_sentence;
+                sentence_ranges.range[sentence_count].end = end_sentence;
+                sentence_count++;
+              }
+              // Init next sentence start:
+              copy++;
+              start_sentence = ++end_sentence;
+              has_content=false;
             }
-            // Init next sentence start:
-            copy++;
-            start_sentence = ++end_sentence;
-            has_content=false;
           }
           else {
             // MathFormula match, so don't break the sentence and move cursor to after math (if we have content)
@@ -238,7 +260,7 @@ dnmRanges tokenize_sentences(char* text) {
               // But if we have no content (stand-alone formula),
               // OR if the next letter is capital (math sentence terminator),
               //  make a sentence break and save:
-              if (has_content && (end_sentence-start_sentence>1)) {
+              if (has_content && (end_sentence > start_sentence)) {
                 sentence_ranges.range[sentence_count].start = start_sentence;
                 sentence_ranges.range[sentence_count].end = end_sentence-1;
                 sentence_count++;
@@ -250,9 +272,44 @@ dnmRanges tokenize_sentences(char* text) {
           }
         }
         else {
-          // Neutral otherwise:
-          copy++;
-          end_sentence++;
+          ; char* next_letter = copy+1;
+          // Get next non-space character
+          while (isspace(*next_letter)) { next_letter++; }
+          // Uppercase next?
+          if (*next_letter && isupper(*next_letter)) {
+            // Ok, uppercase, but is it a stopword? If so, we must ALWAYS break the sentence:
+            int next_word_length = 0;
+            char next_word[20];
+            while(*next_letter && (isalpha(*next_letter)) && (next_word_length<20)) {
+              next_word[next_word_length++] = *next_letter;
+              next_letter++;
+            }
+            next_word[next_word_length] = '\0';
+            bool next_is_stopword = is_stopword(next_word);
+            // If we are followed by a capital letter stopword -> break the sentence
+            if (next_is_stopword) {
+              // Save sentence, if content is present:
+              if (has_content && (end_sentence > start_sentence)) {
+                sentence_ranges.range[sentence_count].start = start_sentence;
+                sentence_ranges.range[sentence_count].end = end_sentence;
+                sentence_count++;
+              }
+              // Init next sentence start:
+              copy++;
+              start_sentence = ++end_sentence;
+              has_content=false;
+            }
+            else {
+              // Neutral otherwise:
+              copy++;
+              end_sentence++;
+            }
+          }
+          else {
+            // Neutral otherwise:
+            copy++;
+            end_sentence++;
+          }
         }
         // End of line break Case
         break;
@@ -267,6 +324,13 @@ dnmRanges tokenize_sentences(char* text) {
         copy++;
         end_sentence++;
     } }
+
+  // Save if we have a trailing sentence:
+  if (has_content && (end_sentence > start_sentence)) {
+      sentence_ranges.range[sentence_count].start = start_sentence;
+      sentence_ranges.range[sentence_count].end = end_sentence;
+      sentence_count++;
+  }
   sentence_ranges.length = sentence_count;
   // Trim all sentences:
   int index;
