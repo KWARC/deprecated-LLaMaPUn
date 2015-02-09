@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
 
 
 #include "llamapun/stopwords.h"
@@ -22,6 +23,7 @@ struct wordcount {
   char *string;
   long long counter;
   UT_hash_handle hh;
+  unsigned long lastOccurence;
 };
 
 
@@ -34,6 +36,7 @@ struct bigramcount {
   struct bigram bigram;
   long long counter;
   UT_hash_handle hh;
+  unsigned long lastOccurence;
 };
 
 struct trigram {
@@ -46,6 +49,7 @@ struct trigramcount {
   struct trigram trigram;
   long long counter;
   UT_hash_handle hh;
+  unsigned long lastOccurence;
 };
 
 
@@ -54,7 +58,7 @@ struct trigramcount {
 struct bigramcount *BIGRAM_HASH = NULL;
 struct trigramcount *TRIGRAM_HASH = NULL;
 
-int FILE_COUNTER = 0;
+unsigned long FILE_COUNTER = 0;
 
 /* Copied from gen_TF_IDF.c */
 char *paragraph_xpath = "//*[local-name()='section' and @class='ltx_section']//*[local-name()='div' and @class='ltx_para']";
@@ -90,10 +94,12 @@ void ngram_parse2(char *words[], size_t number, xmlNodePtr node) {
       tmp_wordcount->string = strdup(current_word);
       current_word = tmp_wordcount->string;
       tmp_wordcount->counter = 1;
+	  tmp_wordcount->lastOccurence = FILE_COUNTER;
       HASH_ADD_KEYPTR(hh, stuff->unigramhash, tmp_wordcount->string, strlen(tmp_wordcount->string), tmp_wordcount);
     } else {
       current_word = tmp_wordcount->string;
-      tmp_wordcount->counter++;
+      if (tmp_wordcount->lastOccurence != FILE_COUNTER) tmp_wordcount->counter++;
+	  tmp_wordcount->lastOccurence = FILE_COUNTER;
     }
 
     if (last_word) {
@@ -105,9 +111,11 @@ void ngram_parse2(char *words[], size_t number, xmlNodePtr node) {
         tmp_bigramcount = (struct bigramcount*) malloc(sizeof(struct bigramcount));
         tmp_bigramcount->bigram = tmpbigram;
         tmp_bigramcount->counter = 1;
+		tmp_bigramcount->lastOccurence = FILE_COUNTER;
         HASH_ADD(hh, BIGRAM_HASH, bigram, sizeof(struct bigram), tmp_bigramcount);
       } else {
-        tmp_bigramcount->counter++;
+         if (tmp_bigramcount->lastOccurence != FILE_COUNTER) tmp_bigramcount->counter++;
+		 tmp_bigramcount->lastOccurence = FILE_COUNTER;
       }
     }
 
@@ -121,9 +129,11 @@ void ngram_parse2(char *words[], size_t number, xmlNodePtr node) {
         tmp_trigramcount = (struct trigramcount*) malloc(sizeof(struct trigramcount));
         tmp_trigramcount->trigram = tmptrigram;
         tmp_trigramcount->counter = 1;
+		tmp_trigramcount->lastOccurence = FILE_COUNTER;
         HASH_ADD(hh, TRIGRAM_HASH, trigram, sizeof(struct trigram), tmp_trigramcount);
       } else {
-        tmp_trigramcount->counter++;
+        if (tmp_trigramcount->lastOccurence != FILE_COUNTER) tmp_trigramcount->counter++;
+	    tmp_trigramcount->lastOccurence = FILE_COUNTER;
       }
     }
 
@@ -139,7 +149,7 @@ void ngram_parse2(char *words[], size_t number, xmlNodePtr node) {
 int ngramparse(xmlDocPtr document, const char *filename) {
   //if (FILE_COUNTER++ > 9) return 1;   //temporarily treat only a subset
 
-  printf("%5d - %s\n", FILE_COUNTER++, filename);
+  printf("%5ld - %s\n", FILE_COUNTER++, filename);
 
   int b = with_words_at_xpath(ngram_parse2, document, paragraph_xpath, stuff->logfile,
                 WORDS_NORMALIZE_WORDS | WORDS_STEM_WORDS | WORDS_MARK_END_OF_SENTENCE,
@@ -191,7 +201,7 @@ int main(int argc, char *argv[]) {
     //printf("%s:   %d\n", current_b->string, current_b->counter);
     snprintf(key, sizeof(key), "%s %s", current_b->bigram.first, current_b->bigram.second);
     json_object_object_add(bigrams, key,
-      json_object_new_int(current_b->counter));
+      json_object_new_double(1+log2(FILE_COUNTER/(1+current_b->counter))));
     HASH_DEL(BIGRAM_HASH, current_b);
     free(current_b);
   }
@@ -212,7 +222,7 @@ int main(int argc, char *argv[]) {
     //printf("%s:   %d\n", current_t->string, current_t->counter);
     snprintf(key, sizeof(key), "%s %s %s", current_t->trigram.first, current_t->trigram.second, current_t->trigram.third);
     json_object_object_add(trigrams, key,
-      json_object_new_int(current_t->counter));
+      json_object_new_double(1+log2(FILE_COUNTER/(1+current_t->counter))));
     HASH_DEL(TRIGRAM_HASH, current_t);
     free(current_t);
   }
@@ -233,7 +243,7 @@ int main(int argc, char *argv[]) {
   HASH_ITER(hh, stuff->unigramhash, current_w, tmp_w) {
     //printf("%s:   %d\n", current_w->string, current_w->counter);
     json_object_object_add(unigrams, current_w->string,
-      json_object_new_int(current_w->counter));
+      json_object_new_double(1+log2(FILE_COUNTER/(1.0+current_w->counter))));
     HASH_DEL(stuff->unigramhash, current_w);
     free(current_w->string);
     free(current_w);

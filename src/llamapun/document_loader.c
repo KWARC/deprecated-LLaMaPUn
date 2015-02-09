@@ -31,7 +31,7 @@ static FILE *TRAVERSAL_LOG_FILE;
 
 #define POSSIBLE_RESIZE(ptr, index, oldsizeptr, newsize, type) \
     {if (index >= *oldsizeptr) {\
-      ptr = (type*)realloc(ptr, newsize); *oldsizeptr=newsize; CHECK_ALLOC(ptr); }}
+      ptr = (type*)realloc(ptr, newsize*sizeof(type)); *oldsizeptr=newsize; CHECK_ALLOC(ptr); }}
 
 void init_document_loader() {
   TEXT_CAT_HANDLE = llamapun_textcat_Init();
@@ -43,6 +43,7 @@ void init_document_loader() {
   char senna_opt_path[2048];
   snprintf(senna_opt_path, sizeof(senna_opt_path), "%sthird-party/senna/", LLAMAPUN_ROOT_PATH);
   initialize_tokenizer(senna_opt_path);
+  initialize_word_normalizer();
 }
 
 void close_document_loader() {
@@ -50,6 +51,7 @@ void close_document_loader() {
   xmlCleanupParser();
   free_tokenizer();
   close_stemmer();
+  close_word_normalizer();
 }
 
 int read_doc_and_call_function(const char *filename, const struct stat *status, int type) {
