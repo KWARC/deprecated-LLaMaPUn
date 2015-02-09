@@ -43,6 +43,7 @@ void init_document_loader() {
   char senna_opt_path[2048];
   snprintf(senna_opt_path, sizeof(senna_opt_path), "%sthird-party/senna/", LLAMAPUN_ROOT_PATH);
   initialize_tokenizer(senna_opt_path);
+  initialize_word_normalizer();
 }
 
 void close_document_loader() {
@@ -50,6 +51,7 @@ void close_document_loader() {
   xmlCleanupParser();
   free_tokenizer();
   close_stemmer();
+  close_word_normalizer();
 }
 
 int read_doc_and_call_function(const char *filename, const struct stat *status, int type) {
