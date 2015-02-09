@@ -157,7 +157,7 @@ int process_file(xmlDocPtr document, const char *filename) {
     dnmRanges sentences = tokenize_sentences(paragraph_text);
     /* For every sentence, tokenize words */
     int sentence_index = 0;
-    double tfc_normalization_divisor = 0.0;    //determine divisor for tf_idf normalization
+    double tfc_normalization_divisor = 1.0;    //determine divisor for tf_idf normalization
 
     for (sentence_index = 0; sentence_index < sentences.length; sentence_index++) {
       // Obtaining only the content words here, disregard stopwords and punctuation
