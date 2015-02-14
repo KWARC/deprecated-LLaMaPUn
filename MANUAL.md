@@ -31,6 +31,7 @@ The following libraries need to be installed:
 * libJSON
 * uthash
 * libiconv
+* openmpi
 
 The [`.travis.yml` file](https://github.com/KWARC/LLaMaPUn/blob/master/.travis.yml) in the repository shows an example installation of the
 LLaMaPUn C library, including the installation of the above mentioned libraries using `apt-get`.
