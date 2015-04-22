@@ -39,3 +39,6 @@ target_link_libraries(extract_ngrams utils document_loader dnmlib ${uthash_LIBRA
 
 add_executable(compute_ngram_idf compute_ngram_idf.c)
 target_link_libraries(compute_ngram_idf m utils document_loader dnmlib ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})
+
+add_executable(addPostToDom addPostToDom.c)
+target_link_libraries(addPostToDom llamapun_senna_pos ${JSON_LIBRARIES} ${uthash_LIBRARIES} ${LIBXML2_LIBRARIES})

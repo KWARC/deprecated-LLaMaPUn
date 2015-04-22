@@ -8,7 +8,7 @@ SET(CMAKE_C_COMPILER mpicc)
 
 # Compiler flags (fPIC required for packaging)
 SET(COMMON_FLAGS
-    "-O3 -Wall -W -Wextra -fPIC")
+    "-O0 -g -Wall -W -Wextra -fPIC")
 SET(CMAKE_C_FLAGS
     "${CMAKE_C_FLAGS} ${COMMON_FLAGS}")
 
@@ -22,8 +22,9 @@ find_library(uthash uthash)
 find_library(pcre pcre)
 FIND_LIBRARY(ICONV_LIBRARIES NAMES iconv libiconv libiconv-2 c)
 find_package(Json REQUIRED)
+#find_path(JSON_INCLUDE_DIR NAMES json-c/json.h json/json.h)
 find_package(LibXml2 REQUIRED)
-include_directories(${LIBXML2_INCLUDE_DIR} ${JSON_INCLUDE_DIRS} ${ICONV_INCLUDE_DIR})
+include_directories(${LIBXML2_INCLUDE_DIR} ${JSON_INCLUDE_DIRS}/json-c ${ICONV_INCLUDE_DIR})
 include_directories("third-party")
 include_directories("third-party/libtextcat-2.2/src")
 include_directories("third-party/morpha")
